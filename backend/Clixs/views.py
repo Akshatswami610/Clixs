@@ -9,11 +9,11 @@ def signup(request):
 def home(request):
     return render(request, 'home.html')
 
-def browse(request):
-    return render(request, 'browse.html')
+def about(request):
+    return render(request, 'about.html')
 
-def post(request):
-    return render(request, 'post.html')
+def addpost(request):
+    return render(request, 'addpost.html')
 
 def profile(request):
     return render(request, 'profile.html')
