@@ -157,11 +157,20 @@ class ItemImage(models.Model):
 # Contact Form
 # =========================
 class ContactForm(models.Model):
+    STATUS = (
+        ("PENDING", "Pending"),
+        ("RESOLVED", "Resolved"),
+    )
     name = models.CharField(max_length=50)
     email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
     subject = models.CharField(max_length=50)
     message = models.TextField()
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS,
+        default="PENDING"
+    )
     created_at = models.DateTimeField(default=timezone.now)
 
     def clean(self):

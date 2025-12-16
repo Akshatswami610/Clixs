@@ -1,15 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from django import forms
+from .models import CustomUser, Item, ItemImage, ContactForm, ReportPost
 
-from .models import (
-    CustomUser,
-    Item,
-    ItemImage,
-    ContactForm,
-    ReportPost,
-)
 
 # =========================
 # Custom User Forms
@@ -27,7 +20,7 @@ class CustomUserChangeForm(UserChangeForm):
 
 
 # =========================
-# Custom User Admin
+# Custom User Admin (FIXED)
 # =========================
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
@@ -45,9 +38,11 @@ class CustomUserAdmin(UserAdmin):
     )
 
     list_filter = ("is_staff", "is_superuser", "is_active")
-
     search_fields = ("phone_number", "first_name", "last_name", "email")
     ordering = ("-date_joined",)
+
+    # 🔒 non-editable fields go here
+    readonly_fields = ("last_login", "date_joined")
 
     fieldsets = (
         (None, {"fields": ("phone_number", "password")}),
@@ -88,7 +83,7 @@ class CustomUserAdmin(UserAdmin):
 
 
 # =========================
-# Item Admin
+# Other Admins (unchanged)
 # =========================
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
@@ -98,18 +93,12 @@ class ItemAdmin(admin.ModelAdmin):
     autocomplete_fields = ("owner",)
 
 
-# =========================
-# Item Image Admin
-# =========================
 @admin.register(ItemImage)
 class ItemImageAdmin(admin.ModelAdmin):
     list_display = ("item", "uploaded_at")
     autocomplete_fields = ("item",)
 
 
-# =========================
-# Contact Form Admin
-# =========================
 @admin.register(ContactForm)
 class ContactFormAdmin(admin.ModelAdmin):
     list_display = ("name", "subject", "created_at")
@@ -117,9 +106,6 @@ class ContactFormAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at",)
 
 
-# =========================
-# Report Post Admin
-# =========================
 @admin.register(ReportPost)
 class ReportPostAdmin(admin.ModelAdmin):
     list_display = ("item", "user", "created_at")
