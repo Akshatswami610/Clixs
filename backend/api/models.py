@@ -188,5 +188,5 @@ class ContactForm(models.Model):
 class ReportPost(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    reason = models.TextField(blank=True)
+    reason = models.TextField(blank=False)
     created_at = models.DateTimeField(default=timezone.now)
