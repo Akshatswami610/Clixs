@@ -190,3 +190,12 @@ class ReportPost(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     reason = models.TextField(blank=False)
     created_at = models.DateTimeField(default=timezone.now)
+
+
+# =========================
+# Feedback
+# =========================
+class Feedback(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    feedback = models.TextField(blank=False)
+    created_at = models.DateTimeField(default=timezone.now)

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import CustomUser, Item, ItemImage, ContactForm, ReportPost
+from .models import CustomUser, Item, ItemImage, ContactForm, ReportPost, Feedback
 
 
 # =========================
@@ -110,3 +110,9 @@ class ContactFormAdmin(admin.ModelAdmin):
 class ReportPostAdmin(admin.ModelAdmin):
     list_display = ("item", "user", "created_at")
     autocomplete_fields = ("item", "user")
+
+
+@admin.register(Feedback)
+class FeedbackAdmin(admin.ModelAdmin):
+    list_display = ("user", "created_at")
+    autocomplete_fields = ("user",)
