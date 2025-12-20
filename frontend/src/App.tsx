@@ -1,19 +1,23 @@
-import { Routes, Route } from "react-router-dom";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-<Route path="/" element={<HomePage />} />
-<Route path="/items" element={<ItemsListPage />} />
-<Route path="/items/:id" element={<ItemDetailPage />} />
+import HomePage from "./pages/HomePage";
+import ItemsListPage from "./pages/marketplace/ItemsListPage";
+import ItemDetailPage from "./pages/marketplace/ItemDetailPage";
+import LoginPage from "./pages/auth/LoginPage";
+import SignupPage from "./pages/auth/SignupPage";
 
-<Route path="/login" element={<LoginPage />} />
-<Route path="/signup" element={<SignupPage />} />
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/items" element={<ItemsListPage />} />
+        <Route path="/items/:id" element={<ItemDetailPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
 
-<Route element={<ProtectedRoute />}>
-  <Route path="/upload-images" element={<UploadItemImagesPage />} />
-  <Route path="/profile" element={<ProfilePage />} />
-</Route>
-
-<Route element={<ProtectedRoute admin />}>
-  <Route path="/admin/contacts" element={<AdminContactsPage />} />
-  <Route path="/admin/reports" element={<AdminReportsPage />} />
-</Route>
+export default App;

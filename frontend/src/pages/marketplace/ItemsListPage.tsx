@@ -227,3 +227,4 @@ export function ItemsListPage() {
     </div>
   )
 }
+export default ItemsListPage;
