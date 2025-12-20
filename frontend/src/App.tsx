@@ -3,8 +3,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import ItemsListPage from "./pages/marketplace/ItemsListPage";
 import ItemDetailPage from "./pages/marketplace/ItemDetailPage";
-import LoginPage from "./pages/auth/LoginPage";
-import SignupPage from "./pages/auth/SignupPage";
+import RegisterPage from "./pages/auth/RegisterPage";
+import ProfilePage from "./pages/auth/ProfilePage";
 
 function App() {
   return (
@@ -13,8 +13,10 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/items" element={<ItemsListPage />} />
         <Route path="/items/:id" element={<ItemDetailPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
+
+        {/* Auth */}
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </BrowserRouter>
   );
