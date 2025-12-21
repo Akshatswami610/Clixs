@@ -187,3 +187,4 @@ export function ItemDetailPage() {
     </div>
   )
 }
+export default ItemDetailPage;

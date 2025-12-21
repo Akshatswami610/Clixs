@@ -1,7 +1,11 @@
 import api from "@/lib/axios";
 
-export const signup = (data: any) =>
-  api.post("auth/register/", data);
+export type User = {
+  id: number;
+  email: string;
+};
 
-export const getProfile = () =>
-  api.get("auth/profile/");
+export const authService = {
+  signup: (data: any) => api.post("auth/register/", data),
+  getProfile: () => api.get("auth/profile/"),
+};
