@@ -3,27 +3,44 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
+from .views import (
+    home,
+    profile,
+    login,
+    signup,
+    about,
+    addpost,
+    contactus,
+    chat,
 )
 
 urlpatterns = [
     # =========================
-    # Django Admin
+    # Admin
     # =========================
-    path("admin/", admin.site.urls),
+    path('admin/', admin.site.urls),
 
     # =========================
-    # API v1 (Core Backend)
+    # API
     # =========================
-    path("api/v1/", include("api.urls")),
+    path('api/v1/', include('api.urls')),
 
     # =========================
-    # JWT Authentication (React uses these)
+    # Auth & User Pages
     # =========================
-    path("api/v1/auth/login/", TokenObtainPairView.as_view(), name="jwt-login"),
-    path("api/v1/auth/refresh/", TokenRefreshView.as_view(), name="jwt-refresh"),
+    path('login/', login, name='login'),
+    path('signup/', signup, name='signup'),
+    path('profile/', profile, name='profile'),
+
+    # =========================
+    # Pages
+    # =========================
+    path('', home, name='home'),          # default landing page
+    path('home/', home, name='home'),
+    path('about/', about, name='about'),
+    path('addpost/', addpost, name='addpost'),
+    path('chat/', chat, name='chat'),
+    path('contact/', contactus, name='contactus'),
 ]
 
 # =========================

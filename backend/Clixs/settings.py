@@ -1,5 +1,4 @@
 from pathlib import Path
-import os
 from datetime import timedelta
 from decouple import config
 
@@ -21,15 +20,6 @@ ALLOWED_HOSTS = ["*"]
 # APPLICATIONS
 # --------------------------------------------------
 INSTALLED_APPS = [
-    # Local apps
-    "api",
-    "Clixs",
-
-    # Third-party
-    "rest_framework",
-    "rest_framework.authtoken",
-    "corsheaders",
-
     # Django default
     "django.contrib.admin",
     "django.contrib.auth",
@@ -37,11 +27,21 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
+    # Third-party
+    "rest_framework",
+    "rest_framework.authtoken",
+    "corsheaders",
+    "rest_framework_simplejwt",
+
+    # Local apps
+    "api",
+    "Clixs",
 ]
 
 
 # --------------------------------------------------
-# MIDDLEWARE (CORS MUST BE FIRST)
+# MIDDLEWARE
 # --------------------------------------------------
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -56,7 +56,7 @@ MIDDLEWARE = [
 
 
 # --------------------------------------------------
-# CORS SETTINGS (React @ Vite)
+# CORS
 # --------------------------------------------------
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
@@ -73,7 +73,6 @@ ROOT_URLCONF = "Clixs.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # Not required for React dev, but safe to keep
         "DIRS": [BASE_DIR / "frontend"],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -91,7 +90,7 @@ WSGI_APPLICATION = "Clixs.wsgi.application"
 
 
 # --------------------------------------------------
-# DATABASE (PostgreSQL)
+# DATABASE
 # --------------------------------------------------
 DATABASES = {
     "default": {
@@ -106,7 +105,7 @@ DATABASES = {
 
 
 # --------------------------------------------------
-# AUTH & PASSWORD VALIDATION
+# AUTH
 # --------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -126,7 +125,7 @@ USE_TZ = True
 
 
 # --------------------------------------------------
-# STATIC & MEDIA (For Item Images)
+# STATIC & MEDIA
 # --------------------------------------------------
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -136,7 +135,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 
 # --------------------------------------------------
-# DJANGO REST FRAMEWORK (JWT)
+# DRF CONFIG
 # --------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -149,7 +148,7 @@ REST_FRAMEWORK = {
 
 
 # --------------------------------------------------
-# SIMPLE JWT CONFIG
+# SIMPLE JWT
 # --------------------------------------------------
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
@@ -159,12 +158,12 @@ SIMPLE_JWT = {
 
 
 # --------------------------------------------------
-# CUSTOM USER MODEL
+# CUSTOM USER
 # --------------------------------------------------
 AUTH_USER_MODEL = "api.CustomUser"
 
 
 # --------------------------------------------------
-# DEFAULT PRIMARY KEY
+# DEFAULT PK
 # --------------------------------------------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
