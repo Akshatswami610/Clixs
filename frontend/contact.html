@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clixs - Contact Us</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(20, 20, 30, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3498db, #9b59b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #00d4ff;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db, #9b59b6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .login-btn {
+            padding: 0.7rem 1.8rem;
+            background: linear-gradient(135deg, #3498db, #00d4ff);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #3498db, #9b59b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-subtitle {
+            text-align: center;
+            color: #b0b0b0;
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .contact-form {
+            background: rgba(30, 30, 45, 0.8);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(20, 20, 30, 0.8);
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #3498db, #9b59b6);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .submit-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            background: rgba(39, 174, 96, 0.2);
+            border: 1px solid #27ae60;
+            color: #27ae60;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        .error-message {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .contact-form {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-logo" onclick="location.href='index.html'">Clixs</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+        <div class="nav-right">
+            <div class="profile-icon hidden" id="profileIcon" onclick="location.href='profile.html'">
+                <span id="userInitial">U</span>
+            </div>
+            <button class="login-btn" id="authBtn" onclick="location.href='login.html'">Login / Signup</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="page-title">Get in Touch</h1>
+        <p class="page-subtitle">Have questions or feedback? We'd love to hear from you!</p>
+
+        <div class="contact-form">
+            <div class="success-message" id="successMessage">
+                Thank you for contacting us! We'll get back to you soon.
+            </div>
+            <div class="error-message" id="errorMessage"></div>
+
+            <form id="contactForm">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email or Phone</label>
+                    <input type="text" class="form-input" id="contact" required placeholder="your@email.com or +1234567890">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Subject</label>
+                    <input type="text" class="form-input" id="subject" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Message</label>
+                    <textarea class="form-textarea" id="message" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn" id="submitBtn">Send Message</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/v1';
+
+        function checkAuth() {
+            const token = localStorage.getItem('authToken');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            if (token && user.first_name) {
+                document.getElementById('authBtn').classList.add('hidden');
+                document.getElementById('profileIcon').classList.remove('hidden');
+                document.getElementById('userInitial').textContent = user.first_name.charAt(0).toUpperCase();
+            }
+        }
+
+        function showMessage(type, message) {
+            const successDiv = document.getElementById('successMessage');
+            const errorDiv = document.getElementById('errorMessage');
+            
+            if (type === 'success') {
+                successDiv.style.display = 'block';
+                errorDiv.style.display = 'none';
+            } else {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                successDiv.style.display = 'none';
+            }
+
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+            submitBtn.textContent = '';
+
+            const contactData = {
+                name: document.getElementById('name').value,
+                contact: document.getElementById('contact').value,
+                subject: document.getElementById('subject').value,
+                message: document.getElementById('message').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/contact/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(contactData)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to send message');
+                }
+
+                showMessage('success');
+                document.getElementById('contactForm').reset();
+            } catch (error) {
+                console.error('Contact error:', error);
+                showMessage('error', error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+                submitBtn.textContent = originalText;
+            }
+        });
+
+        checkAuth();
+    </script>
+</body>
+</html>
