@@ -1,293 +1,225 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clixs - Login</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% extends "basic.html" %}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
-            color: #ffffff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+{% block title %}Clixs - Login{% endblock %}
 
-        .navbar {
-            background: rgba(20, 20, 30, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        }
+{% block extra_styles %}
+body {
+    display: flex;
+    flex-direction: column;
+}
 
-        .nav-logo {
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #3498db, #9b59b6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            cursor: pointer;
-        }
+.auth-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
 
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
+.auth-box {
+    background: rgba(30, 30, 45, 0.9);
+    padding: 3rem;
+    border-radius: 25px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 15px 60px rgba(0, 0, 0, 0.7);
+    animation: slideUp 0.6s ease;
+}
 
-        .nav-links a {
-            color: #e0e0e0;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
-        .nav-links a:hover {
-            color: #00d4ff;
-        }
+.auth-title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #3498db, #9b59b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
 
-        .auth-container {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-        }
+.form-group {
+    margin-bottom: 1.5rem;
+}
 
-        .auth-box {
-            background: rgba(30, 30, 45, 0.9);
-            padding: 3rem;
-            border-radius: 25px;
-            width: 100%;
-            max-width: 450px;
-            box-shadow: 0 15px 60px rgba(0, 0, 0, 0.7);
-            animation: slideUp 0.6s ease;
-        }
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #e0e0e0;
+    font-weight: 500;
+}
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+.form-input {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(20, 20, 30, 0.8);
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
 
-        .auth-title {
-            font-size: 2rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 2rem;
-            background: linear-gradient(135deg, #3498db, #9b59b6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+.form-input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
+}
 
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
+.submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, #3498db, #9b59b6);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
+    margin-top: 1rem;
+}
 
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #e0e0e0;
-            font-weight: 500;
-        }
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
+}
 
-        .form-input {
-            width: 100%;
-            padding: 1rem;
-            background: rgba(20, 20, 30, 0.8);
-            border: 2px solid rgba(52, 152, 219, 0.3);
-            border-radius: 12px;
-            color: #ffffff;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
 
-        .form-input:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
-        }
+.auth-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #b0b0b0;
+}
 
-        .submit-btn {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, #3498db, #9b59b6);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
-            margin-top: 1rem;
-        }
+.auth-link a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
 
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
-        }
+.auth-link a:hover {
+    color: #00d4ff;
+}
 
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+.error-message {
+    background: rgba(231, 76, 60, 0.2);
+    border: 1px solid #e74c3c;
+    color: #e74c3c;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    text-align: center;
+}
 
-        .auth-link {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: #b0b0b0;
-        }
+@media (max-width: 768px) {
+    .auth-box {
+        padding: 2rem;
+    }
+}
+{% endblock %}
 
-        .auth-link a {
-            color: #3498db;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s ease;
-        }
-
-        .auth-link a:hover {
-            color: #00d4ff;
-        }
-
-        .error-message {
-            background: rgba(231, 76, 60, 0.2);
-            border: 1px solid #e74c3c;
-            color: #e74c3c;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        @media (max-width: 768px) {
-            .auth-box {
-                padding: 2rem;
-            }
-
-            .navbar {
-                padding: 1rem;
-            }
-
-            .nav-links {
-                gap: 1rem;
-                font-size: 0.9rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <div class="nav-logo" onclick="location.href='index.html'">Clixs</div>
-        <ul class="nav-links">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="contact.html">Contact</a></li>
-        </ul>
-    </nav>
-
-    <div class="auth-container">
-        <div class="auth-box">
-            <h1 class="auth-title">Welcome Back</h1>
-            <div id="errorMessage" class="error-message" style="display: none;"></div>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label class="form-label">Phone Number</label>
-                    <input type="tel" class="form-input" id="phone" required placeholder="+1234567890">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <input type="password" class="form-input" id="password" required>
-                </div>
-                <button type="submit" class="submit-btn" id="submitBtn">Login</button>
-            </form>
-            <div class="auth-link">
-                Don't have an account? <a href="signup.html">Sign Up</a>
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <h1 class="auth-title">Welcome Back</h1>
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-input" id="phone" required placeholder="+1234567890">
             </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-input" id="password" required>
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn">Login</button>
+        </form>
+        <div class="auth-link">
+            Don't have an account? <a href="signup.html">Sign Up</a>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        const API_BASE = '/api/v1';
+{% block extra_scripts %}
+const API_BASE = '/api/v1';
 
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
+function showError(message) {
+    const errorDiv = document.getElementById('errorMessage');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    setTimeout(() => {
+        errorDiv.style.display = 'none';
+    }, 5000);
+}
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Logging in...';
+
+    const phone = document.getElementById('phone').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const response = await fetch(`${API_BASE}/auth/login/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                phone_number: phone,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Login failed');
         }
 
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Logging in...';
-
-            const phone = document.getElementById('phone').value;
-            const password = document.getElementById('password').value;
-
-            try {
-                const response = await fetch(`${API_BASE}/auth/login/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        phone_number: phone,
-                        password: password
-                    })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.message || 'Login failed');
-                }
-
-                // Store auth token and user data
-                localStorage.setItem('authToken', data.token);
-                
-                // Fetch user profile
-                const profileResponse = await fetch(`${API_BASE}/auth/profile/`, {
-                    headers: {
-                        'Authorization': `Bearer ${data.token}`
-                    }
-                });
-
-                if (profileResponse.ok) {
-                    const userData = await profileResponse.json();
-                    localStorage.setItem('user', JSON.stringify(userData));
-                }
-
-                // Redirect to home
-                window.location.href = 'index.html';
-            } catch (error) {
-                console.error('Login error:', error);
-                showError(error.message);
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Login';
+        // Store auth token and user data
+        localStorage.setItem('authToken', data.token);
+        
+        // Fetch user profile
+        const profileResponse = await fetch(`${API_BASE}/auth/profile/`, {
+            headers: {
+                'Authorization': `Bearer ${data.token}`
             }
         });
-    </script>
-</body>
-</html>
+
+        if (profileResponse.ok) {
+            const userData = await profileResponse.json();
+            localStorage.setItem('user', JSON.stringify(userData));
+        }
+
+        // Redirect to home
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error('Login error:', error);
+        showError(error.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Login';
+    }
+});
+{% endblock %}

@@ -1,726 +1,560 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clixs - Discover Items</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% extends "basic.html" %}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
-            color: #ffffff;
-            min-height: 100vh;
-        }
+{% block title %}Clixs - Discover Items{% endblock %}
 
-        .navbar {
-            position: sticky;
-            top: 0;
-            background: rgba(20, 20, 30, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
+{% block extra_styles %}
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
 
-        .navbar:hover {
-            box-shadow: 0 6px 30px rgba(52, 152, 219, 0.3);
-        }
+.page-heading {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    background: linear-gradient(135deg, #3498db, #00d4ff, #9b59b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: fadeInDown 0.8s ease;
+}
 
-        .nav-logo {
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #3498db, #9b59b6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
-        .nav-logo:hover {
-            transform: scale(1.05);
-        }
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    animation: fadeIn 1s ease;
+}
 
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 
-        .nav-links a {
-            color: #e0e0e0;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            position: relative;
-            padding: 0.5rem 1rem;
-        }
+.item-card {
+    background: rgba(30, 30, 45, 0.8);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    transition: all 0.4s ease;
+    cursor: pointer;
+}
 
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #3498db, #00d4ff);
-            transition: width 0.3s ease;
-        }
+.item-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(52, 152, 219, 0.4);
+}
 
-        .nav-links a:hover {
-            color: #00d4ff;
-        }
+.item-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #1a1a2e, #2d2d44);
+}
 
-        .nav-links a:hover::after {
-            width: 80%;
-        }
+.item-content {
+    padding: 1.5rem;
+}
 
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1rem;
+}
 
-        .profile-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #3498db, #9b59b6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
+.item-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+}
 
-        .profile-icon:hover {
-            transform: scale(1.1) rotate(5deg);
-            box-shadow: 0 0 20px rgba(52, 152, 219, 0.6);
-        }
+.item-category {
+    color: #00d4ff;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
 
-        .login-btn {
-            padding: 0.7rem 1.8rem;
-            background: linear-gradient(135deg, #3498db, #00d4ff);
-            border: none;
-            border-radius: 25px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-        }
+.badges {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
 
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(52, 152, 219, 0.5);
-        }
+.badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
 
-        .hidden {
-            display: none;
-        }
+.badge-sell {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
+.badge-rent {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
 
-        .page-heading {
-            text-align: center;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 3rem;
-            background: linear-gradient(135deg, #3498db, #00d4ff, #9b59b6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: fadeInDown 0.8s ease;
-        }
+.badge-active {
+    background: linear-gradient(135deg, #27ae60, #229954);
+}
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+.badge-sold {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+}
 
-        .items-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2rem;
-            animation: fadeIn 1s ease;
-        }
+.badge-rented {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+.item-price {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #00d4ff;
+    margin-top: 1rem;
+}
 
-        .item-card {
-            background: rgba(30, 30, 45, 0.8);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-            transition: all 0.4s ease;
-            cursor: pointer;
-        }
+.price-details {
+    font-size: 0.85rem;
+    color: #b0b0b0;
+    margin-top: 0.3rem;
+}
 
-        .item-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 12px 40px rgba(52, 152, 219, 0.4);
-        }
+.add-item-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3498db, #9b59b6);
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    box-shadow: 0 6px 25px rgba(52, 152, 219, 0.5);
+    transition: all 0.3s ease;
+    z-index: 100;
+}
 
-        .item-image {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-            background: linear-gradient(135deg, #1a1a2e, #2d2d44);
-        }
+.add-item-btn:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 8px 35px rgba(52, 152, 219, 0.7);
+}
 
-        .item-content {
-            padding: 1.5rem;
-        }
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 2000;
+    animation: fadeIn 0.3s ease;
+}
 
-        .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 1rem;
-        }
+.modal.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-        .item-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 0.5rem;
-        }
+.modal-content {
+    background: rgba(30, 30, 45, 0.98);
+    padding: 2.5rem;
+    border-radius: 25px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 15px 60px rgba(0, 0, 0, 0.7);
+    animation: slideUp 0.4s ease;
+}
 
-        .item-category {
-            color: #00d4ff;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
-        .badges {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
 
-        .badge {
-            padding: 0.3rem 0.8rem;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-align: center;
-            white-space: nowrap;
-        }
+.modal-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #3498db, #9b59b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
 
-        .badge-sell {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-        }
+.close-btn {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
 
-        .badge-rent {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-        }
+.close-btn:hover {
+    color: #e74c3c;
+    transform: rotate(90deg);
+}
 
-        .badge-active {
-            background: linear-gradient(135deg, #27ae60, #229954);
-        }
+.form-group {
+    margin-bottom: 1.5rem;
+}
 
-        .badge-sold {
-            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
-        }
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #e0e0e0;
+    font-weight: 500;
+}
 
-        .badge-rented {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-        }
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 0.9rem;
+    background: rgba(20, 20, 30, 0.8);
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
 
-        .item-price {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #00d4ff;
-            margin-top: 1rem;
-        }
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
+}
 
-        .price-details {
-            font-size: 0.85rem;
-            color: #b0b0b0;
-            margin-top: 0.3rem;
-        }
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
 
-        .add-item-btn {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #3498db, #9b59b6);
-            border: none;
-            color: white;
-            font-size: 2rem;
-            cursor: pointer;
-            box-shadow: 0 6px 25px rgba(52, 152, 219, 0.5);
-            transition: all 0.3s ease;
-            z-index: 100;
-        }
+.submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, #3498db, #9b59b6);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
+}
 
-        .add-item-btn:hover {
-            transform: scale(1.1) rotate(90deg);
-            box-shadow: 0 8px 35px rgba(52, 152, 219, 0.7);
-        }
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
+}
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 2000;
-            animation: fadeIn 0.3s ease;
-        }
+.loading {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.2rem;
+    color: #00d4ff;
+}
 
-        .modal.active {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+.error {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.2rem;
+    color: #e74c3c;
+}
 
-        .modal-content {
-            background: rgba(30, 30, 45, 0.98);
-            padding: 2.5rem;
-            border-radius: 25px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 15px 60px rgba(0, 0, 0, 0.7);
-            animation: slideUp 0.4s ease;
-        }
+@media (max-width: 768px) {
+    .page-heading {
+        font-size: 2rem;
+    }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    .items-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
+    .modal-content {
+        padding: 1.5rem;
+    }
+}
+{% endblock %}
 
-        .modal-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #3498db, #9b59b6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+{% block content %}
+<div class="container">
+    <h1 class="page-heading">Discover items to Buy or Rent</h1>
+    <div id="itemsContainer" class="items-grid"></div>
+</div>
 
-        .close-btn {
-            background: none;
-            border: none;
-            color: #ffffff;
-            font-size: 2rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+<button class="add-item-btn" onclick="openModal()" title="Add New Item">+</button>
 
-        .close-btn:hover {
-            color: #e74c3c;
-            transform: rotate(90deg);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #e0e0e0;
-            font-weight: 500;
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 0.9rem;
-            background: rgba(20, 20, 30, 0.8);
-            border: 2px solid rgba(52, 152, 219, 0.3);
-            border-radius: 12px;
-            color: #ffffff;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, #3498db, #9b59b6);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 3rem;
-            font-size: 1.2rem;
-            color: #00d4ff;
-        }
-
-        .error {
-            text-align: center;
-            padding: 3rem;
-            font-size: 1.2rem;
-            color: #e74c3c;
-        }
-
-        @media (max-width: 768px) {
-            .navbar {
-                padding: 1rem;
-            }
-
-            .nav-links {
-                gap: 1rem;
-                font-size: 0.9rem;
-            }
-
-            .page-heading {
-                font-size: 2rem;
-            }
-
-            .items-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .modal-content {
-                padding: 1.5rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <div class="nav-logo" onclick="location.href='index.html'">Clixs</div>
-        <ul class="nav-links">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="contact.html">Contact</a></li>
-        </ul>
-        <div class="nav-right">
-            <div class="profile-icon hidden" id="profileIcon" onclick="location.href='profile.html'">
-                <span id="userInitial">U</span>
-            </div>
-            <button class="login-btn" id="authBtn" onclick="location.href='login.html'">Login / Signup</button>
+<!-- Add Item Modal -->
+<div class="modal" id="addItemModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Add New Item</h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
         </div>
-    </nav>
-
-    <div class="container">
-        <h1 class="page-heading">Discover items to Buy or Rent</h1>
-        <div id="itemsContainer" class="items-grid"></div>
-    </div>
-
-    <button class="add-item-btn" onclick="openModal()" title="Add New Item">+</button>
-
-    <!-- Add Item Modal -->
-    <div class="modal" id="addItemModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Add New Item</h2>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
+        <form id="addItemForm">
+            <div class="form-group">
+                <label class="form-label">Title</label>
+                <input type="text" class="form-input" id="title" required>
             </div>
-            <form id="addItemForm">
-                <div class="form-group">
-                    <label class="form-label">Title</label>
-                    <input type="text" class="form-input" id="title" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-textarea" id="description" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Category</label>
-                    <input type="text" class="form-input" id="category" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Item Type</label>
-                    <select class="form-select" id="itemType" onchange="togglePriceFields()" required>
-                        <option value="">Select Type</option>
-                        <option value="SELL">Sell</option>
-                        <option value="RENT">Rent</option>
-                    </select>
-                </div>
-                <div class="form-group hidden" id="sellPriceGroup">
-                    <label class="form-label">Sell Price</label>
-                    <input type="number" class="form-input" id="sellPrice" step="0.01">
-                </div>
-                <div class="form-group hidden" id="rentPriceGroup">
-                    <label class="form-label">Daily Price</label>
-                    <input type="number" class="form-input" id="dailyPrice" step="0.01">
-                    <label class="form-label" style="margin-top: 1rem;">Weekly Price</label>
-                    <input type="number" class="form-input" id="weeklyPrice" step="0.01">
-                    <label class="form-label" style="margin-top: 1rem;">Monthly Price</label>
-                    <input type="number" class="form-input" id="monthlyPrice" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Images</label>
-                    <input type="file" class="form-input" id="images" multiple accept="image/*">
-                </div>
-                <button type="submit" class="submit-btn">Add Item</button>
-            </form>
-        </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-textarea" id="description" required></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <input type="text" class="form-input" id="category" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Item Type</label>
+                <select class="form-select" id="itemType" onchange="togglePriceFields()" required>
+                    <option value="">Select Type</option>
+                    <option value="SELL">Sell</option>
+                    <option value="RENT">Rent</option>
+                </select>
+            </div>
+            <div class="form-group hidden" id="sellPriceGroup">
+                <label class="form-label">Sell Price</label>
+                <input type="number" class="form-input" id="sellPrice" step="0.01">
+            </div>
+            <div class="form-group hidden" id="rentPriceGroup">
+                <label class="form-label">Daily Price</label>
+                <input type="number" class="form-input" id="dailyPrice" step="0.01">
+                <label class="form-label" style="margin-top: 1rem;">Weekly Price</label>
+                <input type="number" class="form-input" id="weeklyPrice" step="0.01">
+                <label class="form-label" style="margin-top: 1rem;">Monthly Price</label>
+                <input type="number" class="form-input" id="monthlyPrice" step="0.01">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Images</label>
+                <input type="file" class="form-input" id="images" multiple accept="image/*">
+            </div>
+            <button type="submit" class="submit-btn">Add Item</button>
+        </form>
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        const API_BASE = '/api/v1';
+{% block extra_scripts %}
+const API_BASE = '/api/v1';
 
-        // Check auth
-        function checkAuth() {
-            const token = localStorage.getItem('authToken');
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            
-            if (token && user.first_name) {
-                document.getElementById('authBtn').classList.add('hidden');
-                document.getElementById('profileIcon').classList.remove('hidden');
-                document.getElementById('userInitial').textContent = user.first_name.charAt(0).toUpperCase();
-            }
+// Fetch and display items
+async function fetchItems() {
+    const container = document.getElementById('itemsContainer');
+    container.innerHTML = '<div class="loading">Loading items...</div>';
+
+    try {
+        const response = await fetch(`${API_BASE}/items/`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch items');
         }
 
-        // Fetch and display items
-        async function fetchItems() {
-            const container = document.getElementById('itemsContainer');
-            container.innerHTML = '<div class="loading">Loading items...</div>';
+        const items = await response.json();
+        displayItems(items);
+    } catch (error) {
+        console.error('Error fetching items:', error);
+        container.innerHTML = '<div class="error">Failed to load items. Please try again later.</div>';
+    }
+}
 
-            try {
-                const response = await fetch(`${API_BASE}/items/`);
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch items');
-                }
+function displayItems(items) {
+    const container = document.getElementById('itemsContainer');
+    
+    if (items.length === 0) {
+        container.innerHTML = '<div class="loading">No items available yet.</div>';
+        return;
+    }
 
-                const items = await response.json();
-                displayItems(items);
-            } catch (error) {
-                console.error('Error fetching items:', error);
-                container.innerHTML = '<div class="error">Failed to load items. Please try again later.</div>';
-            }
+    container.innerHTML = items.map(item => {
+        const imageUrl = item.images && item.images[0] ? item.images[0].image : '/placeholder.svg?height=220&width=320';
+        const typeClass = item.item_type === 'SELL' ? 'badge-sell' : 'badge-rent';
+        const statusClass = item.status === 'ACTIVE' ? 'badge-active' : item.status === 'SOLD' ? 'badge-sold' : 'badge-rented';
+        
+        let priceHtml = '';
+        if (item.item_type === 'SELL') {
+            priceHtml = `<div class="item-price">$${item.sell_price || 0}</div>`;
+        } else {
+            priceHtml = `
+                <div class="item-price">$${item.daily_price || 0}/day</div>
+                <div class="price-details">
+                    ${item.weekly_price ? `Weekly: $${item.weekly_price}` : ''} 
+                    ${item.monthly_price ? `| Monthly: $${item.monthly_price}` : ''}
+                </div>
+            `;
         }
 
-        function displayItems(items) {
-            const container = document.getElementById('itemsContainer');
-            
-            if (items.length === 0) {
-                container.innerHTML = '<div class="loading">No items available yet.</div>';
-                return;
-            }
-
-            container.innerHTML = items.map(item => {
-                const imageUrl = item.images && item.images[0] ? item.images[0].image : '/placeholder.svg?height=220&width=320';
-                const typeClass = item.item_type === 'SELL' ? 'badge-sell' : 'badge-rent';
-                const statusClass = item.status === 'ACTIVE' ? 'badge-active' : item.status === 'SOLD' ? 'badge-sold' : 'badge-rented';
-                
-                let priceHtml = '';
-                if (item.item_type === 'SELL') {
-                    priceHtml = `<div class="item-price">$${item.sell_price || 0}</div>`;
-                } else {
-                    priceHtml = `
-                        <div class="item-price">$${item.daily_price || 0}/day</div>
-                        <div class="price-details">
-                            ${item.weekly_price ? `Weekly: $${item.weekly_price}` : ''} 
-                            ${item.monthly_price ? `| Monthly: $${item.monthly_price}` : ''}
+        return `
+            <div class="item-card">
+                <img src="${imageUrl}" alt="${item.title}" class="item-image" onerror="this.src='/placeholder.svg?height=220&width=320'">
+                <div class="item-content">
+                    <div class="item-header">
+                        <div>
+                            <div class="item-title">${item.title}</div>
+                            <div class="item-category">${item.category}</div>
                         </div>
-                    `;
-                }
-
-                return `
-                    <div class="item-card">
-                        <img src="${imageUrl}" alt="${item.title}" class="item-image" onerror="this.src='/placeholder.svg?height=220&width=320'">
-                        <div class="item-content">
-                            <div class="item-header">
-                                <div>
-                                    <div class="item-title">${item.title}</div>
-                                    <div class="item-category">${item.category}</div>
-                                </div>
-                                <div class="badges">
-                                    <span class="badge ${typeClass}">${item.item_type}</span>
-                                    <span class="badge ${statusClass}">${item.status}</span>
-                                </div>
-                            </div>
-                            ${priceHtml}
+                        <div class="badges">
+                            <span class="badge ${typeClass}">${item.item_type}</span>
+                            <span class="badge ${statusClass}">${item.status}</span>
                         </div>
                     </div>
-                `;
-            }).join('');
+                    ${priceHtml}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Modal functions
+function openModal() {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        alert('Please login to add items');
+        location.href = 'login.html';
+        return;
+    }
+    document.getElementById('addItemModal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('addItemModal').classList.remove('active');
+    document.getElementById('addItemForm').reset();
+    togglePriceFields();
+}
+
+function togglePriceFields() {
+    const itemType = document.getElementById('itemType').value;
+    const sellPriceGroup = document.getElementById('sellPriceGroup');
+    const rentPriceGroup = document.getElementById('rentPriceGroup');
+
+    if (itemType === 'SELL') {
+        sellPriceGroup.classList.remove('hidden');
+        rentPriceGroup.classList.add('hidden');
+    } else if (itemType === 'RENT') {
+        sellPriceGroup.classList.add('hidden');
+        rentPriceGroup.classList.remove('hidden');
+    } else {
+        sellPriceGroup.classList.add('hidden');
+        rentPriceGroup.classList.add('hidden');
+    }
+}
+
+// Submit new item
+document.getElementById('addItemForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        alert('Please login to add items');
+        location.href = 'login.html';
+        return;
+    }
+
+    const itemType = document.getElementById('itemType').value;
+    const itemData = {
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        category: document.getElementById('category').value,
+        item_type: itemType
+    };
+
+    if (itemType === 'SELL') {
+        itemData.sell_price = document.getElementById('sellPrice').value;
+    } else {
+        itemData.daily_price = document.getElementById('dailyPrice').value;
+        itemData.weekly_price = document.getElementById('weeklyPrice').value;
+        itemData.monthly_price = document.getElementById('monthlyPrice').value;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/items/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(itemData)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to add item');
         }
 
-        // Modal functions
-        function openModal() {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                alert('Please login to add items');
-                location.href = 'login.html';
-                return;
-            }
-            document.getElementById('addItemModal').classList.add('active');
-        }
+        const newItem = await response.json();
 
-        function closeModal() {
-            document.getElementById('addItemModal').classList.remove('active');
-            document.getElementById('addItemForm').reset();
-            togglePriceFields();
-        }
+        // Upload images if any
+        const images = document.getElementById('images').files;
+        if (images.length > 0) {
+            for (let image of images) {
+                const formData = new FormData();
+                formData.append('item', newItem.id);
+                formData.append('image', image);
 
-        function togglePriceFields() {
-            const itemType = document.getElementById('itemType').value;
-            const sellPriceGroup = document.getElementById('sellPriceGroup');
-            const rentPriceGroup = document.getElementById('rentPriceGroup');
-
-            if (itemType === 'SELL') {
-                sellPriceGroup.classList.remove('hidden');
-                rentPriceGroup.classList.add('hidden');
-            } else if (itemType === 'RENT') {
-                sellPriceGroup.classList.add('hidden');
-                rentPriceGroup.classList.remove('hidden');
-            } else {
-                sellPriceGroup.classList.add('hidden');
-                rentPriceGroup.classList.add('hidden');
-            }
-        }
-
-        // Submit new item
-        document.getElementById('addItemForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                alert('Please login to add items');
-                location.href = 'login.html';
-                return;
-            }
-
-            const itemType = document.getElementById('itemType').value;
-            const itemData = {
-                title: document.getElementById('title').value,
-                description: document.getElementById('description').value,
-                category: document.getElementById('category').value,
-                item_type: itemType
-            };
-
-            if (itemType === 'SELL') {
-                itemData.sell_price = document.getElementById('sellPrice').value;
-            } else {
-                itemData.daily_price = document.getElementById('dailyPrice').value;
-                itemData.weekly_price = document.getElementById('weeklyPrice').value;
-                itemData.monthly_price = document.getElementById('monthlyPrice').value;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/items/`, {
+                await fetch(`${API_BASE}/item-images/`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify(itemData)
+                    body: formData
                 });
-
-                if (!response.ok) {
-                    throw new Error('Failed to add item');
-                }
-
-                const newItem = await response.json();
-
-                // Upload images if any
-                const images = document.getElementById('images').files;
-                if (images.length > 0) {
-                    for (let image of images) {
-                        const formData = new FormData();
-                        formData.append('item', newItem.id);
-                        formData.append('image', image);
-
-                        await fetch(`${API_BASE}/item-images/`, {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${token}`
-                            },
-                            body: formData
-                        });
-                    }
-                }
-
-                alert('Item added successfully!');
-                closeModal();
-                fetchItems();
-            } catch (error) {
-                console.error('Error adding item:', error);
-                alert('Failed to add item. Please try again.');
             }
-        });
+        }
 
-        // Close modal on outside click
-        document.getElementById('addItemModal').addEventListener('click', (e) => {
-            if (e.target.id === 'addItemModal') {
-                closeModal();
-            }
-        });
-
-        // Initialize
-        checkAuth();
+        alert('Item added successfully!');
+        closeModal();
         fetchItems();
-    </script>
-</body>
-</html>
+    } catch (error) {
+        console.error('Error adding item:', error);
+        alert('Failed to add item. Please try again.');
+    }
+});
+
+// Close modal on outside click
+document.getElementById('addItemModal').addEventListener('click', (e) => {
+    if (e.target.id === 'addItemModal') {
+        closeModal();
+    }
+});
+
+// Initialize
+fetchItems();
+{% endblock %}
