@@ -214,9 +214,8 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         }
 
         // Redirect to home
-        window.location.href = 'index.html';
+        window.location.href = '{% url 'home' %}';
     } catch (error) {
-        console.error('Login error:', error);
         showError(error.message);
         submitBtn.disabled = false;
         submitBtn.textContent = 'Login';
