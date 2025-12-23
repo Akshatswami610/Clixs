@@ -230,12 +230,16 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
     submitBtn.classList.add('loading');
     submitBtn.textContent = '';
 
+    const contactValue = document.getElementById('contact').value;
+
     const contactData = {
         name: document.getElementById('name').value,
-        contact: document.getElementById('contact').value,
         subject: document.getElementById('subject').value,
-        message: document.getElementById('message').value
+        message: document.getElementById('message').value,
+        email: contactValue.includes('@') ? contactValue : null,
+        phone: contactValue.includes('@') ? null : contactValue
     };
+
 
     try {
         const response = await fetch(`${API_BASE}/contact/`, {
