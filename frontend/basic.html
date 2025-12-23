@@ -151,17 +151,17 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="nav-logo" onclick="location.href='home'">Clixs</div>
+        <div class="nav-logo" onclick="location.href='{% url 'home' %}'">Clixs</div>
         <ul class="nav-links">
-            <li><a href="home">Home</a></li>
-            <li><a href="about.">About</a></li>
-            <li><a href="contact.">Contact</a></li>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'about' %}">About</a></li>
+            <li><a href="{% url 'contactus' %}">Contact</a></li>
         </ul>
         <div class="nav-right">
-            <div class="profile-icon hidden" id="profileIcon" onclick="location.href='profile'">
+            <div class="profile-icon hidden" id="profileIcon" onclick="location.href='{% url 'profile' %}'">
                 <span id="userInitial">U</span>
             </div>
-            <button class="login-btn" id="authBtn" onclick="location.href='login'">Login / Signup</button>
+            <button class="login-btn" id="authBtn" onclick="location.href='{% url 'login' %}'">Login / Signup</button>
         </div>
     </nav>
 

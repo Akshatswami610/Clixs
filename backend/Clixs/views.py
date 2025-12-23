@@ -68,6 +68,7 @@ def signup(request):
         if User.objects.filter(username=username).exists():
             messages.error(request, "Username already exists")
             return redirect('signup')
+            return redirect('signup')
 
         user = User.objects.create_user(
             username=username,
