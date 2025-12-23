@@ -318,13 +318,12 @@
 
 {% block content %}
 <div class="container">
-    <h1 class="page-heading">Discover items to Buy or Rent</h1>
-    <div id="itemsContainer" class="items-grid"></div>
+    <h1 class="page-heading">Discover Amazing Items</h1>
+    <div class="items-grid" id="itemsContainer"></div>
 </div>
 
-<button class="add-item-btn" onclick="openModal()" title="Add New Item">+</button>
+<button class="add-item-btn" onclick="openModal()">+</button>
 
-<!-- Add Item Modal -->
 <div class="modal" id="addItemModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -334,39 +333,34 @@
         <form id="addItemForm">
             <div class="form-group">
                 <label class="form-label">Title</label>
-                <input type="text" class="form-input" id="title" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Description</label>
-                <textarea class="form-textarea" id="description" required></textarea>
+                <input type="text" class="form-input" name="title" required>
             </div>
             <div class="form-group">
                 <label class="form-label">Category</label>
-                <input type="text" class="form-input" id="category" required>
+                <select class="form-select" name="category" required>
+                    <option value="">Select category</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Furniture">Furniture</option>
+                    <option value="Vehicles">Vehicles</option>
+                    <option value="Books">Books</option>
+                    <option value="Other">Other</option>
+                </select>
             </div>
             <div class="form-group">
                 <label class="form-label">Item Type</label>
-                <select class="form-select" id="itemType" onchange="togglePriceFields()" required>
-                    <option value="">Select Type</option>
+                <select class="form-select" name="item_type" required>
+                    <option value="">Select type</option>
                     <option value="SELL">Sell</option>
                     <option value="RENT">Rent</option>
                 </select>
             </div>
-            <div class="form-group hidden" id="sellPriceGroup">
-                <label class="form-label">Sell Price</label>
-                <input type="number" class="form-input" id="sellPrice" step="0.01">
-            </div>
-            <div class="form-group hidden" id="rentPriceGroup">
-                <label class="form-label">Daily Price</label>
-                <input type="number" class="form-input" id="dailyPrice" step="0.01">
-                <label class="form-label" style="margin-top: 1rem;">Weekly Price</label>
-                <input type="number" class="form-input" id="weeklyPrice" step="0.01">
-                <label class="form-label" style="margin-top: 1rem;">Monthly Price</label>
-                <input type="number" class="form-input" id="monthlyPrice" step="0.01">
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-textarea" name="description" required></textarea>
             </div>
             <div class="form-group">
-                <label class="form-label">Images</label>
-                <input type="file" class="form-input" id="images" multiple accept="image/*">
+                <label class="form-label">Price</label>
+                <input type="number" class="form-input" name="price" required>
             </div>
             <button type="submit" class="submit-btn">Add Item</button>
         </form>
@@ -375,57 +369,109 @@
 {% endblock %}
 
 {% block extra_scripts %}
-const API_BASE = '/api/v1';
+document.addEventListener("DOMContentLoaded", () => {
 
-// Fetch and display items
+/* =========================
+   Constants & Helpers
+========================= */
+const API_BASE = "/api/v1";
+const PLACEHOLDER = "/static/images/placeholder.svg";
+
+function formatINR(amount) {
+    if (!amount || isNaN(amount)) return "";
+    return "₹" + Number(amount).toLocaleString("en-IN");
+}
+
+/* =========================
+   Modal Functions
+========================= */
+window.openModal = function() {
+    document.getElementById('addItemModal').classList.add('active');
+}
+
+window.closeModal = function() {
+    document.getElementById('addItemModal').classList.remove('active');
+}
+
+// Close modal when clicking outside
+document.getElementById('addItemModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+
+/* =========================
+   Fetch and Display Items
+========================= */
 async function fetchItems() {
-    const container = document.getElementById('itemsContainer');
+    const container = document.getElementById("itemsContainer");
+    if (!container) return;
+
     container.innerHTML = '<div class="loading">Loading items...</div>';
 
     try {
         const response = await fetch(`${API_BASE}/items/`);
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch items');
-        }
+        if (!response.ok) throw new Error("Failed to fetch items");
 
         const items = await response.json();
         displayItems(items);
     } catch (error) {
-        console.error('Error fetching items:', error);
-        container.innerHTML = '<div class="error">Failed to load items. Please try again later.</div>';
+        console.error(error);
+        container.innerHTML =
+            '<div class="error">Failed to load items. Please try again later.</div>';
     }
 }
 
+/* =========================
+   Render Items
+========================= */
 function displayItems(items) {
-    const container = document.getElementById('itemsContainer');
-    
-    if (items.length === 0) {
+    const container = document.getElementById("itemsContainer");
+    if (!container) return;
+
+    if (!items.length) {
         container.innerHTML = '<div class="loading">No items available yet.</div>';
         return;
     }
 
-    container.innerHTML = items.map(item => {
-        const imageUrl = item.images && item.images[0] ? item.images[0].image : '/placeholder.svg?height=220&width=320';
-        const typeClass = item.item_type === 'SELL' ? 'badge-sell' : 'badge-rent';
-        const statusClass = item.status === 'ACTIVE' ? 'badge-active' : item.status === 'SOLD' ? 'badge-sold' : 'badge-rented';
-        
-        let priceHtml = '';
-        if (item.item_type === 'SELL') {
-            priceHtml = `<div class="item-price">$${item.sell_price || 0}</div>`;
+    container.innerHTML = items.map((item) => {
+        const imageUrl =
+            item.images?.length > 0 ? item.images[0].image : PLACEHOLDER;
+
+        const typeClass = item.item_type === "SELL" ? "badge-sell" : "badge-rent";
+        const statusClass =
+            item.status === "ACTIVE"
+                ? "badge-active"
+                : item.status === "SOLD"
+                ? "badge-sold"
+                : "badge-rented";
+
+        let priceHtml = "";
+
+        if (item.item_type === "SELL") {
+            priceHtml = `<div class="item-price">${formatINR(item.sell_price)}</div>`;
         } else {
+            const daily = item.rent_prices?.daily;
+            const weekly = item.rent_prices?.weekly;
+            const monthly = item.rent_prices?.monthly;
+
             priceHtml = `
-                <div class="item-price">$${item.daily_price || 0}/day</div>
+                <div class="item-price">
+                    ${daily ? `${formatINR(daily)}/day` : ""}
+                </div>
                 <div class="price-details">
-                    ${item.weekly_price ? `Weekly: $${item.weekly_price}` : ''} 
-                    ${item.monthly_price ? `| Monthly: $${item.monthly_price}` : ''}
+                    ${weekly ? `Weekly: ${formatINR(weekly)}` : ""}
+                    ${monthly ? ` | Monthly: ${formatINR(monthly)}` : ""}
                 </div>
             `;
         }
 
         return `
             <div class="item-card">
-                <img src="${imageUrl}" alt="${item.title}" class="item-image" onerror="this.src='/placeholder.svg?height=220&width=320'">
+                <img src="${imageUrl}"
+                     class="item-image"
+                     loading="lazy"
+                     onerror="this.src='${PLACEHOLDER}'">
                 <div class="item-content">
                     <div class="item-header">
                         <div>
@@ -441,120 +487,25 @@ function displayItems(items) {
                 </div>
             </div>
         `;
-    }).join('');
+    }).join("");
 }
 
-// Modal functions
-function openModal() {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-        alert('Please login to add items');
-        location.href = 'login.html';
-        return;
-    }
-    document.getElementById('addItemModal').classList.add('active');
+/* =========================
+   Modal + Form
+========================= */
+const form = document.getElementById("addItemForm");
+if (form) {
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        alert("Form submit works ✅");
+        // Add your form submission logic here
+    });
 }
 
-function closeModal() {
-    document.getElementById('addItemModal').classList.remove('active');
-    document.getElementById('addItemForm').reset();
-    togglePriceFields();
-}
-
-function togglePriceFields() {
-    const itemType = document.getElementById('itemType').value;
-    const sellPriceGroup = document.getElementById('sellPriceGroup');
-    const rentPriceGroup = document.getElementById('rentPriceGroup');
-
-    if (itemType === 'SELL') {
-        sellPriceGroup.classList.remove('hidden');
-        rentPriceGroup.classList.add('hidden');
-    } else if (itemType === 'RENT') {
-        sellPriceGroup.classList.add('hidden');
-        rentPriceGroup.classList.remove('hidden');
-    } else {
-        sellPriceGroup.classList.add('hidden');
-        rentPriceGroup.classList.add('hidden');
-    }
-}
-
-// Submit new item
-document.getElementById('addItemForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-        alert('Please login to add items');
-        location.href = 'login.html';
-        return;
-    }
-
-    const itemType = document.getElementById('itemType').value;
-    const itemData = {
-        title: document.getElementById('title').value,
-        description: document.getElementById('description').value,
-        category: document.getElementById('category').value,
-        item_type: itemType
-    };
-
-    if (itemType === 'SELL') {
-        itemData.sell_price = document.getElementById('sellPrice').value;
-    } else {
-        itemData.daily_price = document.getElementById('dailyPrice').value;
-        itemData.weekly_price = document.getElementById('weeklyPrice').value;
-        itemData.monthly_price = document.getElementById('monthlyPrice').value;
-    }
-
-    try {
-        const response = await fetch(`${API_BASE}/items/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(itemData)
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to add item');
-        }
-
-        const newItem = await response.json();
-
-        // Upload images if any
-        const images = document.getElementById('images').files;
-        if (images.length > 0) {
-            for (let image of images) {
-                const formData = new FormData();
-                formData.append('item', newItem.id);
-                formData.append('image', image);
-
-                await fetch(`${API_BASE}/item-images/`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: formData
-                });
-            }
-        }
-
-        alert('Item added successfully!');
-        closeModal();
-        fetchItems();
-    } catch (error) {
-        console.error('Error adding item:', error);
-        alert('Failed to add item. Please try again.');
-    }
-});
-
-// Close modal on outside click
-document.getElementById('addItemModal').addEventListener('click', (e) => {
-    if (e.target.id === 'addItemModal') {
-        closeModal();
-    }
-});
-
-// Initialize
+/* =========================
+   Init
+========================= */
 fetchItems();
+
+});
 {% endblock %}
