@@ -195,16 +195,21 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.message || 'Login failed');
+            throw new Error(data.detail || data.message || 'Login failed');
         }
 
-        // Store auth token and user data
-        localStorage.setItem('authToken', data.token);
-        
+        // Store auth token (check for different token field names)
+        const token = data.token || data.access || data.auth_token || data.key;
+        if (!token) {
+            throw new Error('No authentication token received');
+        }
+
+        localStorage.setItem('authToken', token);
+
         // Fetch user profile
         const profileResponse = await fetch(`${API_BASE}/auth/profile/`, {
             headers: {
-                'Authorization': `Bearer ${data.token}`
+                'Authorization': `Token ${token}`
             }
         });
 
@@ -214,8 +219,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         }
 
         // Redirect to home
-        window.location.href = '{% url 'home' %}';
+        window.location.href = '{% url "home" %}';
     } catch (error) {
+        console.error('Login error:', error);
         showError(error.message);
         submitBtn.disabled = false;
         submitBtn.textContent = 'Login';
