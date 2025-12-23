@@ -281,9 +281,14 @@
     box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
 }
 
-.submit-btn:hover {
+.submit-btn:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
+}
+
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .loading {
@@ -300,6 +305,85 @@
     color: #e74c3c;
 }
 
+.price-group {
+    display: none;
+}
+
+.price-group.active {
+    display: block;
+}
+
+.rent-prices {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.file-input-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.9rem;
+    background: rgba(52, 152, 219, 0.1);
+    border: 2px dashed rgba(52, 152, 219, 0.5);
+    border-radius: 12px;
+    color: #3498db;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.file-label:hover {
+    background: rgba(52, 152, 219, 0.2);
+    border-color: #3498db;
+}
+
+.file-name {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: #b0b0b0;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-success {
+    background: rgba(39, 174, 96, 0.2);
+    border: 1px solid #27ae60;
+    color: #2ecc71;
+}
+
+.alert-error {
+    background: rgba(231, 76, 60, 0.2);
+    border: 1px solid #e74c3c;
+    color: #e74c3c;
+}
+
 @media (max-width: 768px) {
     .page-heading {
         font-size: 2rem;
@@ -312,6 +396,10 @@
 
     .modal-content {
         padding: 1.5rem;
+    }
+
+    .rent-prices {
+        grid-template-columns: 1fr;
     }
 }
 {% endblock %}
@@ -330,39 +418,79 @@
             <h2 class="modal-title">Add New Item</h2>
             <button class="close-btn" onclick="closeModal()">&times;</button>
         </div>
-        <form id="addItemForm">
+
+        <div id="alertContainer"></div>
+
+        <form id="addItemForm" enctype="multipart/form-data">
             <div class="form-group">
-                <label class="form-label">Title</label>
-                <input type="text" class="form-input" name="title" required>
+                <label class="form-label">Title *</label>
+                <input type="text" class="form-input" name="title" required maxlength="100">
             </div>
+
             <div class="form-group">
-                <label class="form-label">Category</label>
+                <label class="form-label">Category *</label>
                 <select class="form-select" name="category" required>
                     <option value="">Select category</option>
                     <option value="Electronics">Electronics</option>
                     <option value="Furniture">Furniture</option>
                     <option value="Vehicles">Vehicles</option>
                     <option value="Books">Books</option>
+                    <option value="Clothing">Clothing</option>
+                    <option value="Sports">Sports</option>
                     <option value="Other">Other</option>
                 </select>
             </div>
+
             <div class="form-group">
-                <label class="form-label">Item Type</label>
-                <select class="form-select" name="item_type" required>
+                <label class="form-label">Item Type *</label>
+                <select class="form-select" name="item_type" id="itemType" required>
                     <option value="">Select type</option>
                     <option value="SELL">Sell</option>
                     <option value="RENT">Rent</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label class="form-label">Description</label>
-                <textarea class="form-textarea" name="description" required></textarea>
+
+            <div class="form-group price-group" id="sellPriceGroup">
+                <label class="form-label">Selling Price (₹) *</label>
+                <input type="number" class="form-input" name="sell_price" min="0" step="0.01">
             </div>
-            <div class="form-group">
-                <label class="form-label">Price</label>
-                <input type="number" class="form-input" name="price" required>
+
+            <div class="form-group price-group" id="rentPriceGroup">
+                <label class="form-label">Rental Prices (₹) *</label>
+                <div class="rent-prices">
+                    <div>
+                        <label class="form-label" style="font-size: 0.85rem;">Daily</label>
+                        <input type="number" class="form-input" name="rent_daily" min="0" step="0.01">
+                    </div>
+                    <div>
+                        <label class="form-label" style="font-size: 0.85rem;">Weekly</label>
+                        <input type="number" class="form-input" name="rent_weekly" min="0" step="0.01">
+                    </div>
+                    <div>
+                        <label class="form-label" style="font-size: 0.85rem;">Monthly</label>
+                        <input type="number" class="form-input" name="rent_monthly" min="0" step="0.01">
+                    </div>
+                </div>
             </div>
-            <button type="submit" class="submit-btn">Add Item</button>
+
+            <div class="form-group">
+                <label class="form-label">Description *</label>
+                <textarea class="form-textarea" name="description" required maxlength="500"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Images (Max 5)</label>
+                <div class="file-input-wrapper">
+                    <input type="file" class="file-input" id="imageInput" name="images" accept="image/*" multiple>
+                    <label for="imageInput" class="file-label">
+                        <span>📷</span>
+                        <span>Choose Images</span>
+                    </label>
+                    <div class="file-name" id="fileName">No files selected</div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">Add Item</button>
         </form>
     </div>
 </div>
@@ -375,11 +503,45 @@ document.addEventListener("DOMContentLoaded", () => {
    Constants & Helpers
 ========================= */
 const API_BASE = "/api/v1";
-const PLACEHOLDER = "/static/images/placeholder.svg";
+const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%231a1a2e'/%3E%3Cg transform='translate(200, 150)'%3E%3Ccircle cx='0' cy='-20' r='40' fill='%233498db' opacity='0.3'/%3E%3Crect x='-30' y='10' width='60' height='40' rx='5' fill='%233498db' opacity='0.3'/%3E%3Cpolygon points='0,-10 -25,25 25,25' fill='%233498db' opacity='0.5'/%3E%3C/g%3E%3Ctext x='200' y='250' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%23666'%3ENo Image%3C/text%3E%3C/svg%3E";
 
 function formatINR(amount) {
     if (!amount || isNaN(amount)) return "";
     return "₹" + Number(amount).toLocaleString("en-IN");
+}
+
+function showAlert(message, type = 'success') {
+    const alertContainer = document.getElementById('alertContainer');
+    if (!alertContainer) return;
+
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.textContent = message;
+    alertContainer.innerHTML = '';
+    alertContainer.appendChild(alert);
+
+    setTimeout(() => {
+        if (alert && alert.parentNode) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+function getImageUrl(imagePath) {
+    if (!imagePath) return PLACEHOLDER;
+
+    // If it's already a full URL, return it
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        return imagePath;
+    }
+
+    // If it starts with /media/, return as is
+    if (imagePath.startsWith('/media/')) {
+        return imagePath;
+    }
+
+    // Otherwise, prepend /media/
+    return `/media/${imagePath}`;
 }
 
 /* =========================
@@ -391,12 +553,68 @@ window.openModal = function() {
 
 window.closeModal = function() {
     document.getElementById('addItemModal').classList.remove('active');
+    document.getElementById('addItemForm').reset();
+    document.getElementById('fileName').textContent = 'No files selected';
+    document.getElementById('alertContainer').innerHTML = '';
+    togglePriceFields();
 }
 
 // Close modal when clicking outside
 document.getElementById('addItemModal')?.addEventListener('click', function(e) {
     if (e.target === this) {
         closeModal();
+    }
+});
+
+/* =========================
+   Price Field Toggle
+========================= */
+const itemTypeSelect = document.getElementById('itemType');
+const sellPriceGroup = document.getElementById('sellPriceGroup');
+const rentPriceGroup = document.getElementById('rentPriceGroup');
+
+function togglePriceFields() {
+    const itemType = itemTypeSelect.value;
+
+    if (itemType === 'SELL') {
+        sellPriceGroup.classList.add('active');
+        rentPriceGroup.classList.remove('active');
+        document.querySelector('[name="sell_price"]').required = true;
+        document.querySelector('[name="rent_daily"]').required = false;
+    } else if (itemType === 'RENT') {
+        sellPriceGroup.classList.remove('active');
+        rentPriceGroup.classList.add('active');
+        document.querySelector('[name="sell_price"]').required = false;
+        document.querySelector('[name="rent_daily"]').required = true;
+    } else {
+        sellPriceGroup.classList.remove('active');
+        rentPriceGroup.classList.remove('active');
+    }
+}
+
+itemTypeSelect.addEventListener('change', togglePriceFields);
+
+/* =========================
+   File Input Handler
+========================= */
+const fileInput = document.getElementById('imageInput');
+const fileName = document.getElementById('fileName');
+
+fileInput.addEventListener('change', function() {
+    const files = this.files;
+    if (files.length > 5) {
+        showAlert('Maximum 5 images allowed', 'error');
+        this.value = '';
+        fileName.textContent = 'No files selected';
+        return;
+    }
+
+    if (files.length === 0) {
+        fileName.textContent = 'No files selected';
+    } else if (files.length === 1) {
+        fileName.textContent = files[0].name;
+    } else {
+        fileName.textContent = `${files.length} files selected`;
     }
 });
 
@@ -410,8 +628,25 @@ async function fetchItems() {
     container.innerHTML = '<div class="loading">Loading items...</div>';
 
     try {
-        const response = await fetch(`${API_BASE}/items/`);
-        if (!response.ok) throw new Error("Failed to fetch items");
+        const token = localStorage.getItem('authToken');
+        const headers = {};
+
+        // Add auth token if available
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${API_BASE}/items/`, {
+            headers: headers
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                container.innerHTML = '<div class="error">Please login to view items. <a href="/login" style="color: #3498db; text-decoration: underline;">Login here</a></div>';
+                return;
+            }
+            throw new Error("Failed to fetch items");
+        }
 
         const items = await response.json();
         displayItems(items);
@@ -435,8 +670,11 @@ function displayItems(items) {
     }
 
     container.innerHTML = items.map((item) => {
-        const imageUrl =
-            item.images?.length > 0 ? item.images[0].image : PLACEHOLDER;
+        let imageUrl = PLACEHOLDER;
+
+        if (item.images && item.images.length > 0) {
+            imageUrl = getImageUrl(item.images[0].image);
+        }
 
         const typeClass = item.item_type === "SELL" ? "badge-sell" : "badge-rent";
         const statusClass =
@@ -470,6 +708,7 @@ function displayItems(items) {
             <div class="item-card">
                 <img src="${imageUrl}"
                      class="item-image"
+                     alt="${item.title}"
                      loading="lazy"
                      onerror="this.src='${PLACEHOLDER}'">
                 <div class="item-content">
@@ -491,14 +730,89 @@ function displayItems(items) {
 }
 
 /* =========================
-   Modal + Form
+   Form Submission
 ========================= */
 const form = document.getElementById("addItemForm");
+const submitBtn = document.getElementById("submitBtn");
+
 if (form) {
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        alert("Form submit works ✅");
-        // Add your form submission logic here
+
+        const formData = new FormData(form);
+        const itemType = formData.get('item_type');
+
+        // Validate based on item type
+        if (itemType === 'SELL' && !formData.get('sell_price')) {
+            showAlert('Selling price is required', 'error');
+            return;
+        }
+
+        if (itemType === 'RENT') {
+            const daily = formData.get('rent_daily');
+            const weekly = formData.get('rent_weekly');
+            const monthly = formData.get('rent_monthly');
+
+            if (!daily && !weekly && !monthly) {
+                showAlert('At least one rental price is required', 'error');
+                return;
+            }
+
+            // Build rent_prices JSON
+            const rentPrices = {};
+            if (daily) rentPrices.daily = parseFloat(daily);
+            if (weekly) rentPrices.weekly = parseFloat(weekly);
+            if (monthly) rentPrices.monthly = parseFloat(monthly);
+
+            formData.set('rent_prices', JSON.stringify(rentPrices));
+            formData.delete('rent_daily');
+            formData.delete('rent_weekly');
+            formData.delete('rent_monthly');
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Adding Item...';
+
+        try {
+            const token = localStorage.getItem('authToken');
+
+            if (!token) {
+                showAlert('Please login to add items', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add Item';
+                return;
+            }
+
+            const response = await fetch(`${API_BASE}/items/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Token ${token}`
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                showAlert('Item added successfully!', 'success');
+                form.reset();
+                fileName.textContent = 'No files selected';
+                togglePriceFields();
+
+                // Refresh items list
+                setTimeout(() => {
+                    fetchItems();
+                    closeModal();
+                }, 1500);
+            } else {
+                const error = await response.json();
+                showAlert(error.detail || 'Failed to add item', 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showAlert('An error occurred. Please try again.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Add Item';
+        }
     });
 }
 
