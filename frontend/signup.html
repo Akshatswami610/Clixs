@@ -1,283 +1,294 @@
-{% extends "base.html" %}
+{% extends "basic.html" %}
 
 {% block title %}Clixs - Sign Up{% endblock %}
 
 {% block extra_styles %}
-body {
-    display: flex;
-    flex-direction: column;
-}
-.auth-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
-}
-
-.auth-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
-}
-
-.auth-box {
-    background: rgba(30, 30, 45, 0.9);
-    padding: 3rem;
-    border-radius: 25px;
-    width: 100%;
-    max-width: 500px;
-    box-shadow: 0 15px 60px rgba(0, 0, 0, 0.7);
-    animation: slideUp 0.6s ease;
-}
-
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(50px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.auth-title {
-    font-size: 2rem;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 2rem;
-    background: linear-gradient(135deg, #3498db, #9b59b6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #e0e0e0;
-    font-weight: 500;
-}
-
-.form-input {
-    width: 100%;
-    padding: 1rem;
-    background: rgba(20, 20, 30, 0.8);
-    border: 2px solid rgba(52, 152, 219, 0.3);
-    border-radius: 12px;
-    color: #ffffff;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
-}
-
-.submit-btn {
-    width: 100%;
-    padding: 1rem;
-    background: linear-gradient(135deg, #3498db, #9b59b6);
-    border: none;
-    border-radius: 12px;
-    color: white;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
-    margin-top: 1rem;
-}
-
-.submit-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
-}
-
-.submit-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.auth-link {
-    text-align: center;
-    margin-top: 1.5rem;
-    color: #b0b0b0;
-}
-
-.auth-link a {
-    color: #3498db;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.3s ease;
-}
-
-.auth-link a:hover {
-    color: #00d4ff;
-}
-
-.error-message {
-    background: rgba(231, 76, 60, 0.2);
-    border: 1px solid #e74c3c;
-    color: #e74c3c;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-@media (max-width: 768px) {
-    .navbar {
-        padding: 1rem;
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
     }
 
-    .nav-links {
-        gap: 1rem;
-        font-size: 0.9rem;
-    }
-
-    .nav-logo {
-        font-size: 1.5rem;
-    }
-
-    .auth-box {
+    .auth-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         padding: 2rem;
     }
 
-    .form-row {
-        grid-template-columns: 1fr;
+    .auth-box {
+        background: rgba(30, 30, 45, 0.9);
+        padding: 3rem;
+        border-radius: 25px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 15px 60px rgba(0, 0, 0, 0.7);
+        animation: slideUp 0.6s ease;
     }
-}
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <div class="nav-logo" onclick="location.href='index.html'">Clixs</div>
-        <ul class="nav-links">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="contact.html">Contact</a></li>
-        </ul>
-    </nav>
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .auth-title {
+        font-size: 2rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 2rem;
+        background: linear-gradient(135deg, #3498db, #9b59b6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #e0e0e0;
+        font-weight: 500;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 1rem;
+        background: rgba(20, 20, 30, 0.8);
+        border: 2px solid rgba(52, 152, 219, 0.3);
+        border-radius: 12px;
+        color: #ffffff;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .form-input.error {
+        border-color: #e74c3c;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #3498db, #9b59b6);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
+        margin-top: 1rem;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .auth-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #b0b0b0;
+    }
+
+    .auth-link a {
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+
+    .auth-link a:hover {
+        color: #00d4ff;
+    }
+
+    .error-message {
+        background: rgba(231, 76, 60, 0.2);
+        border: 1px solid #e74c3c;
+        color: #e74c3c;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .field-error {
+        color: #e74c3c;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+        .navbar {
+            padding: 1rem;
+        }
+
+        .nav-links {
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+        }
+
+        .auth-box {
+            padding: 2rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
 <div class="auth-container">
     <div class="auth-box">
         <h1 class="auth-title">Create Account</h1>
-        <div id="errorMessage" class="error-message" style="display: none;"></div>
-        <form id="signupForm">
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="error-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        {% if form.non_field_errors %}
+            <div class="error-message">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'signup' %}">
+            {% csrf_token %}
+
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">First Name</label>
-                    <input type="text" class="form-input" id="firstName" required>
+                    <label class="form-label" for="id_first_name">First Name</label>
+                    <input
+                        type="text"
+                        name="first_name"
+                        id="id_first_name"
+                        class="form-input {% if form.first_name.errors %}error{% endif %}"
+                        value="{{ form.first_name.value|default:'' }}"
+                        required
+                    >
+                    {% if form.first_name.errors %}
+                        <div class="field-error">{{ form.first_name.errors.0 }}</div>
+                    {% endif %}
                 </div>
+
                 <div class="form-group">
-                    <label class="form-label">Last Name</label>
-                    <input type="text" class="form-input" id="lastName" required>
+                    <label class="form-label" for="id_last_name">Last Name</label>
+                    <input
+                        type="text"
+                        name="last_name"
+                        id="id_last_name"
+                        class="form-input {% if form.last_name.errors %}error{% endif %}"
+                        value="{{ form.last_name.value|default:'' }}"
+                        required
+                    >
+                    {% if form.last_name.errors %}
+                        <div class="field-error">{{ form.last_name.errors.0 }}</div>
+                    {% endif %}
                 </div>
             </div>
+
             <div class="form-group">
-                <label class="form-label">Phone Number</label>
-                <input type="tel" class="form-input" id="phone" required placeholder="+1234567890">
+                <label class="form-label" for="id_phone">Phone Number</label>
+                <input
+                    type="tel"
+                    name="phone"
+                    id="id_phone"
+                    class="form-input {% if form.phone.errors %}error{% endif %}"
+                    value="{{ form.phone.value|default:'' }}"
+                    required
+                >
+                {% if form.phone.errors %}
+                    <div class="field-error">{{ form.phone.errors.0 }}</div>
+                {% endif %}
             </div>
+
             <div class="form-group">
-                <label class="form-label">Registration Number</label>
-                <input type="text" class="form-input" id="regNo" required>
+                <label class="form-label" for="id_registration_number">Registration Number</label>
+                <input
+                    type="text"
+                    name="registration_number"
+                    id="id_registration_number"
+                    class="form-input {% if form.registration_number.errors %}error{% endif %}"
+                    value="{{ form.registration_number.value|default:'' }}"
+                    required
+                >
+                {% if form.registration_number.errors %}
+                    <div class="field-error">{{ form.registration_number.errors.0 }}</div>
+                {% endif %}
             </div>
+
             <div class="form-group">
-                <label class="form-label">Password</label>
-                <input type="password" class="form-input" id="password" required minlength="6">
+                <label class="form-label" for="id_password">Password</label>
+                <input
+                    type="password"
+                    name="password"
+                    id="id_password"
+                    class="form-input {% if form.password.errors %}error{% endif %}"
+                    required
+                >
+                {% if form.password.errors %}
+                    <div class="field-error">{{ form.password.errors.0 }}</div>
+                {% endif %}
             </div>
+
             <div class="form-group">
-                <label class="form-label">Confirm Password</label>
-                <input type="password" class="form-input" id="confirmPassword" required>
+                <label class="form-label" for="id_confirm_password">Confirm Password</label>
+                <input
+                    type="password"
+                    name="confirm_password"
+                    id="id_confirm_password"
+                    class="form-input {% if form.confirm_password.errors %}error{% endif %}"
+                    required
+                >
+                {% if form.confirm_password.errors %}
+                    <div class="field-error">{{ form.confirm_password.errors.0 }}</div>
+                {% endif %}
             </div>
-            <button type="submit" class="submit-btn" id="submitBtn">Sign Up</button>
+
+            <button type="submit" class="submit-btn">Sign Up</button>
         </form>
+
         <div class="auth-link">
-            Already have an account? <a href="login.html">Login</a>
+            Already have an account? <a href="{% url 'login' %}">Login</a>
         </div>
     </div>
 </div>
-
-    <script>
-        const API_BASE = '/api/v1';
-
-function showError(message) {
-    const errorDiv = document.getElementById('errorMessage');
-    errorDiv.textContent = message;
-    errorDiv.style.display = 'block';
-    setTimeout(() => {
-        errorDiv.style.display = 'none';
-    }, 5000);
-}
-
-document.getElementById('signupForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-
-    if (password !== confirmPassword) {
-        showError('Passwords do not match');
-        return;
-    }
-
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Creating account...';
-
-    const userData = {
-        first_name: document.getElementById('firstName').value,
-        last_name: document.getElementById('lastName').value,
-        phone_number: document.getElementById('phone').value,
-        registration_number: document.getElementById('regNo').value,
-        password: password
-    };
-
-    try {
-        const response = await fetch(`${API_BASE}/auth/register/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(userData)
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Registration failed');
-        }
-
-        // Store auth token if provided
-        if (data.token) {
-            localStorage.setItem('authToken', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user || userData));
-        }
-
-        alert('Account created successfully!');
-        window.location.href = 'login.html';
-    } catch (error) {
-        console.error('Signup error:', error);
-        showError(error.message);
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Sign Up';
-    }
-});
-    </script>
-</body>
-</html>
+{% endblock %}
