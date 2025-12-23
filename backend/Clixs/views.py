@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login, logout
-from django.contrib.auth.models import User
 from django.contrib import messages
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 # =========================
@@ -46,38 +47,50 @@ def contactus(request):
 
 def login(request):
     if request.method == "POST":
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        phone_number = request.POST.get("username")  # reuse input field
+        password = request.POST.get("password")
 
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(
+            request,
+            phone_number=phone_number,
+            password=password
+        )
+
         if user is not None:
             auth_login(request, user)
-            return redirect('home')
+            return redirect("home")
         else:
-            messages.error(request, "Invalid username or password")
+            messages.error(request, "Invalid phone number or password")
 
-    return render(request, 'login.html')
+    return render(request, "login.html")
 
 
 def signup(request):
     if request.method == "POST":
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        phone_number = request.POST.get("phone")
+        reg_no = request.POST.get("registration_number")
+        password = request.POST.get("password")
+        confirm_password = request.POST.get("confirm_password")
 
-        if User.objects.filter(username=username).exists():
-            messages.error(request, "Username already exists")
-            return redirect('signup')
-            return redirect('signup')
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match")
+            return redirect("signup")
+
+        if User.objects.filter(phone_number=phone_number).exists():
+            messages.error(request, "Phone number already registered")
+            return redirect("signup")
 
         user = User.objects.create_user(
-            username=username,
-            email=email,
-            password=password
+            phone_number=phone_number,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            reg_no=reg_no,
         )
-        user.save()
 
         messages.success(request, "Account created successfully")
-        return redirect('login')
+        return redirect("login")
 
-    return render(request, 'signup.html')
+    return render(request, "signup.html")
