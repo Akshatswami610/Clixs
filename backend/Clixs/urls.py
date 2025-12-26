@@ -12,6 +12,7 @@ from .views import (
     addpost,
     contactus,
     chat,
+    itemdetail,
 )
 
 urlpatterns = [
@@ -37,6 +38,7 @@ urlpatterns = [
     # =========================
     path('', home, name='home'),          # default landing page
     path('home/', home, name='home'),
+    path('item-detail', itemdetail, name='item-detail'),
     path('about/', about, name='about'),
     path('addpost/', addpost, name='addpost'),
     path('chat/', chat, name='chat'),
