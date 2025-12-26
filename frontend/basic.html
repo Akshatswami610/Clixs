@@ -92,6 +92,10 @@
             gap: 1.5rem;
         }
 
+        .profile-container {
+            position: relative;
+        }
+
         .profile-icon {
             width: 40px;
             height: 40px;
@@ -108,6 +112,64 @@
         .profile-icon:hover {
             transform: scale(1.1) rotate(5deg);
             box-shadow: 0 0 20px rgba(52, 152, 219, 0.6);
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: rgba(30, 30, 45, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            min-width: 200px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .profile-container:hover .profile-dropdown,
+        .profile-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #e0e0e0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(52, 152, 219, 0.1);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(52, 152, 219, 0.2);
+            color: #00d4ff;
+        }
+
+        .dropdown-icon {
+            font-size: 1.2rem;
+        }
+
+        .logout-item {
+            color: #e74c3c;
+        }
+
+        .logout-item:hover {
+            background: rgba(231, 76, 60, 0.2);
+            color: #ff6b6b;
         }
 
         .login-btn {
@@ -128,7 +190,7 @@
         }
 
         .hidden {
-            display: none;
+            display: none !important;
         }
 
         @media (max-width: 768px) {
@@ -144,6 +206,10 @@
             .nav-logo {
                 font-size: 1.5rem;
             }
+
+            .profile-dropdown {
+                right: -10px;
+            }
         }
 
         {% block extra_styles %}{% endblock %}
@@ -158,8 +224,20 @@
             <li><a href="{% url 'contactus' %}">Contact</a></li>
         </ul>
         <div class="nav-right">
-            <div class="profile-icon hidden" id="profileIcon" onclick="location.href='{% url 'profile' %}'">
-                <span id="userInitial">U</span>
+            <div class="profile-container hidden" id="profileContainer">
+                <div class="profile-icon" id="profileIcon">
+                    <span id="userInitial">U</span>
+                </div>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <a href="{% url 'profile' %}" class="dropdown-item">
+                        <span class="dropdown-icon">👤</span>
+                        <span>My Profile</span>
+                    </a>
+                    <div class="dropdown-item logout-item" onclick="logout()">
+                        <span class="dropdown-icon">🚪</span>
+                        <span>Logout</span>
+                    </div>
+                </div>
             </div>
             <button class="login-btn" id="authBtn" onclick="location.href='{% url 'login' %}'">Login / Signup</button>
         </div>
@@ -171,17 +249,52 @@
         // Check if user is logged in
         function checkAuth() {
             const token = localStorage.getItem('authToken');
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userStr = localStorage.getItem('user');
 
-            if (token && user.first_name) {
+            let user = null;
+            try {
+                user = userStr ? JSON.parse(userStr) : null;
+            } catch (e) {
+                console.error('Error parsing user data:', e);
+            }
+
+            if (token && user && user.first_name) {
                 document.getElementById('authBtn').classList.add('hidden');
-                document.getElementById('profileIcon').classList.remove('hidden');
+                document.getElementById('profileContainer').classList.remove('hidden');
                 document.getElementById('userInitial').textContent = user.first_name.charAt(0).toUpperCase();
             } else {
                 document.getElementById('authBtn').classList.remove('hidden');
-                document.getElementById('profileIcon').classList.add('hidden');
+                document.getElementById('profileContainer').classList.add('hidden');
             }
         }
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('user');
+                location.href = '{% url "home" %}';
+            }
+        }
+
+        // Toggle dropdown on click for mobile
+        document.getElementById('profileIcon')?.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768) {
+                e.stopPropagation();
+                const dropdown = document.getElementById('profileDropdown');
+                dropdown.classList.toggle('show');
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const profileContainer = document.getElementById('profileContainer');
+            const dropdown = document.getElementById('profileDropdown');
+
+            if (profileContainer && !profileContainer.contains(e.target)) {
+                dropdown?.classList.remove('show');
+            }
+        });
 
         // Initialize on load
         checkAuth();
