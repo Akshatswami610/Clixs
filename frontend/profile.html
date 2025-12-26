@@ -9,6 +9,62 @@
     padding: 3rem 2rem;
 }
 
+.auth-required-message {
+    text-align: center;
+    padding: 4rem 2rem;
+    animation: fadeIn 0.6s ease;
+}
+
+.auth-required-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #3498db, #9b59b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+}
+
+.auth-required-text {
+    font-size: 1.2rem;
+    color: #b0b0b0;
+    margin-bottom: 2rem;
+}
+
+.auth-required-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.auth-required-btn {
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.login-required-btn {
+    background: linear-gradient(135deg, #3498db, #00d4ff);
+    color: white;
+    box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
+}
+
+.signup-required-btn {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    color: white;
+    box-shadow: 0 4px 20px rgba(155, 89, 182, 0.4);
+}
+
+.auth-required-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
+}
+
 .profile-header {
     background: rgba(30, 30, 45, 0.8);
     padding: 2.5rem;
@@ -165,6 +221,10 @@
     color: #00d4ff;
 }
 
+.hidden {
+    display: none;
+}
+
 @media (max-width: 768px) {
     .profile-header {
         padding: 1.5rem;
@@ -177,22 +237,47 @@
     .items-grid {
         grid-template-columns: 1fr;
     }
+
+    .auth-required-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .auth-required-btn {
+        width: 100%;
+        max-width: 300px;
+    }
 }
 {% endblock %}
 
 {% block content %}
 <div class="container">
-    <div class="profile-header">
-        <h1 class="profile-title">My Profile</h1>
-        <div class="profile-info" id="profileInfo">
-            <div class="loading">Loading profile...</div>
+    <div id="authRequiredSection" class="auth-required-message hidden">
+        <h1 class="auth-required-title">Profile Access Required</h1>
+        <p class="auth-required-text">Please login or create an account to view your profile</p>
+        <div class="auth-required-buttons">
+            <button class="auth-required-btn login-required-btn" onclick="location.href='{% url 'login' %}'">
+                Login
+            </button>
+            <button class="auth-required-btn signup-required-btn" onclick="location.href='{% url 'signup' %}'">
+                Sign Up
+            </button>
         </div>
-        <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
-    <h2 class="section-title">My Items</h2>
-    <div class="items-grid" id="userItems">
-        <div class="loading">Loading items...</div>
+    <div id="profileContent" class="hidden">
+        <div class="profile-header">
+            <h1 class="profile-title">My Profile</h1>
+            <div class="profile-info" id="profileInfo">
+                <div class="loading">Loading profile...</div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <h2 class="section-title">My Items</h2>
+        <div class="items-grid" id="userItems">
+            <div class="loading">Loading items...</div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -202,11 +287,16 @@ const API_BASE = '/api/v1';
 
 function checkAuthRequired() {
     const token = localStorage.getItem('authToken');
-    if (!token) {
-        alert('Please login to view your profile');
-        location.href = 'login.html';
+    const user = localStorage.getItem('user');
+
+    if (!token || !user) {
+        document.getElementById('authRequiredSection').classList.remove('hidden');
+        document.getElementById('profileContent').classList.add('hidden');
         return false;
     }
+
+    document.getElementById('authRequiredSection').classList.add('hidden');
+    document.getElementById('profileContent').classList.remove('hidden');
     return true;
 }
 
@@ -224,13 +314,22 @@ async function loadProfile() {
         });
 
         if (!response.ok) {
+            if (response.status === 401) {
+                // Token expired or invalid
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('user');
+                checkAuthRequired();
+                return;
+            }
             throw new Error('Failed to load profile');
         }
 
         const user = await response.json();
         localStorage.setItem('user', JSON.stringify(user));
 
-        document.getElementById('userInitial').textContent = user.first_name.charAt(0).toUpperCase();
+        if (typeof checkAuth === 'function') {
+            checkAuth();
+        }
 
         profileInfo.innerHTML = `
             <div class="info-item">
@@ -243,7 +342,7 @@ async function loadProfile() {
             </div>
             <div class="info-item">
                 <div class="info-label">Registration Number</div>
-                <div class="info-value">${user.registration_number}</div>
+                <div class="info-value">${user.registration_number || 'N/A'}</div>
             </div>
         `;
     } catch (error) {
@@ -271,7 +370,7 @@ async function loadUserItems() {
 
         const items = await response.json();
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        
+
         // Filter items by current user
         const userItems = items.filter(item => item.user_id === user.id);
 
@@ -281,9 +380,9 @@ async function loadUserItems() {
         }
 
         itemsContainer.innerHTML = userItems.map(item => {
-            const statusClass = item.status === 'ACTIVE' ? 'status-active' : 
+            const statusClass = item.status === 'ACTIVE' ? 'status-active' :
                                item.status === 'SOLD' ? 'status-sold' : 'status-rented';
-            
+
             return `
                 <div class="item-card">
                     <div class="item-title">${item.title}</div>
@@ -337,11 +436,12 @@ async function deleteItem(itemId) {
 function logout() {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
-    location.href = 'index.html';
+    location.href = '{% url "home" %}';
 }
 
 // Initialize
-checkAuthRequired();
-loadProfile();
-loadUserItems();
+if (checkAuthRequired()) {
+    loadProfile();
+    loadUserItems();
+}
 {% endblock %}
