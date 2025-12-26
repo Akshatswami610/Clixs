@@ -265,7 +265,7 @@ body {
 {% block extra_scripts %}
 const API_BASE = '/api/v1';
 const TOKEN_KEY = 'authToken';
-const USER_KEY = 'userData';
+const USER_KEY = 'user';
 
 // Utility Functions
 const showMessage = (message, type = 'error') => {
@@ -334,7 +334,7 @@ const setUserData = (userData) => {
 
 const fetchWithAuth = async (url, token, options = {}) => {
     const headers = {
-        'Authorization': `Token ${token}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         ...options.headers
     };
@@ -433,39 +433,48 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             }
         }
 
-        // Extract token - standardize your API to use one field name
-        const token = data.token || data.access || data.auth_token || data.key;
+        // Extract JWT access token - SimpleJWT returns 'access' and 'refresh'
+        const token = data.access;
 
         if (!token) {
             throw new Error('Authentication failed. Please try again');
         }
+
+        console.log('JWT token received');
 
         // Store token
         if (!setAuthToken(token)) {
             throw new Error('Failed to save authentication. Please check your browser settings');
         }
 
-        // Fetch user profile
+        // Now fetch user profile with the JWT token
+        let userData = null;
+
         try {
             const profileResponse = await fetchWithAuth(`${API_BASE}/auth/profile/`, token);
+            console.log('Profile response status:', profileResponse.status);
 
             if (profileResponse.ok) {
-                const userData = await profileResponse.json();
+                userData = await profileResponse.json();
+                console.log('User data fetched:', userData);
                 setUserData(userData);
             } else {
-                console.warn('Could not fetch user profile, continuing with limited data');
-                // Store minimal user data from login response
-                if (data.user) {
-                    setUserData(data.user);
-                }
+                const errorText = await profileResponse.text();
+                console.error('Profile fetch failed:', profileResponse.status, errorText);
+                throw new Error('Could not fetch user profile');
             }
         } catch (profileError) {
             console.error('Profile fetch error:', profileError);
-            // Continue anyway - user is authenticated
+            throw new Error('Login successful but could not load profile. Please refresh the page.');
         }
 
         // Show success message
         showMessage('Login successful! Redirecting...', 'success');
+
+        // Manually trigger navbar update if checkAuth function exists
+        if (typeof checkAuth === 'function') {
+            checkAuth();
+        }
 
         // Redirect after short delay
         setTimeout(() => {
@@ -483,21 +492,26 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 // Check if already logged in
 window.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem(TOKEN_KEY);
-    if (token) {
-        // Optionally verify token is still valid
-        fetch(`${API_BASE}/auth/verify/`, {
-            headers: { 'Authorization': `Token ${token}` }
-        }).then(response => {
-            if (response.ok) {
+    const user = localStorage.getItem(USER_KEY);
+
+    // Only redirect if we have both token AND user data
+    if (token && user) {
+        try {
+            const userData = JSON.parse(user);
+            // Verify user data has required fields
+            if (userData && (userData.first_name || userData.name || userData.phone_number)) {
                 window.location.href = '{% url "home" %}';
-            } else {
-                // Token invalid, clear it
-                localStorage.removeItem(TOKEN_KEY);
-                localStorage.removeItem(USER_KEY);
+                return;
             }
-        }).catch(() => {
-            // Network error, stay on login page
-        });
+        } catch (e) {
+            console.error('Invalid user data in localStorage:', e);
+        }
+    }
+
+    // If we only have token but no user data, clear everything
+    if (token && !user) {
+        console.log('Token exists but no user data, clearing...');
+        localStorage.removeItem(TOKEN_KEY);
     }
 });
 {% endblock %}
