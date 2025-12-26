@@ -1,10 +1,647 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "basic.html" %}
 
-</body>
-</html>
+{% block title %}Item Details - Clixs{% endblock %}
+
+{% block extra_styles %}
+.detail-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    background: rgba(52, 152, 219, 0.1);
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 12px;
+    color: #3498db;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 2rem;
+    text-decoration: none;
+}
+
+.back-btn:hover {
+    background: rgba(52, 152, 219, 0.2);
+    border-color: #3498db;
+    transform: translateX(-5px);
+}
+
+.detail-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    animation: fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.image-section {
+    position: relative;
+}
+
+.main-image {
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #1a1a2e, #2d2d44);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    margin-bottom: 1rem;
+}
+
+.image-thumbnails {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+}
+
+.thumbnail {
+    width: 100px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 12px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+}
+
+.thumbnail:hover,
+.thumbnail.active {
+    opacity: 1;
+    border-color: #3498db;
+    transform: scale(1.05);
+}
+
+.info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.item-header {
+    border-bottom: 2px solid rgba(52, 152, 219, 0.2);
+    padding-bottom: 1.5rem;
+}
+
+.item-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.item-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.badge-sell {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.badge-rent {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.badge-active {
+    background: linear-gradient(135deg, #27ae60, #229954);
+}
+
+.badge-sold {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+}
+
+.badge-rented {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+}
+
+.category-badge {
+    background: rgba(52, 152, 219, 0.2);
+    color: #00d4ff;
+    padding: 0.5rem 1rem;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.price-section {
+    background: rgba(30, 30, 45, 0.6);
+    padding: 2rem;
+    border-radius: 20px;
+    border: 2px solid rgba(52, 152, 219, 0.2);
+}
+
+.price-label {
+    font-size: 0.9rem;
+    color: #b0b0b0;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.main-price {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #00d4ff;
+    margin-bottom: 1rem;
+}
+
+.rent-prices-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.rent-price-item {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(52, 152, 219, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+.rent-price-period {
+    font-size: 0.8rem;
+    color: #b0b0b0;
+    margin-bottom: 0.5rem;
+}
+
+.rent-price-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #00d4ff;
+}
+
+.description-section {
+    background: rgba(30, 30, 45, 0.6);
+    padding: 2rem;
+    border-radius: 20px;
+    border: 2px solid rgba(52, 152, 219, 0.2);
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.description-text {
+    color: #e0e0e0;
+    line-height: 1.8;
+    font-size: 1.05rem;
+}
+
+.seller-section {
+    background: rgba(30, 30, 45, 0.6);
+    padding: 2rem;
+    border-radius: 20px;
+    border: 2px solid rgba(52, 152, 219, 0.2);
+}
+
+.seller-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.seller-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3498db, #9b59b6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+}
+
+.seller-details {
+    flex: 1;
+}
+
+.seller-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 0.3rem;
+}
+
+.seller-email {
+    font-size: 0.9rem;
+    color: #b0b0b0;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.chat-btn {
+    width: 100%;
+    padding: 1.2rem;
+    background: linear-gradient(135deg, #3498db, #9b59b6);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.chat-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
+}
+
+.secondary-btn {
+    width: 100%;
+    padding: 1.2rem;
+    background: rgba(52, 152, 219, 0.1);
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 12px;
+    color: #3498db;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.secondary-btn:hover {
+    background: rgba(52, 152, 219, 0.2);
+    border-color: #3498db;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    font-size: 1.5rem;
+    color: #00d4ff;
+}
+
+.error-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    text-align: center;
+    gap: 1rem;
+}
+
+.error-message {
+    font-size: 1.5rem;
+    color: #e74c3c;
+}
+
+.posted-date {
+    font-size: 0.9rem;
+    color: #b0b0b0;
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 968px) {
+    .detail-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .main-image {
+        height: 400px;
+    }
+
+    .item-title {
+        font-size: 2rem;
+    }
+
+    .main-price {
+        font-size: 2.5rem;
+    }
+
+    .rent-prices-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .detail-container {
+        padding: 1rem;
+    }
+
+    .main-image {
+        height: 300px;
+    }
+
+    .item-title {
+        font-size: 1.8rem;
+    }
+}
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <a href="/home" class="back-btn">
+        <span>←</span>
+        <span>Back to Items</span>
+    </a>
+
+    <div id="itemDetailContainer"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+document.addEventListener("DOMContentLoaded", () => {
+    const API_BASE = "/api/v1";
+    const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%231a1a2e'/%3E%3Cg transform='translate(200, 150)'%3E%3Ccircle cx='0' cy='-20' r='40' fill='%233498db' opacity='0.3'/%3E%3Crect x='-30' y='10' width='60' height='40' rx='5' fill='%233498db' opacity='0.3'/%3E%3Cpolygon points='0,-10 -25,25 25,25' fill='%233498db' opacity='0.5'/%3E%3C/g%3E%3Ctext x='200' y='250' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%23666'%3ENo Image%3C/text%3E%3C/svg%3E";
+
+    function formatINR(amount) {
+        if (!amount || isNaN(amount)) return "";
+        return "₹" + Number(amount).toLocaleString("en-IN");
+    }
+
+    function getImageUrl(imagePath) {
+        if (!imagePath) return PLACEHOLDER;
+        if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+            return imagePath;
+        }
+        if (imagePath.startsWith('/media/')) {
+            return imagePath;
+        }
+        return `/media/${imagePath}`;
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+    }
+
+    function getInitials(name) {
+        if (!name) return "U";
+        return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    }
+
+    function getItemIdFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('id');
+    }
+
+    async function fetchItemDetail() {
+        const container = document.getElementById("itemDetailContainer");
+        const itemId = getItemIdFromURL();
+
+        if (!itemId) {
+            container.innerHTML = `
+                <div class="error-container">
+                    <div class="error-message">Item not found</div>
+                    <a href="/home" class="chat-btn" style="max-width: 300px;">Go Back to Home</a>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = '<div class="loading-container">Loading item details...</div>';
+
+        try {
+            const token = localStorage.getItem('authToken');
+            const headers = {};
+
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const response = await fetch(`${API_BASE}/items/${itemId}/`, {
+                headers: headers
+            });
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error("Item not found");
+                }
+                if (response.status === 401) {
+                    container.innerHTML = `
+                        <div class="error-container">
+                            <div class="error-message">Please login to view item details</div>
+                            <a href="/login" class="chat-btn" style="max-width: 300px;">Login</a>
+                        </div>
+                    `;
+                    return;
+                }
+                throw new Error("Failed to fetch item details");
+            }
+
+            const item = await response.json();
+            displayItemDetail(item);
+        } catch (error) {
+            console.error(error);
+            container.innerHTML = `
+                <div class="error-container">
+                    <div class="error-message">${error.message}</div>
+                    <a href="/home" class="chat-btn" style="max-width: 300px;">Go Back to Home</a>
+                </div>
+            `;
+        }
+    }
+
+    function displayItemDetail(item) {
+        const container = document.getElementById("itemDetailContainer");
+        
+        const images = item.images && item.images.length > 0 
+            ? item.images.map(img => getImageUrl(img.image))
+            : [PLACEHOLDER];
+
+        const typeClass = item.item_type === "SELL" ? "badge-sell" : "badge-rent";
+        const statusClass = 
+            item.status === "ACTIVE" ? "badge-active" :
+            item.status === "SOLD" ? "badge-sold" : "badge-rented";
+
+        let priceHtml = "";
+        if (item.item_type === "SELL") {
+            priceHtml = `
+                <div class="price-section">
+                    <div class="price-label">Selling Price</div>
+                    <div class="main-price">${formatINR(item.sell_price)}</div>
+                </div>
+            `;
+        } else {
+            const daily = item.rent_prices?.daily;
+            const weekly = item.rent_prices?.weekly;
+            const monthly = item.rent_prices?.monthly;
+
+            priceHtml = `
+                <div class="price-section">
+                    <div class="price-label">Rental Prices</div>
+                    ${daily ? `<div class="main-price">${formatINR(daily)}<span style="font-size: 1.2rem; color: #b0b0b0;">/day</span></div>` : ''}
+                    <div class="rent-prices-grid">
+                        ${daily ? `
+                            <div class="rent-price-item">
+                                <div class="rent-price-period">Daily</div>
+                                <div class="rent-price-amount">${formatINR(daily)}</div>
+                            </div>
+                        ` : ''}
+                        ${weekly ? `
+                            <div class="rent-price-item">
+                                <div class="rent-price-period">Weekly</div>
+                                <div class="rent-price-amount">${formatINR(weekly)}</div>
+                            </div>
+                        ` : ''}
+                        ${monthly ? `
+                            <div class="rent-price-item">
+                                <div class="rent-price-period">Monthly</div>
+                                <div class="rent-price-amount">${formatINR(monthly)}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        const thumbnailsHtml = images.length > 1 ? `
+            <div class="image-thumbnails">
+                ${images.map((img, index) => `
+                    <img src="${img}" 
+                         class="thumbnail ${index === 0 ? 'active' : ''}" 
+                         alt="Thumbnail ${index + 1}"
+                         data-index="${index}"
+                         onerror="this.src='${PLACEHOLDER}'">
+                `).join('')}
+            </div>
+        ` : '';
+
+        container.innerHTML = `
+            <div class="detail-content">
+                <div class="image-section">
+                    <img src="${images[0]}" 
+                         class="main-image" 
+                         id="mainImage"
+                         alt="${item.title}"
+                         onerror="this.src='${PLACEHOLDER}'">
+                    ${thumbnailsHtml}
+                </div>
+
+                <div class="info-section">
+                    <div class="item-header">
+                        <h1 class="item-title">${item.title}</h1>
+                        <div class="item-meta">
+                            <span class="badge ${typeClass}">${item.item_type}</span>
+                            <span class="badge ${statusClass}">${item.status}</span>
+                            <span class="category-badge">${item.category}</span>
+                        </div>
+                        ${item.created_at ? `<div class="posted-date">Posted on ${formatDate(item.created_at)}</div>` : ''}
+                    </div>
+
+                    ${priceHtml}
+
+                    <div class="description-section">
+                        <h2 class="section-title">
+                            <span>📝</span>
+                            <span>Description</span>
+                        </h2>
+                        <p class="description-text">${item.description || 'No description available.'}</p>
+                    </div>
+
+                    <div class="seller-section">
+                        <h2 class="section-title">
+                            <span>👤</span>
+                            <span>Seller Information</span>
+                        </h2>
+                        <div class="seller-info">
+                            <div class="seller-avatar">${getInitials(item.owner?.name || item.owner?.username || 'User')}</div>
+                            <div class="seller-details">
+                                <div class="seller-name">${item.owner?.name || item.owner?.username || 'Anonymous'}</div>
+                                <div class="seller-email">${item.owner?.email || 'Email not available'}</div>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="chat-btn" onclick="chatWithSeller(${item.id}, ${item.owner?.id})">
+                                <span>💬</span>
+                                <span>Chat with Seller</span>
+                            </button>
+                            ${item.status === 'ACTIVE' ? `
+                                <button class="secondary-btn" onclick="makeOffer(${item.id})">
+                                    ${item.item_type === 'SELL' ? 'Make an Offer' : 'Request to Rent'}
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add thumbnail click handlers
+        if (images.length > 1) {
+            document.querySelectorAll('.thumbnail').forEach(thumb => {
+                thumb.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    const mainImage = document.getElementById('mainImage');
+                    mainImage.src = images[index];
+                    
+                    document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
+    }
+
+    // Global functions for button actions
+    window.chatWithSeller = function(itemId, sellerId) {
+        // Store item context for chat
+        localStorage.setItem('chatContext', JSON.stringify({
+            itemId: itemId,
+            sellerId: sellerId,
+            timestamp: Date.now()
+        }));
+        
+        // Redirect to chat page
+        window.location.href = `/chat?user=${sellerId}&item=${itemId}`;
+    };
+
+    window.makeOffer = function(itemId) {
+        alert('Make offer functionality - Coming soon!');
+        // You can implement this later
+    };
+
+    // Fetch item details on page load
+    fetchItemDetail();
+});
+{% endblock %}

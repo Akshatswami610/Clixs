@@ -69,7 +69,7 @@ CORS_ALLOW_CREDENTIALS = True
 # URL & TEMPLATES
 # --------------------------------------------------
 ROOT_URLCONF = "Clixs.urls"
-APPEND_SLASH = False
+#APPEND_SLASH = False
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
