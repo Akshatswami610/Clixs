@@ -23,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "phone_number",
-            "reg_no",
+            "registration_number",
             "first_name",
             "last_name",
             "is_active",
