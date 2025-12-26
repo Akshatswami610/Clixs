@@ -139,14 +139,14 @@
 
 .items-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 2rem;
 }
 
 .item-card {
     background: rgba(30, 30, 45, 0.8);
-    border-radius: 15px;
-    padding: 1.5rem;
+    border-radius: 20px;
+    overflow: hidden;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
     transition: all 0.3s ease;
 }
@@ -156,19 +156,58 @@
     box-shadow: 0 12px 40px rgba(52, 152, 219, 0.3);
 }
 
+.item-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #1a1a2e, #2d2d44);
+}
+
+.item-content {
+    padding: 1.5rem;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1rem;
+}
+
 .item-title {
     font-size: 1.3rem;
     font-weight: 600;
+    color: #ffffff;
     margin-bottom: 0.5rem;
 }
 
-.item-status {
-    display: inline-block;
+.item-category {
+    color: #00d4ff;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.badges {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.badge {
     padding: 0.3rem 0.8rem;
     border-radius: 15px;
     font-size: 0.75rem;
     font-weight: 600;
-    margin-bottom: 1rem;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.badge-sell {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.badge-rent {
+    background: linear-gradient(135deg, #3498db, #2980b9);
 }
 
 .status-active {
@@ -183,20 +222,34 @@
     background: linear-gradient(135deg, #f39c12, #e67e22);
 }
 
+.item-price {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #00d4ff;
+    margin: 1rem 0;
+}
+
 .item-actions {
     display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
+    gap: 0.8rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(52, 152, 219, 0.2);
 }
 
 .action-btn {
     flex: 1;
-    padding: 0.6rem;
+    padding: 0.8rem;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 600;
+    font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .edit-btn {
@@ -211,7 +264,11 @@
 
 .action-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+    box-shadow: 0 4px 20px rgba(52, 152, 219, 0.5);
+}
+
+.delete-btn:hover {
+    box-shadow: 0 4px 20px rgba(231, 76, 60, 0.5);
 }
 
 .loading {
@@ -223,6 +280,103 @@
 
 .hidden {
     display: none;
+}
+
+.confirmation-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.confirmation-modal.active {
+    display: flex;
+}
+
+.confirmation-content {
+    background: rgba(30, 30, 45, 0.98);
+    padding: 2.5rem;
+    border-radius: 20px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 15px 60px rgba(0, 0, 0, 0.7);
+    animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.confirmation-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.confirmation-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.confirmation-message {
+    font-size: 1.1rem;
+    color: #b0b0b0;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.confirmation-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.confirm-btn,
+.cancel-btn {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.confirm-btn {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+.cancel-btn {
+    background: rgba(52, 152, 219, 0.1);
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    color: #3498db;
+}
+
+.confirm-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(231, 76, 60, 0.6);
+}
+
+.cancel-btn:hover {
+    background: rgba(52, 152, 219, 0.2);
+    border-color: #3498db;
 }
 
 @media (max-width: 768px) {
@@ -280,10 +434,44 @@
         </div>
     </div>
 </div>
+
+<!-- Confirmation Modal -->
+<div class="confirmation-modal" id="confirmationModal">
+    <div class="confirmation-content">
+        <div class="confirmation-icon">⚠️</div>
+        <h2 class="confirmation-title">Delete Item?</h2>
+        <p class="confirmation-message">
+            Are you sure you want to delete this item? This action cannot be undone.
+        </p>
+        <div class="confirmation-buttons">
+            <button class="cancel-btn" onclick="closeConfirmation()">Cancel</button>
+            <button class="confirm-btn" onclick="confirmDelete()">Delete</button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
 const API_BASE = '/api/v1';
+const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%231a1a2e'/%3E%3Cg transform='translate(200, 150)'%3E%3Ccircle cx='0' cy='-20' r='40' fill='%233498db' opacity='0.3'/%3E%3Crect x='-30' y='10' width='60' height='40' rx='5' fill='%233498db' opacity='0.3'/%3E%3Cpolygon points='0,-10 -25,25 25,25' fill='%233498db' opacity='0.5'/%3E%3C/g%3E%3Ctext x='200' y='250' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%23666'%3ENo Image%3C/text%3E%3C/svg%3E";
+
+let itemToDelete = null;
+
+function formatINR(amount) {
+    if (!amount || isNaN(amount)) return "";
+    return "₹" + Number(amount).toLocaleString("en-IN");
+}
+
+function getImageUrl(imagePath) {
+    if (!imagePath) return PLACEHOLDER;
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        return imagePath;
+    }
+    if (imagePath.startsWith('/media/')) {
+        return imagePath;
+    }
+    return `/media/${imagePath}`;
+}
 
 function checkAuthRequired() {
     const token = localStorage.getItem('authToken');
@@ -315,7 +503,6 @@ async function loadProfile() {
 
         if (!response.ok) {
             if (response.status === 401) {
-                // Token expired or invalid
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('user');
                 checkAuthRequired();
@@ -372,27 +559,61 @@ async function loadUserItems() {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
 
         // Filter items by current user
-        const userItems = items.filter(item => item.user_id === user.id);
+        const userItems = items.filter(item =>
+            item.user_id === user.id || item.owner?.id === user.id
+        );
 
         if (userItems.length === 0) {
-            itemsContainer.innerHTML = '<div class="loading">No items yet</div>';
+            itemsContainer.innerHTML = '<div class="loading">No items yet. Start by adding your first item!</div>';
             return;
         }
 
         itemsContainer.innerHTML = userItems.map(item => {
-            const statusClass = item.status === 'ACTIVE' ? 'status-active' :
-                               item.status === 'SOLD' ? 'status-sold' : 'status-rented';
+            let imageUrl = PLACEHOLDER;
+            if (item.images && item.images.length > 0) {
+                imageUrl = getImageUrl(item.images[0].image);
+            }
+
+            const typeClass = item.item_type === 'SELL' ? 'badge-sell' : 'badge-rent';
+            const statusClass =
+                item.status === 'ACTIVE' ? 'status-active' :
+                item.status === 'SOLD' ? 'status-sold' : 'status-rented';
+
+            let priceHtml = '';
+            if (item.item_type === 'SELL') {
+                priceHtml = `<div class="item-price">${formatINR(item.sell_price)}</div>`;
+            } else {
+                const daily = item.rent_prices?.daily;
+                priceHtml = `<div class="item-price">${daily ? formatINR(daily) + '/day' : 'Contact for price'}</div>`;
+            }
 
             return `
                 <div class="item-card">
-                    <div class="item-title">${item.title}</div>
-                    <span class="item-status ${statusClass}">${item.status}</span>
-                    <div style="color: #b0b0b0; margin-top: 0.5rem;">
-                        ${item.category} • ${item.item_type}
-                    </div>
-                    <div class="item-actions">
-                        <button class="action-btn edit-btn" onclick="editItem(${item.id})">Edit</button>
-                        <button class="action-btn delete-btn" onclick="deleteItem(${item.id})">Delete</button>
+                    <img src="${imageUrl}"
+                         class="item-image"
+                         alt="${item.title}"
+                         loading="lazy"
+                         onerror="this.src='${PLACEHOLDER}'">
+                    <div class="item-content">
+                        <div class="item-header">
+                            <div>
+                                <div class="item-title">${item.title}</div>
+                                <div class="item-category">${item.category}</div>
+                            </div>
+                            <div class="badges">
+                                <span class="badge ${typeClass}">${item.item_type}</span>
+                                <span class="badge ${statusClass}">${item.status}</span>
+                            </div>
+                        </div>
+                        ${priceHtml}
+                        <div class="item-actions">
+                            <button class="action-btn edit-btn" onclick="editItem(${item.id})">
+                                <span>✏️</span> Edit
+                            </button>
+                            <button class="action-btn delete-btn" onclick="showDeleteConfirmation(${item.id})">
+                                <span>🗑️</span> Delete
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -404,17 +625,27 @@ async function loadUserItems() {
 }
 
 function editItem(itemId) {
-    alert('Edit functionality coming soon!');
+    alert('Edit functionality coming soon! Item ID: ' + itemId);
     // TODO: Implement edit modal
 }
 
-async function deleteItem(itemId) {
-    if (!confirm('Are you sure you want to delete this item?')) return;
+function showDeleteConfirmation(itemId) {
+    itemToDelete = itemId;
+    document.getElementById('confirmationModal').classList.add('active');
+}
+
+function closeConfirmation() {
+    itemToDelete = null;
+    document.getElementById('confirmationModal').classList.remove('active');
+}
+
+async function confirmDelete() {
+    if (!itemToDelete) return;
 
     const token = localStorage.getItem('authToken');
 
     try {
-        const response = await fetch(`${API_BASE}/items/${itemId}/`, {
+        const response = await fetch(`${API_BASE}/items/${itemToDelete}/`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -425,11 +656,12 @@ async function deleteItem(itemId) {
             throw new Error('Failed to delete item');
         }
 
-        alert('Item deleted successfully!');
+        closeConfirmation();
         loadUserItems();
     } catch (error) {
         console.error('Error deleting item:', error);
-        alert('Failed to delete item');
+        alert('Failed to delete item. Please try again.');
+        closeConfirmation();
     }
 }
 
