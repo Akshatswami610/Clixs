@@ -376,7 +376,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const phone = document.getElementById('phone').value.trim();
     const password = document.getElementById('password').value;
 
-    // Client-side validation
+    // Client-side validation - only check if fields are empty
     let isValid = true;
 
     if (!phone) {
@@ -389,9 +389,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
     if (!password) {
         showFieldError('password', 'Password is required');
-        isValid = false;
-    } else if (password.length < 6) {
-        showFieldError('password', 'Password must be at least 6 characters');
         isValid = false;
     }
 
@@ -422,6 +419,15 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
                 throw new Error('Invalid phone number or password');
             } else if (response.status === 429) {
                 throw new Error('Too many login attempts. Please try again later');
+            } else if (response.status === 400) {
+                // Handle field-specific errors from backend
+                if (data.phone_number) {
+                    showFieldError('phone', Array.isArray(data.phone_number) ? data.phone_number[0] : data.phone_number);
+                }
+                if (data.password) {
+                    showFieldError('password', Array.isArray(data.password) ? data.password[0] : data.password);
+                }
+                throw new Error(data.detail || data.message || data.error || 'Please check your input');
             } else {
                 throw new Error(data.detail || data.message || data.error || 'Login failed');
             }
