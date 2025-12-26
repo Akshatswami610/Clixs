@@ -724,6 +724,16 @@ if (form) {
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
+        const token = localStorage.getItem('authToken');
+
+        if (!token) {
+            showAlert('Please login to add items', 'error');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
+            return;
+        }
+
         const formData = new FormData(form);
         const itemType = formData.get('item_type');
 
@@ -757,14 +767,7 @@ if (form) {
         submitBtn.textContent = 'Adding Item...';
 
         try {
-            const token = localStorage.getItem('authToken');
-
-            if (!token) {
-                showAlert('Please login to add items', 'error');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Add Item';
-                return;
-            }
+            console.log('Submitting item with token:', token ? 'Token exists' : 'No token');
 
             const response = await fetch(`${API_BASE}/items/`, {
                 method: 'POST',
@@ -773,6 +776,8 @@ if (form) {
                 },
                 body: formData
             });
+
+            console.log('Response status:', response.status);
 
             if (response.ok) {
                 showAlert('Item added successfully!', 'success');
@@ -785,12 +790,22 @@ if (form) {
                     closeModal();
                 }, 1500);
             } else {
-                const error = await response.json();
-                showAlert(error.detail || 'Failed to add item', 'error');
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Error response:', errorData);
+
+                if (response.status === 401) {
+                    showAlert('Session expired. Please login again.', 'error');
+                    setTimeout(() => {
+                        localStorage.removeItem('authToken');
+                        window.location.href = '/login';
+                    }, 2000);
+                } else {
+                    showAlert(errorData.detail || errorData.message || 'Failed to add item. Please try again.', 'error');
+                }
             }
         } catch (error) {
-            console.error(error);
-            showAlert('An error occurred. Please try again.', 'error');
+            console.error('Submission error:', error);
+            showAlert('An error occurred. Please check your connection and try again.', 'error');
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Add Item';
