@@ -10,7 +10,7 @@ from .models import CustomUser, Item, ItemImage, ContactForm, ReportPost, Feedba
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
-        fields = ("phone_number", "first_name", "last_name", "reg_no")
+        fields = ("phone_number", "first_name", "last_name", "registration_number")
 
 
 class CustomUserChangeForm(UserChangeForm):
@@ -38,7 +38,7 @@ class CustomUserAdmin(UserAdmin):
     )
 
     list_filter = ("is_staff", "is_superuser", "is_active")
-    search_fields = ("phone_number", "first_name", "last_name", "reg_no")
+    search_fields = ("phone_number", "first_name", "last_name", "registration_number")
     ordering = ("-date_joined",)
 
     # 🔒 non-editable fields go here
@@ -46,7 +46,7 @@ class CustomUserAdmin(UserAdmin):
 
     fieldsets = (
         (None, {"fields": ("phone_number", "password")}),
-        ("Personal Info", {"fields": ("first_name", "last_name", "reg_no")}),
+        ("Personal Info", {"fields": ("first_name", "last_name", "registration_number")}),
         (
             "Permissions",
             {
@@ -73,7 +73,7 @@ class CustomUserAdmin(UserAdmin):
                     "password2",
                     "first_name",
                     "last_name",
-                    "reg_no",
+                    "registration_number",
                     "is_staff",
                     "is_superuser",
                 ),
