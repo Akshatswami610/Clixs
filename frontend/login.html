@@ -604,7 +604,7 @@ body {
         <div class="animation-content">
             <h1 class="brand-title">Welcome back!</h1>
             <p class="brand-subtitle">
-                Login to access your account and continue your blogging journey with us.
+                Sign in to access your account and continue your blogging journey with us.
             </p>
             <ul class="feature-list">
                 <li class="feature-item">
@@ -690,7 +690,7 @@ body {
 
                 <button type="submit" class="submit-btn" id="submitBtn">
                     <span>→</span>
-                    <span>Sign In</span>
+                    <span>Login</span>
                 </button>
             </form>
 
@@ -849,9 +849,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
     if (!password) {
         showFieldError('password', 'Password is required');
-        isValid = false;
-    } else if (password.length < 6) {
-        showFieldError('password', 'Password must be at least 6 characters');
         isValid = false;
     }
 
