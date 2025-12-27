@@ -3,16 +3,40 @@
 {% block title %}Clixs - About Us{% endblock %}
 
 {% block extra_styles %}
-.container {
-    max-width: 1000px;
+.about-container {
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 4rem 2rem;
+    padding: 2rem;
 }
 
-.hero {
+/* Hero Section */
+.hero-section {
+    position: relative;
     text-align: center;
+    padding: 6rem 2rem 4rem;
     margin-bottom: 4rem;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
+    border-radius: 30px;
+    overflow: hidden;
     animation: fadeInDown 0.8s ease;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 50%, rgba(52, 152, 219, 0.2), transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(155, 89, 182, 0.2), transparent 50%);
+    animation: pulse 8s ease-in-out infinite;
+    z-index: 0;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.8; }
 }
 
 @keyframes fadeInDown {
@@ -26,29 +50,43 @@
     }
 }
 
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-badge {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    background: rgba(52, 152, 219, 0.2);
+    border: 2px solid rgba(52, 152, 219, 0.4);
+    border-radius: 50px;
+    color: #00d4ff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    animation: fadeIn 1s ease 0.2s backwards;
+}
+
 .hero-title {
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
+    font-size: 4rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
     background: linear-gradient(135deg, #3498db, #00d4ff, #9b59b6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    line-height: 1.2;
+    animation: fadeIn 1s ease 0.4s backwards;
 }
 
 .hero-subtitle {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     color: #b0b0b0;
-    line-height: 1.6;
-}
-
-.content-section {
-    background: rgba(30, 30, 45, 0.8);
-    padding: 2.5rem;
-    border-radius: 20px;
-    margin-bottom: 2rem;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-    animation: fadeIn 1s ease;
+    line-height: 1.8;
+    max-width: 700px;
+    margin: 0 auto 2rem;
+    animation: fadeIn 1s ease 0.6s backwards;
 }
 
 @keyframes fadeIn {
@@ -56,24 +94,207 @@
     to { opacity: 1; }
 }
 
-.section-title {
-    font-size: 1.8rem;
+.hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-top: 3rem;
+    flex-wrap: wrap;
+    animation: fadeIn 1s ease 0.8s backwards;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
     font-weight: 700;
-    margin-bottom: 1rem;
     color: #00d4ff;
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.95rem;
+    color: #b0b0b0;
+    margin-top: 0.5rem;
+}
+
+/* Story Section */
+.story-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 5rem;
+    align-items: center;
+}
+
+.story-content {
+    animation: slideInLeft 1s ease;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.story-image-wrapper {
+    position: relative;
+    animation: slideInRight 1s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.story-image {
+    width: 100%;
+    height: 400px;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(155, 89, 182, 0.2));
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    transition: all 0.3s ease;
+}
+
+.story-image:hover {
+    transform: scale(1.02);
+    box-shadow: 0 15px 50px rgba(52, 152, 219, 0.3);
+}
+
+.section-label {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    background: rgba(52, 152, 219, 0.1);
+    border-radius: 20px;
+    color: #00d4ff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #ffffff;
+    line-height: 1.3;
 }
 
 .section-text {
-    font-size: 1.1rem;
-    line-height: 1.8;
-    color: #e0e0e0;
+    font-size: 1.15rem;
+    line-height: 1.9;
+    color: #c0c0c0;
+    margin-bottom: 1.5rem;
+}
+
+/* Values Section */
+.values-section {
+    margin-bottom: 5rem;
+}
+
+.values-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.value-card {
+    background: rgba(30, 30, 45, 0.8);
+    padding: 2.5rem;
+    border-radius: 20px;
+    border: 2px solid rgba(52, 152, 219, 0.2);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.value-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.value-card:hover {
+    border-color: #3498db;
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(52, 152, 219, 0.3);
+}
+
+.value-card:hover::before {
+    opacity: 1;
+}
+
+.value-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+    transition: transform 0.4s ease;
+}
+
+.value-card:hover .value-icon {
+    transform: scale(1.2) rotate(5deg);
+}
+
+.value-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #ffffff;
+}
+
+.value-text {
+    color: #b0b0b0;
+    line-height: 1.7;
+    font-size: 1.05rem;
+}
+
+/* Features Section */
+.features-section {
+    background: rgba(30, 30, 45, 0.6);
+    padding: 4rem 2rem;
+    border-radius: 30px;
+    margin-bottom: 5rem;
+}
+
+.features-header {
+    text-align: center;
+    margin-bottom: 3rem;
 }
 
 .features-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 2rem;
-    margin-top: 3rem;
 }
 
 .feature-card {
@@ -82,6 +303,7 @@
     border-radius: 15px;
     border: 2px solid rgba(52, 152, 219, 0.2);
     transition: all 0.3s ease;
+    text-align: center;
 }
 
 .feature-card:hover {
@@ -91,14 +313,20 @@
 }
 
 .feature-icon {
-    font-size: 2.5rem;
+    font-size: 3rem;
     margin-bottom: 1rem;
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+    transform: scale(1.15);
 }
 
 .feature-title {
     font-size: 1.3rem;
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
     color: #ffffff;
 }
 
@@ -107,97 +335,460 @@
     line-height: 1.6;
 }
 
+/* Team Section */
+.team-section {
+    margin-bottom: 5rem;
+}
+
+.team-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2.5rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.team-member {
+    background: rgba(30, 30, 45, 0.8);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 2px solid rgba(52, 152, 219, 0.2);
+    transition: all 0.4s ease;
+    text-align: center;
+}
+
+.team-member:hover {
+    border-color: #3498db;
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(52, 152, 219, 0.3);
+}
+
+.member-image {
+    width: 100%;
+    height: 280px;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.3), rgba(155, 89, 182, 0.3));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.member-image::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(52, 152, 219, 0.2), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.team-member:hover .member-image::before {
+    opacity: 1;
+}
+
+.member-info {
+    padding: 2rem;
+}
+
+.member-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+}
+
+.member-role {
+    color: #00d4ff;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.member-bio {
+    color: #b0b0b0;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+/* CTA Section */
+.cta-section {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(155, 89, 182, 0.2));
+    padding: 4rem 2rem;
+    border-radius: 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(52, 152, 219, 0.1), transparent 50%);
+    animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.cta-content {
+    position: relative;
+    z-index: 1;
+}
+
+.cta-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.cta-text {
+    font-size: 1.2rem;
+    color: #b0b0b0;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.cta-button {
+    padding: 1rem 2.5rem;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.cta-button-primary {
+    background: linear-gradient(135deg, #3498db, #9b59b6);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
+}
+
+.cta-button-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
+}
+
+.cta-button-secondary {
+    background: transparent;
+    border: 2px solid #3498db;
+    color: #3498db;
+}
+
+.cta-button-secondary:hover {
+    background: rgba(52, 152, 219, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 968px) {
+    .story-section {
+        grid-template-columns: 1fr;
+    }
+
+    .story-image {
+        height: 300px;
+    }
+}
+
 @media (max-width: 768px) {
     .hero-title {
-        font-size: 2rem;
+        font-size: 2.5rem;
     }
 
     .hero-subtitle {
         font-size: 1.1rem;
     }
 
-    .content-section {
-        padding: 1.5rem;
+    .hero-stats {
+        gap: 2rem;
     }
 
-    .features-grid {
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+
+    .features-grid,
+    .values-grid,
+    .team-grid {
         grid-template-columns: 1fr;
+    }
+
+    .cta-title {
+        font-size: 2rem;
+    }
+
+    .cta-buttons {
+        flex-direction: column;
+        align-items: stretch;
     }
 }
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="hero">
-        <h1 class="hero-title">About Clixs</h1>
-        <p class="hero-subtitle">Connecting people through seamless buying, selling, and renting</p>
-    </div>
-
-    <div class="content-section">
-        <h2 class="section-title">What is Clixs?</h2>
-        <p class="section-text">
-            Clixs is a modern marketplace platform that revolutionizes the way people buy, sell, and rent items. 
-            We've created a premium, user-friendly experience that brings together buyers and sellers in a secure, 
-            efficient environment. Whether you're looking to sell your old items, find great deals, or rent equipment 
-            for a short-term project, Clixs is your go-to platform.
-        </p>
-    </div>
-
-    <div class="content-section">
-        <h2 class="section-title">Why Clixs Exists</h2>
-        <p class="section-text">
-            In today's fast-paced world, people need flexible options for acquiring and monetizing goods. Traditional 
-            marketplaces often lack the sophistication and security that modern users demand. Clixs was born from the 
-            vision of creating a premium marketplace that combines beautiful design with powerful functionality, making 
-            transactions smooth and trustworthy for everyone involved.
-        </p>
-    </div>
-
-    <div class="content-section">
-        <h2 class="section-title">How It Helps</h2>
-        <p class="section-text">
-            Clixs empowers users to maximize the value of their possessions while providing buyers and renters with 
-            access to a wide variety of items. Our platform simplifies the entire process—from listing items with 
-            detailed descriptions and images to managing transactions and building a trusted community. We handle the 
-            complexities so you can focus on what matters: finding what you need or selling what you have.
-        </p>
-    </div>
-
-    <div class="content-section">
-        <h2 class="section-title">Our Vision</h2>
-        <p class="section-text">
-            We envision a world where resources are shared efficiently, waste is minimized, and everyone has access to 
-            the items they need, when they need them. Clixs aims to be the leading marketplace that champions 
-            sustainability, community trust, and innovation in peer-to-peer commerce. Together, we're building a 
-            smarter, more connected marketplace for the future.
-        </p>
-    </div>
-
-    <div class="features-grid">
-        <div class="feature-card">
-            <div class="feature-icon">🛒</div>
-            <div class="feature-title">Easy Buying</div>
-            <div class="feature-text">Browse thousands of items with detailed descriptions and images.</div>
+<div class="about-container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="hero-badge">✨ About Our Platform</div>
+            <h1 class="hero-title">Building the Future of Commerce</h1>
+            <p class="hero-subtitle">
+                Empowering communities through seamless buying, selling, and renting.
+                Where trust meets innovation in the modern marketplace.
+            </p>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-number">10K+</span>
+                    <span class="stat-label">Active Users</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">50K+</span>
+                    <span class="stat-label">Items Listed</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">98%</span>
+                    <span class="stat-label">Satisfaction Rate</span>
+                </div>
+            </div>
         </div>
-        <div class="feature-card">
-            <div class="feature-icon">💰</div>
-            <div class="feature-title">Quick Selling</div>
-            <div class="feature-text">List your items in minutes and reach a wide audience instantly.</div>
+    </div>
+
+    <!-- Story Section -->
+    <div class="story-section">
+        <div class="story-content">
+            <span class="section-label">Our Story</span>
+            <h2 class="section-title">Reimagining the Marketplace Experience</h2>
+            <p class="section-text">
+                Clixs was born from a simple observation: traditional marketplaces were cluttered,
+                impersonal, and lacked the sophistication that modern users deserve. We set out to
+                create something different—a platform that combines beautiful design with powerful
+                functionality.
+            </p>
+            <p class="section-text">
+                Today, Clixs is more than just a marketplace. It's a community where trust is built
+                through transparency, where transactions are seamless, and where everyone has the
+                opportunity to maximize the value of their possessions while discovering amazing deals.
+            </p>
         </div>
-        <div class="feature-card">
-            <div class="feature-icon">🔄</div>
-            <div class="feature-title">Flexible Renting</div>
-            <div class="feature-text">Rent items by the day, week, or month with transparent pricing.</div>
+        <div class="story-image-wrapper">
+            <div class="story-image">🚀</div>
         </div>
-        <div class="feature-card">
-            <div class="feature-icon">🔒</div>
-            <div class="feature-title">Secure Platform</div>
-            <div class="feature-text">Your transactions and data are protected with top-tier security.</div>
+    </div>
+
+    <!-- Values Section -->
+    <div class="values-section">
+        <div class="values-header">
+            <span class="section-label">Core Values</span>
+            <h2 class="section-title">What Drives Us Forward</h2>
+        </div>
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon">🎯</div>
+                <h3 class="value-title">User First</h3>
+                <p class="value-text">
+                    Every decision we make prioritizes your experience. From intuitive design to
+                    responsive support, we're committed to making your journey effortless.
+                </p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">🛡️</div>
+                <h3 class="value-title">Trust & Security</h3>
+                <p class="value-text">
+                    Your safety is paramount. We employ cutting-edge security measures and transparent
+                    practices to ensure every transaction is protected.
+                </p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">🌱</div>
+                <h3 class="value-title">Sustainability</h3>
+                <p class="value-text">
+                    By facilitating the reuse and sharing of items, we're helping reduce waste and
+                    promote a more sustainable approach to consumption.
+                </p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">💡</div>
+                <h3 class="value-title">Innovation</h3>
+                <p class="value-text">
+                    We continuously evolve our platform with the latest technology and features to
+                    stay ahead of your needs and expectations.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="features-section">
+        <div class="features-header">
+            <span class="section-label">Platform Features</span>
+            <h2 class="section-title">Everything You Need in One Place</h2>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🛒</div>
+                <div class="feature-title">Smart Buying</div>
+                <div class="feature-text">
+                    Browse thousands of verified items with detailed descriptions, high-quality images,
+                    and transparent pricing.
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <div class="feature-title">Quick Selling</div>
+                <div class="feature-text">
+                    List your items in minutes with our streamlined process and reach thousands of
+                    potential buyers instantly.
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <div class="feature-title">Flexible Renting</div>
+                <div class="feature-text">
+                    Rent items by the day, week, or month with transparent pricing and flexible terms
+                    that work for you.
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <div class="feature-title">Secure Transactions</div>
+                <div class="feature-text">
+                    Your data and transactions are protected with enterprise-grade security and
+                    encryption technology.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Section -->
+    <div class="team-section">
+        <div class="team-header">
+            <span class="section-label">Meet The Team</span>
+            <h2 class="section-title">The People Behind Clixs</h2>
+            <p class="section-text" style="text-align: center; max-width: 700px; margin: 1rem auto 0;">
+                A passionate team of innovators, designers, and developers dedicated to revolutionizing
+                the marketplace experience.
+            </p>
+        </div>
+        <div class="team-grid">
+            <div class="team-member">
+                <div class="member-image">👨‍💼</div>
+                <div class="member-info">
+                    <h3 class="member-name">Alex Chen</h3>
+                    <p class="member-role">Founder & CEO</p>
+                    <p class="member-bio">
+                        Visionary entrepreneur with 10+ years in e-commerce, passionate about
+                        building user-centric platforms.
+                    </p>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="member-image">👩‍💻</div>
+                <div class="member-info">
+                    <h3 class="member-name">Sarah Johnson</h3>
+                    <p class="member-role">Head of Product</p>
+                    <p class="member-bio">
+                        Product strategist focused on creating intuitive experiences that delight
+                        users and solve real problems.
+                    </p>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="member-image">👨‍🎨</div>
+                <div class="member-info">
+                    <h3 class="member-name">Marcus Rodriguez</h3>
+                    <p class="member-role">Lead Designer</p>
+                    <p class="member-bio">
+                        Award-winning designer crafting beautiful, accessible interfaces that
+                        bring joy to every interaction.
+                    </p>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="member-image">👩‍🔧</div>
+                <div class="member-info">
+                    <h3 class="member-name">Priya Patel</h3>
+                    <p class="member-role">Chief Technology Officer</p>
+                    <p class="member-bio">
+                        Tech innovator ensuring our platform is fast, secure, and scalable for
+                        millions of users worldwide.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="cta-section">
+        <div class="cta-content">
+            <h2 class="cta-title">Ready to Join Our Community?</h2>
+            <p class="cta-text">
+                Start buying, selling, and renting today. Join thousands of satisfied users
+                who trust Clixs for their marketplace needs.
+            </p>
+            <div class="cta-buttons">
+                <a href="/" class="cta-button cta-button-primary">Explore Items</a>
+                <a href="/contact" class="cta-button cta-button-secondary">Contact Us</a>
+            </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-// No additional scripts needed for about page
+// Add scroll animations
+document.addEventListener('DOMContentLoaded', () => {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe all value cards, feature cards, and team members
+    document.querySelectorAll('.value-card, .feature-card, .team-member').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+});
 {% endblock %}
