@@ -4,290 +4,597 @@
 
 {% block extra_styles %}
 <style>
-    body {
-        display: flex;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+.auth-container {
+    flex: 1;
+    display: flex;
+    min-height: calc(100vh - 80px);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Left side - Animation */
+.auth-left {
+    flex: 1;
+    background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 50%, #1a2942 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 3rem;
+}
+
+.animation-content {
+    position: relative;
+    z-index: 2;
+    text-align: left;
+    max-width: 500px;
+}
+
+.brand-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    line-height: 1.2;
+}
+
+.brand-subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.8;
+    margin-bottom: 2.5rem;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.05rem;
+    animation: fadeInLeft 0.6s ease backwards;
+}
+
+.feature-item:nth-child(1) { animation-delay: 0.1s; }
+.feature-item:nth-child(2) { animation-delay: 0.2s; }
+.feature-item:nth-child(3) { animation-delay: 0.3s; }
+.feature-item:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.feature-icon {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Floating particles animation */
+.particle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: rise 15s infinite ease-in;
+}
+
+.particle:nth-child(1) {
+    width: 4px;
+    height: 4px;
+    left: 10%;
+    animation-delay: 0s;
+    animation-duration: 12s;
+}
+
+.particle:nth-child(2) {
+    width: 6px;
+    height: 6px;
+    left: 30%;
+    animation-delay: 2s;
+    animation-duration: 15s;
+}
+
+.particle:nth-child(3) {
+    width: 4px;
+    height: 4px;
+    left: 50%;
+    animation-delay: 4s;
+    animation-duration: 18s;
+}
+
+.particle:nth-child(4) {
+    width: 5px;
+    height: 5px;
+    left: 70%;
+    animation-delay: 6s;
+    animation-duration: 14s;
+}
+
+.particle:nth-child(5) {
+    width: 3px;
+    height: 3px;
+    left: 20%;
+    animation-delay: 3s;
+    animation-duration: 16s;
+}
+
+.particle:nth-child(6) {
+    width: 4px;
+    height: 4px;
+    left: 80%;
+    animation-delay: 5s;
+    animation-duration: 13s;
+}
+
+.particle:nth-child(7) {
+    width: 5px;
+    height: 5px;
+    left: 40%;
+    animation-delay: 1s;
+    animation-duration: 17s;
+}
+
+.particle:nth-child(8) {
+    width: 3px;
+    height: 3px;
+    left: 60%;
+    animation-delay: 7s;
+    animation-duration: 15s;
+}
+
+@keyframes rise {
+    0% {
+        bottom: -50px;
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.5;
+    }
+    90% {
+        opacity: 0.3;
+    }
+    100% {
+        bottom: 110%;
+        opacity: 0;
+    }
+}
+
+/* Right side - Form */
+.auth-right {
+    flex: 1;
+    background: #1a2332;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    overflow-y: auto;
+}
+
+.auth-right::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(79, 70, 229, 0.05), transparent 50%);
+    pointer-events: none;
+}
+
+.auth-box {
+    background: transparent;
+    padding: 3rem;
+    width: 100%;
+    max-width: 520px;
+    animation: slideIn 0.6s ease;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.auth-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: left;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.auth-subtitle {
+    text-align: left;
+    color: #94a3b8;
+    margin-bottom: 2.5rem;
+    font-size: 0.95rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.75rem;
+    color: #e2e8f0;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(71, 85, 105, 0.5);
+    border-radius: 10px;
+    color: #cbd5e1;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-input::placeholder {
+    color: #64748b;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    background: rgba(30, 41, 59, 1);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-input.error {
+    border-color: #e74c3c;
+    animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+.field-error {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: block;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background: #4f46e5;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.submit-btn:hover:not(:disabled) {
+    background: #4338ca;
+}
+
+.submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(71, 85, 105, 0.3);
+    color: #94a3b8;
+}
+
+.auth-link a {
+    color: #6366f1;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.auth-link a:hover {
+    color: #818cf8;
+}
+
+.error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 968px) {
+    .auth-container {
         flex-direction: column;
     }
 
-    .auth-container {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 2rem;
+    .auth-left {
+        min-height: 40vh;
     }
 
+    .brand-title {
+        font-size: 2rem;
+    }
+
+    .brand-subtitle {
+        font-size: 1rem;
+    }
+
+    .auth-right {
+        min-height: 60vh;
+    }
+}
+
+@media (max-width: 768px) {
     .auth-box {
-        background: rgba(30, 30, 45, 0.9);
-        padding: 3rem;
-        border-radius: 25px;
-        width: 100%;
-        max-width: 500px;
-        box-shadow: 0 15px 60px rgba(0, 0, 0, 0.7);
-        animation: slideUp 0.6s ease;
-    }
-
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(50px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        padding: 2rem 1.5rem;
     }
 
     .auth-title {
-        font-size: 2rem;
-        font-weight: 700;
-        text-align: center;
-        margin-bottom: 2rem;
-        background: linear-gradient(135deg, #3498db, #9b59b6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        font-size: 1.8rem;
+    }
+
+    .animation-content {
+        padding: 2rem;
     }
 
     .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
+        grid-template-columns: 1fr;
     }
 
-    .form-group {
-        margin-bottom: 1.5rem;
+    .feature-list {
+        display: none;
     }
-
-    .form-label {
-        display: block;
-        margin-bottom: 0.5rem;
-        color: #e0e0e0;
-        font-weight: 500;
-    }
-
-    .form-input {
-        width: 100%;
-        padding: 1rem;
-        background: rgba(20, 20, 30, 0.8);
-        border: 2px solid rgba(52, 152, 219, 0.3);
-        border-radius: 12px;
-        color: #ffffff;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        box-sizing: border-box;
-    }
-
-    .form-input:focus {
-        outline: none;
-        border-color: #3498db;
-        box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
-    }
-
-    .form-input.error {
-        border-color: #e74c3c;
-    }
-
-    .submit-btn {
-        width: 100%;
-        padding: 1rem;
-        background: linear-gradient(135deg, #3498db, #9b59b6);
-        border: none;
-        border-radius: 12px;
-        color: white;
-        font-size: 1.1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
-        margin-top: 1rem;
-    }
-
-    .submit-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
-    }
-
-    .submit-btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-    .auth-link {
-        text-align: center;
-        margin-top: 1.5rem;
-        color: #b0b0b0;
-    }
-
-    .auth-link a {
-        color: #3498db;
-        text-decoration: none;
-        font-weight: 600;
-        transition: color 0.3s ease;
-    }
-
-    .auth-link a:hover {
-        color: #00d4ff;
-    }
-
-    .error-message {
-        background: rgba(231, 76, 60, 0.2);
-        border: 1px solid #e74c3c;
-        color: #e74c3c;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-        text-align: center;
-    }
-
-    .field-error {
-        color: #e74c3c;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-    }
-
-    @media (max-width: 768px) {
-        .navbar {
-            padding: 1rem;
-        }
-
-        .nav-links {
-            gap: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .nav-logo {
-            font-size: 1.5rem;
-        }
-
-        .auth-box {
-            padding: 2rem;
-        }
-
-        .form-row {
-            grid-template-columns: 1fr;
-        }
-    }
+}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="auth-container">
-    <div class="auth-box">
-        <h1 class="auth-title">Create Account</h1>
+    <!-- Left Side - Animations -->
+    <div class="auth-left">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="error-message">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
+        <div class="animation-content">
+            <h1 class="brand-title">Join us today!</h1>
+            <p class="brand-subtitle">
+                Create your account and start your journey with thousands of users who trust us.
+            </p>
+            <ul class="feature-list">
+                <li class="feature-item">
+                    <span class="feature-icon">✓</span>
+                    <span>Quick and easy registration</span>
+                </li>
+                <li class="feature-item">
+                    <span class="feature-icon">✓</span>
+                    <span>Secure account protection</span>
+                </li>
+                <li class="feature-item">
+                    <span class="feature-icon">✓</span>
+                    <span>Access to all features</span>
+                </li>
+                <li class="feature-item">
+                    <span class="feature-icon">✓</span>
+                    <span>24/7 customer support</span>
+                </li>
+            </ul>
+        </div>
+    </div>
 
-        {% if form.non_field_errors %}
-            <div class="error-message">
-                {% for error in form.non_field_errors %}
-                    {{ error }}
+    <!-- Right Side - Form -->
+    <div class="auth-right">
+        <div class="auth-box">
+            <h1 class="auth-title">Sign Up</h1>
+            <p class="auth-subtitle">Create your account to get started</p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="error-message">{{ message }}</div>
                 {% endfor %}
-            </div>
-        {% endif %}
+            {% endif %}
 
-        <form method="post" action="{% url 'signup' %}">
-            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="error-message">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
 
-            <div class="form-row">
+            <form method="post" action="{% url 'signup' %}">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="id_first_name">First Name</label>
+                        <input
+                            type="text"
+                            name="first_name"
+                            id="id_first_name"
+                            class="form-input {% if form.first_name.errors %}error{% endif %}"
+                            value="{{ form.first_name.value|default:'' }}"
+                            placeholder="John"
+                            required
+                        >
+                        {% if form.first_name.errors %}
+                            <div class="field-error">{{ form.first_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="id_last_name">Last Name</label>
+                        <input
+                            type="text"
+                            name="last_name"
+                            id="id_last_name"
+                            class="form-input {% if form.last_name.errors %}error{% endif %}"
+                            value="{{ form.last_name.value|default:'' }}"
+                            placeholder="Doe"
+                            required
+                        >
+                        {% if form.last_name.errors %}
+                            <div class="field-error">{{ form.last_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
                 <div class="form-group">
-                    <label class="form-label" for="id_first_name">First Name</label>
+                    <label class="form-label" for="id_phone">Phone Number</label>
                     <input
-                        type="text"
-                        name="first_name"
-                        id="id_first_name"
-                        class="form-input {% if form.first_name.errors %}error{% endif %}"
-                        value="{{ form.first_name.value|default:'' }}"
+                        type="tel"
+                        name="phone"
+                        id="id_phone"
+                        class="form-input {% if form.phone.errors %}error{% endif %}"
+                        value="{{ form.phone.value|default:'' }}"
+                        placeholder="+1234567890"
                         required
                     >
-                    {% if form.first_name.errors %}
-                        <div class="field-error">{{ form.first_name.errors.0 }}</div>
+                    {% if form.phone.errors %}
+                        <div class="field-error">{{ form.phone.errors.0 }}</div>
                     {% endif %}
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="id_last_name">Last Name</label>
+                    <label class="form-label" for="id_registration_number">Registration Number</label>
                     <input
                         type="text"
-                        name="last_name"
-                        id="id_last_name"
-                        class="form-input {% if form.last_name.errors %}error{% endif %}"
-                        value="{{ form.last_name.value|default:'' }}"
+                        name="registration_number"
+                        id="id_registration_number"
+                        class="form-input {% if form.registration_number.errors %}error{% endif %}"
+                        value="{{ form.registration_number.value|default:'' }}"
+                        placeholder="Enter your registration number"
                         required
                     >
-                    {% if form.last_name.errors %}
-                        <div class="field-error">{{ form.last_name.errors.0 }}</div>
+                    {% if form.registration_number.errors %}
+                        <div class="field-error">{{ form.registration_number.errors.0 }}</div>
                     {% endif %}
                 </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="id_password">Password</label>
+                        <input
+                            type="password"
+                            name="password"
+                            id="id_password"
+                            class="form-input {% if form.password.errors %}error{% endif %}"
+                            placeholder="Enter password"
+                            required
+                        >
+                        {% if form.password.errors %}
+                            <div class="field-error">{{ form.password.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="id_confirm_password">Confirm Password</label>
+                        <input
+                            type="password"
+                            name="confirm_password"
+                            id="id_confirm_password"
+                            class="form-input {% if form.confirm_password.errors %}error{% endif %}"
+                            placeholder="Confirm password"
+                            required
+                        >
+                        {% if form.confirm_password.errors %}
+                            <div class="field-error">{{ form.confirm_password.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <span>→</span>
+                    <span>Create Account</span>
+                </button>
+            </form>
+
+            <div class="auth-link">
+                Already have an account? <a href="{% url 'login' %}">Sign In</a>
             </div>
-
-            <div class="form-group">
-                <label class="form-label" for="id_phone">Phone Number</label>
-                <input
-                    type="tel"
-                    name="phone"
-                    id="id_phone"
-                    class="form-input {% if form.phone.errors %}error{% endif %}"
-                    value="{{ form.phone.value|default:'' }}"
-                    required
-                >
-                {% if form.phone.errors %}
-                    <div class="field-error">{{ form.phone.errors.0 }}</div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="id_registration_number">Registration Number</label>
-                <input
-                    type="text"
-                    name="registration_number"
-                    id="id_registration_number"
-                    class="form-input {% if form.registration_number.errors %}error{% endif %}"
-                    value="{{ form.registration_number.value|default:'' }}"
-                    required
-                >
-                {% if form.registration_number.errors %}
-                    <div class="field-error">{{ form.registration_number.errors.0 }}</div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="id_password">Password</label>
-                <input
-                    type="password"
-                    name="password"
-                    id="id_password"
-                    class="form-input {% if form.password.errors %}error{% endif %}"
-                    required
-                >
-                {% if form.password.errors %}
-                    <div class="field-error">{{ form.password.errors.0 }}</div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="id_confirm_password">Confirm Password</label>
-                <input
-                    type="password"
-                    name="confirm_password"
-                    id="id_confirm_password"
-                    class="form-input {% if form.confirm_password.errors %}error{% endif %}"
-                    required
-                >
-                {% if form.confirm_password.errors %}
-                    <div class="field-error">{{ form.confirm_password.errors.0 }}</div>
-                {% endif %}
-            </div>
-
-            <button type="submit" class="submit-btn">Sign Up</button>
-        </form>
-
-        <div class="auth-link">
-            Already have an account? <a href="{% url 'login' %}">Login</a>
         </div>
     </div>
 </div>
