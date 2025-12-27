@@ -3,22 +3,40 @@
 {% block title %}Clixs - Contact Us{% endblock %}
 
 {% block extra_styles %}
-.container {
-    max-width: 800px;
+.contact-container {
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 4rem 2rem;
+    padding: 2rem;
 }
 
-.page-title {
-    font-size: 2.5rem;
-    font-weight: 700;
+/* Hero Section */
+.hero-section {
+    position: relative;
     text-align: center;
-    margin-bottom: 1rem;
-    background: linear-gradient(135deg, #3498db, #9b59b6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    padding: 6rem 2rem 4rem;
+    margin-bottom: 4rem;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
+    border-radius: 30px;
+    overflow: hidden;
     animation: fadeInDown 0.8s ease;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 50%, rgba(52, 152, 219, 0.2), transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(155, 89, 182, 0.2), transparent 50%);
+    animation: pulse 8s ease-in-out infinite;
+    z-index: 0;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.8; }
 }
 
 @keyframes fadeInDown {
@@ -32,11 +50,201 @@
     }
 }
 
-.page-subtitle {
-    text-align: center;
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-badge {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    background: rgba(52, 152, 219, 0.2);
+    border: 2px solid rgba(52, 152, 219, 0.4);
+    border-radius: 50px;
+    color: #00d4ff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    animation: fadeIn 1s ease 0.2s backwards;
+}
+
+.hero-title {
+    font-size: 4rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #3498db, #00d4ff, #9b59b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    animation: fadeIn 1s ease 0.4s backwards;
+}
+
+.hero-subtitle {
+    font-size: 1.4rem;
     color: #b0b0b0;
-    margin-bottom: 3rem;
+    line-height: 1.8;
+    max-width: 700px;
+    margin: 0 auto;
+    animation: fadeIn 1s ease 0.6s backwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Main Content Grid */
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 3rem;
+    margin-bottom: 5rem;
+}
+
+/* Contact Info Section */
+.contact-info-section {
+    animation: slideInLeft 1s ease;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.section-label {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    background: rgba(52, 152, 219, 0.1);
+    border-radius: 20px;
+    color: #00d4ff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #ffffff;
+}
+
+.section-text {
     font-size: 1.1rem;
+    line-height: 1.8;
+    color: #c0c0c0;
+    margin-bottom: 2rem;
+}
+
+.contact-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.contact-method {
+    background: rgba(30, 30, 45, 0.8);
+    padding: 1.5rem;
+    border-radius: 15px;
+    border: 2px solid rgba(52, 152, 219, 0.2);
+    transition: all 0.3s ease;
+}
+
+.contact-method:hover {
+    border-color: #3498db;
+    transform: translateX(5px);
+    box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3);
+}
+
+.method-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+}
+
+.method-icon {
+    font-size: 1.8rem;
+}
+
+.method-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.method-content {
+    color: #00d4ff;
+    font-size: 1.05rem;
+    margin-left: 2.8rem;
+}
+
+.method-content a {
+    color: #00d4ff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.method-content a:hover {
+    color: #3498db;
+}
+
+.method-description {
+    color: #b0b0b0;
+    font-size: 0.9rem;
+    margin-left: 2.8rem;
+    margin-top: 0.5rem;
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.social-link {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(30, 30, 45, 0.8);
+    border-radius: 50%;
+    border: 2px solid rgba(52, 152, 219, 0.2);
+    font-size: 1.5rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.social-link:hover {
+    border-color: #3498db;
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+}
+
+/* Contact Form Section */
+.contact-form-section {
+    animation: slideInRight 1s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .contact-form {
@@ -44,12 +252,7 @@
     padding: 2.5rem;
     border-radius: 20px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-    animation: fadeIn 1s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    border: 2px solid rgba(52, 152, 219, 0.2);
 }
 
 .form-group {
@@ -63,8 +266,14 @@
     font-weight: 500;
 }
 
+.required {
+    color: #e74c3c;
+    margin-left: 0.2rem;
+}
+
 .form-input,
-.form-textarea {
+.form-textarea,
+.form-select {
     width: 100%;
     padding: 1rem;
     background: rgba(20, 20, 30, 0.8);
@@ -77,10 +286,17 @@
 }
 
 .form-input:focus,
-.form-textarea:focus {
+.form-textarea:focus,
+.form-select:focus {
     outline: none;
     border-color: #3498db;
     box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
+}
+
+.form-input.error,
+.form-textarea.error,
+.form-select.error {
+    border-color: #e74c3c;
 }
 
 .form-textarea {
@@ -88,9 +304,35 @@
     min-height: 150px;
 }
 
+.char-count {
+    text-align: right;
+    font-size: 0.85rem;
+    color: #b0b0b0;
+    margin-top: 0.3rem;
+}
+
+.char-count.warning {
+    color: #f39c12;
+}
+
+.char-count.error {
+    color: #e74c3c;
+}
+
+.field-error {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+    display: none;
+}
+
+.field-error.active {
+    display: block;
+}
+
 .submit-btn {
     width: 100%;
-    padding: 1rem;
+    padding: 1.2rem;
     background: linear-gradient(135deg, #3498db, #9b59b6);
     border: none;
     border-radius: 12px;
@@ -101,10 +343,9 @@
     transition: all 0.3s ease;
     box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
     position: relative;
-    overflow: hidden;
 }
 
-.submit-btn:hover {
+.submit-btn:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
 }
@@ -114,87 +355,415 @@
     cursor: not-allowed;
 }
 
-.submit-btn.loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    margin: -10px 0 0 -10px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
+.alert {
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    display: none;
+    animation: slideDown 0.3s ease;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.success-message {
+.alert.active {
+    display: block;
+}
+
+.alert-success {
     background: rgba(39, 174, 96, 0.2);
-    border: 1px solid #27ae60;
-    color: #27ae60;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    text-align: center;
-    display: none;
+    border: 2px solid #27ae60;
+    color: #2ecc71;
 }
 
-.error-message {
+.alert-error {
     background: rgba(231, 76, 60, 0.2);
-    border: 1px solid #e74c3c;
+    border: 2px solid #e74c3c;
     color: #e74c3c;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
+}
+
+/* FAQ Section */
+.faq-section {
+    margin-bottom: 5rem;
+}
+
+.faq-header {
     text-align: center;
-    display: none;
+    margin-bottom: 3rem;
+}
+
+.faq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.faq-item {
+    background: rgba(30, 30, 45, 0.8);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 2px solid rgba(52, 152, 219, 0.2);
+    transition: all 0.3s ease;
+}
+
+.faq-item:hover {
+    border-color: #3498db;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3);
+}
+
+.faq-question {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: start;
+    gap: 0.8rem;
+}
+
+.faq-icon {
+    color: #00d4ff;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.faq-answer {
+    color: #b0b0b0;
+    line-height: 1.7;
+    padding-left: 2rem;
+}
+
+/* Response Time Banner */
+.response-banner {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(155, 89, 182, 0.2));
+    padding: 2rem;
+    border-radius: 20px;
+    text-align: center;
+    margin-bottom: 5rem;
+}
+
+.banner-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.banner-icon {
+    font-size: 2rem;
+}
+
+.banner-text {
+    font-size: 1.2rem;
+    color: #ffffff;
+}
+
+.banner-highlight {
+    color: #00d4ff;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 968px) {
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .faq-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 768px) {
-    .page-title {
-        font-size: 2rem;
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem;
     }
 
     .contact-form {
         padding: 1.5rem;
     }
+
+    .section-title {
+        font-size: 1.6rem;
+    }
 }
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="page-title">Get in Touch</h1>
-    <p class="page-subtitle">Have questions or feedback? We'd love to hear from you!</p>
-
-    <div class="contact-form">
-        <div class="success-message" id="successMessage">
-            Thank you for contacting us! We'll get back to you soon.
+<div class="contact-container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="hero-badge">💬 Get In Touch</div>
+            <h1 class="hero-title">We're Here to Help</h1>
+            <p class="hero-subtitle">
+                Have questions, feedback, or need assistance? Our team is ready to assist you.
+                Reach out and we'll get back to you as soon as possible.
+            </p>
         </div>
-        <div class="error-message" id="errorMessage"></div>
+    </div>
 
-        <form id="contactForm">
-            <div class="form-group">
-                <label class="form-label">Name</label>
-                <input type="text" class="form-input" id="name" required>
+    <!-- Response Time Banner -->
+    <div class="response-banner">
+        <div class="banner-content">
+            <span class="banner-icon">⚡</span>
+            <span class="banner-text">
+                Average response time: <span class="banner-highlight">24 hours</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="contact-grid">
+        <!-- Contact Info Section -->
+        <div class="contact-info-section">
+            <span class="section-label">Contact Information</span>
+            <h2 class="section-title">Let's Connect</h2>
+            <p class="section-text">
+                Choose your preferred way to reach us. We're available through multiple
+                channels to ensure you get the help you need.
+            </p>
+
+            <div class="contact-methods">
+                <div class="contact-method">
+                    <div class="method-header">
+                        <span class="method-icon">📧</span>
+                        <span class="method-title">Email</span>
+                    </div>
+                    <div class="method-content">
+                        <a href="mailto:support@clixs.com">support@clixs.com</a>
+                    </div>
+                    <div class="method-description">
+                        For general inquiries and support requests
+                    </div>
+                </div>
+
+                <div class="contact-method">
+                    <div class="method-header">
+                        <span class="method-icon">📞</span>
+                        <span class="method-title">Phone</span>
+                    </div>
+                    <div class="method-content">
+                        <a href="tel:+1234567890">+1 (234) 567-890</a>
+                    </div>
+                    <div class="method-description">
+                        Mon-Fri, 9:00 AM - 6:00 PM (EST)
+                    </div>
+                </div>
+
+                <div class="contact-method">
+                    <div class="method-header">
+                        <span class="method-icon">💼</span>
+                        <span class="method-title">Business</span>
+                    </div>
+                    <div class="method-content">
+                        <a href="mailto:business@clixs.com">business@clixs.com</a>
+                    </div>
+                    <div class="method-description">
+                        For partnerships and business inquiries
+                    </div>
+                </div>
+
+                <div class="contact-method">
+                    <div class="method-header">
+                        <span class="method-icon">🏢</span>
+                        <span class="method-title">Office Hours</span>
+                    </div>
+                    <div class="method-content">
+                        Monday - Friday: 9:00 AM - 6:00 PM
+                    </div>
+                    <div class="method-description">
+                        Weekend support via email only
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Email or Phone</label>
-                <input type="text" class="form-input" id="contact" required placeholder="your@email.com or +1234567890">
+
+            
+        </div>
+
+        <!-- Contact Form Section -->
+        <div class="contact-form-section">
+            <div class="contact-form">
+                <div class="alert alert-success" id="successAlert">
+                    ✅ Thank you for contacting us! We've received your message and will respond within 24 hours.
+                </div>
+                <div class="alert alert-error" id="errorAlert"></div>
+
+                <form id="contactForm" novalidate>
+                    <div class="form-group">
+                        <label class="form-label">
+                            Name <span class="required">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            class="form-input"
+                            id="name"
+                            name="name"
+                            required
+                            maxlength="100"
+                            placeholder="Your full name">
+                        <div class="field-error" id="nameError">Please enter your name</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Email <span class="required">*</span>
+                        </label>
+                        <input
+                            type="email"
+                            class="form-input"
+                            id="email"
+                            name="email"
+                            required
+                            maxlength="100"
+                            placeholder="your.email@example.com">
+                        <div class="field-error" id="emailError">Please enter a valid email address</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Phone <span style="color: #b0b0b0; font-weight: 400;">(Optional)</span>
+                        </label>
+                        <input
+                            type="tel"
+                            class="form-input"
+                            id="phone"
+                            name="phone"
+                            maxlength="20"
+                            placeholder="+1 (234) 567-890">
+                        <div class="field-error" id="phoneError">Please enter a valid phone number</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Subject <span class="required">*</span>
+                        </label>
+                        <select class="form-select" id="subject" name="subject" required>
+                            <option value="">Select a subject</option>
+                            <option value="general">General Inquiry</option>
+                            <option value="support">Technical Support</option>
+                            <option value="feedback">Feedback</option>
+                            <option value="business">Business Partnership</option>
+                            <option value="bug">Report a Bug</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <div class="field-error" id="subjectError">Please select a subject</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Message <span class="required">*</span>
+                        </label>
+                        <textarea
+                            class="form-textarea"
+                            id="message"
+                            name="message"
+                            required
+                            maxlength="1000"
+                            placeholder="Tell us how we can help you..."></textarea>
+                        <div class="char-count" id="charCount">0 / 1000 characters</div>
+                        <div class="field-error" id="messageError">Please enter your message (minimum 10 characters)</div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        Send Message
+                    </button>
+                </form>
             </div>
-            <div class="form-group">
-                <label class="form-label">Subject</label>
-                <input type="text" class="form-input" id="subject" required>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="faq-section">
+        <div class="faq-header">
+            <span class="section-label">Frequently Asked</span>
+            <h2 class="section-title">Common Questions</h2>
+            <p class="section-text" style="text-align: center; max-width: 700px; margin: 1rem auto 0;">
+                Find quick answers to the most common questions. Can't find what you're looking for?
+                Feel free to contact us directly.
+            </p>
+        </div>
+        <div class="faq-grid">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-icon">❓</span>
+                    <span>How quickly will I get a response?</span>
+                </div>
+                <div class="faq-answer">
+                    We typically respond to all inquiries within 24 hours during business days.
+                    For urgent matters, please call our support line directly.
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Message</label>
-                <textarea class="form-textarea" id="message" required></textarea>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-icon">🔒</span>
+                    <span>Is my information secure?</span>
+                </div>
+                <div class="faq-answer">
+                    Absolutely. We use industry-standard encryption and never share your personal
+                    information with third parties. Your privacy is our priority.
+                </div>
             </div>
-            <button type="submit" class="submit-btn" id="submitBtn">Send Message</button>
-        </form>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-icon">📞</span>
+                    <span>Can I schedule a call?</span>
+                </div>
+                <div class="faq-answer">
+                    Yes! Mention in your message that you'd like to schedule a call, and we'll
+                    coordinate a convenient time with you.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-icon">💼</span>
+                    <span>Do you offer business partnerships?</span>
+                </div>
+                <div class="faq-answer">
+                    We're always open to exploring partnerships. Please use our business email
+                    or select "Business Partnership" in the subject dropdown.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-icon">🌍</span>
+                    <span>Do you support international users?</span>
+                </div>
+                <div class="faq-answer">
+                    Yes! While our primary support hours are EST, we respond to inquiries from
+                    all time zones and regions.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-icon">🐛</span>
+                    <span>How do I report a bug?</span>
+                </div>
+                <div class="faq-answer">
+                    Select "Report a Bug" in the subject dropdown and provide as much detail as
+                    possible. Screenshots are very helpful!
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -202,44 +771,183 @@
 {% block extra_scripts %}
 const API_BASE = '/api/v1';
 
-function showMessage(type, message) {
-    const successDiv = document.getElementById('successMessage');
-    const errorDiv = document.getElementById('errorMessage');
-    
+// Utility function to escape HTML
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text ? String(text).replace(/[&<>"']/g, m => map[m]) : '';
+}
+
+// Email validation
+function isValidEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+// Phone validation (basic)
+function isValidPhone(phone) {
+    if (!phone) return true; // Optional field
+    const re = /^[\d\s\+\-\(\)]+$/;
+    return re.test(phone) && phone.replace(/\D/g, '').length >= 10;
+}
+
+// Show alert message
+function showAlert(type, message) {
+    const successAlert = document.getElementById('successAlert');
+    const errorAlert = document.getElementById('errorAlert');
+
+    successAlert.classList.remove('active');
+    errorAlert.classList.remove('active');
+
     if (type === 'success') {
-        successDiv.style.display = 'block';
-        errorDiv.style.display = 'none';
+        successAlert.classList.add('active');
+        successAlert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } else {
-        errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
-        successDiv.style.display = 'none';
+        errorAlert.textContent = message;
+        errorAlert.classList.add('active');
+        errorAlert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     setTimeout(() => {
-        successDiv.style.display = 'none';
-        errorDiv.style.display = 'none';
-    }, 5000);
+        successAlert.classList.remove('active');
+        errorAlert.classList.remove('active');
+    }, 6000);
 }
 
+// Show field error
+function showFieldError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    const error = document.getElementById(fieldId + 'Error');
+
+    field.classList.add('error');
+    if (error) {
+        error.textContent = message;
+        error.classList.add('active');
+    }
+}
+
+// Clear field error
+function clearFieldError(fieldId) {
+    const field = document.getElementById(fieldId);
+    const error = document.getElementById(fieldId + 'Error');
+
+    field.classList.remove('error');
+    if (error) {
+        error.classList.remove('active');
+    }
+}
+
+// Clear all errors
+function clearAllErrors() {
+    ['name', 'email', 'phone', 'subject', 'message'].forEach(clearFieldError);
+}
+
+// Validate form
+function validateForm() {
+    clearAllErrors();
+    let isValid = true;
+
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const subject = document.getElementById('subject').value;
+    const message = document.getElementById('message').value.trim();
+
+    if (!name || name.length < 2) {
+        showFieldError('name', 'Please enter your name (at least 2 characters)');
+        isValid = false;
+    }
+
+    if (!email) {
+        showFieldError('email', 'Email is required');
+        isValid = false;
+    } else if (!isValidEmail(email)) {
+        showFieldError('email', 'Please enter a valid email address');
+        isValid = false;
+    }
+
+    if (phone && !isValidPhone(phone)) {
+        showFieldError('phone', 'Please enter a valid phone number');
+        isValid = false;
+    }
+
+    if (!subject) {
+        showFieldError('subject', 'Please select a subject');
+        isValid = false;
+    }
+
+    if (!message || message.length < 10) {
+        showFieldError('message', 'Please enter a message (at least 10 characters)');
+        isValid = false;
+    } else if (message.length > 1000) {
+        showFieldError('message', 'Message is too long (maximum 1000 characters)');
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+// Character counter for message
+const messageField = document.getElementById('message');
+const charCount = document.getElementById('charCount');
+
+messageField.addEventListener('input', function() {
+    const length = this.value.length;
+    charCount.textContent = `${length} / 1000 characters`;
+
+    if (length > 900) {
+        charCount.classList.add('warning');
+    } else {
+        charCount.classList.remove('warning');
+    }
+
+    if (length >= 1000) {
+        charCount.classList.add('error');
+    } else {
+        charCount.classList.remove('error');
+    }
+
+    // Clear error if typing
+    if (length >= 10) {
+        clearFieldError('message');
+    }
+});
+
+// Clear errors on input
+['name', 'email', 'phone', 'subject'].forEach(fieldId => {
+    const field = document.getElementById(fieldId);
+    if (field) {
+        field.addEventListener('input', () => clearFieldError(fieldId));
+        field.addEventListener('change', () => clearFieldError(fieldId));
+    }
+});
+
+// Form submission
 document.getElementById('contactForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
+    if (!validateForm()) {
+        showAlert('error', 'Please correct the errors in the form');
+        return;
+    }
+
     const submitBtn = document.getElementById('submitBtn');
     const originalText = submitBtn.textContent;
     submitBtn.disabled = true;
-    submitBtn.classList.add('loading');
-    submitBtn.textContent = '';
-
-    const contactValue = document.getElementById('contact').value;
+    submitBtn.textContent = 'Sending...';
 
     const contactData = {
-        name: document.getElementById('name').value,
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim() || null,
         subject: document.getElementById('subject').value,
-        message: document.getElementById('message').value,
-        email: contactValue.includes('@') ? contactValue : null,
-        phone: contactValue.includes('@') ? null : contactValue
+        message: document.getElementById('message').value.trim()
     };
-
 
     try {
         const response = await fetch(`${API_BASE}/contact/`, {
@@ -250,21 +958,48 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
             body: JSON.stringify(contactData)
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-            throw new Error(data.message || 'Failed to send message');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || errorData.message || 'Failed to send message. Please try again.');
         }
 
-        showMessage('success');
+        const data = await response.json();
+
+        showAlert('success');
         document.getElementById('contactForm').reset();
+        charCount.textContent = '0 / 1000 characters';
+        charCount.classList.remove('warning', 'error');
+
     } catch (error) {
         console.error('Contact error:', error);
-        showMessage('error', error.message);
+        showAlert('error', error.message || 'An error occurred. Please try again or contact us directly via email.');
     } finally {
         submitBtn.disabled = false;
-        submitBtn.classList.remove('loading');
         submitBtn.textContent = originalText;
     }
+});
+
+// Scroll animations
+document.addEventListener('DOMContentLoaded', () => {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.faq-item, .contact-method').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
 });
 {% endblock %}
