@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Clixs - Modern marketplace for buying, selling, and renting items">
     <title>{% block title %}Clixs{% endblock %}</title>
     <style>
         * {
@@ -16,8 +17,15 @@
             background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
             color: #ffffff;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
+        main {
+            flex: 1;
+        }
+
+        /* Navbar Styles */
         .navbar {
             position: sticky;
             top: 0;
@@ -45,6 +53,7 @@
             background-clip: text;
             cursor: pointer;
             transition: transform 0.3s ease;
+            user-select: none;
         }
 
         .nav-logo:hover {
@@ -86,12 +95,51 @@
             width: 80%;
         }
 
+        .nav-links a.active {
+            color: #00d4ff;
+        }
+
+        .nav-links a.active::after {
+            width: 80%;
+        }
+
         .nav-right {
             display: flex;
             align-items: center;
             gap: 1.5rem;
         }
 
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 0.5rem;
+            z-index: 1001;
+        }
+
+        .mobile-menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: #00d4ff;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(8px, 8px);
+        }
+
+        .mobile-menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        /* Profile Container */
         .profile-container {
             position: relative;
         }
@@ -107,6 +155,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 600;
+            border: 2px solid rgba(52, 152, 219, 0.3);
         }
 
         .profile-icon:hover {
@@ -189,22 +238,184 @@
             box-shadow: 0 6px 25px rgba(52, 152, 219, 0.5);
         }
 
+        /* Footer Styles */
+        .footer {
+            background: rgba(20, 20, 30, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 3rem 2rem 2rem;
+            margin-top: 4rem;
+            border-top: 1px solid rgba(52, 152, 219, 0.2);
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #3498db, #9b59b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-section p {
+            color: #b0b0b0;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: #b0b0b0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: #00d4ff;
+            padding-left: 5px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 50%;
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: rgba(52, 152, 219, 0.3);
+            border-color: #3498db;
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(52, 152, 219, 0.1);
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .footer-bottom a {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+
+        .footer-bottom a:hover {
+            text-decoration: underline;
+        }
+
+        /* Utility Classes */
         .hidden {
             display: none !important;
         }
 
-        @media (max-width: 768px) {
-            .navbar {
-                padding: 1rem;
-            }
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1.2rem 1.8rem;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            z-index: 3000;
+            animation: slideInRight 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            max-width: 400px;
+        }
 
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast.hiding {
+            animation: slideOutRight 0.4s ease forwards;
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
             .nav-links {
+                position: fixed;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: rgba(20, 20, 30, 0.98);
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+                padding: 2rem;
                 gap: 1rem;
-                font-size: 0.9rem;
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+                transform: translateY(-100%);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
             }
 
-            .nav-logo {
-                font-size: 1.5rem;
+            .nav-links.active {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .mobile-menu-toggle {
+                display: flex;
+            }
+
+            .nav-right {
+                gap: 1rem;
             }
 
             .profile-dropdown {
@@ -212,40 +423,147 @@
             }
         }
 
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .nav-logo {
+                font-size: 1.5rem;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+
+            .toast {
+                right: 1rem;
+                left: 1rem;
+                bottom: 1rem;
+            }
+        }
+
         {% block extra_styles %}{% endblock %}
     </style>
 </head>
 <body>
+    <!-- Navigation -->
     <nav class="navbar">
-        <div class="nav-logo" onclick="location.href='{% url 'home' %}'">Clixs</div>
-        <ul class="nav-links">
+        <div class="nav-logo" onclick="location.href='{% url 'home' %}'" role="button" tabindex="0" aria-label="Clixs Home">
+            Clixs
+        </div>
+
+        <div class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <ul class="nav-links" id="navLinks">
             <li><a href="{% url 'home' %}">Home</a></li>
             <li><a href="{% url 'about' %}">About</a></li>
             <li><a href="{% url 'contactus' %}">Contact</a></li>
         </ul>
+
         <div class="nav-right">
             <div class="profile-container hidden" id="profileContainer">
-                <div class="profile-icon" id="profileIcon">
+                <div class="profile-icon" id="profileIcon" role="button" tabindex="0" aria-label="User profile">
                     <span id="userInitial">U</span>
                 </div>
-                <div class="profile-dropdown" id="profileDropdown">
-                    <a href="{% url 'profile' %}" class="dropdown-item">
+                <div class="profile-dropdown" id="profileDropdown" role="menu">
+                    <a href="{% url 'profile' %}" class="dropdown-item" role="menuitem">
                         <span class="dropdown-icon">👤</span>
                         <span>My Profile</span>
                     </a>
-                    <div class="dropdown-item logout-item" onclick="logout()">
+                    <div class="dropdown-item logout-item" onclick="logout()" role="menuitem" tabindex="0">
                         <span class="dropdown-icon">🚪</span>
                         <span>Logout</span>
                     </div>
                 </div>
             </div>
-            <button class="login-btn" id="authBtn" onclick="location.href='{% url 'login' %}'">Login / Signup</button>
+            <button class="login-btn" id="authBtn" onclick="location.href='{% url 'login' %}'">
+                Login / Signup
+            </button>
         </div>
     </nav>
 
-    {% block content %}{% endblock %}
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About Clixs</h3>
+                <p>
+                    Your trusted marketplace for buying, selling, and renting items.
+                    Building a sustainable community through smart commerce.
+                </p>
+                <div class="social-links">
+                    <a href="#" class="social-link" aria-label="Facebook">📘</a>
+                    <a href="#" class="social-link" aria-label="Twitter">🐦</a>
+                    <a href="#" class="social-link" aria-label="Instagram">📷</a>
+                    <a href="#" class="social-link" aria-label="LinkedIn">💼</a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'about' %}">About Us</a></li>
+                    <li><a href="{% url 'contactus' %}">Contact</a></li>
+                    <li><a href="{% url 'profile' %}">My Profile</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">FAQs</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <ul class="footer-links">
+                    <li>📧 support@clixs.com</li>
+                    <li>📞 +1 (234) 567-890</li>
+                    <li>🏢 Mon-Fri, 9AM-6PM EST</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 Clixs. All rights reserved. | Made with ❤️ by <a href="#">Clixs Team</a></p>
+        </div>
+    </footer>
 
     <script>
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
         // Check if user is logged in
         function checkAuth() {
             const token = localStorage.getItem('authToken');
@@ -256,6 +574,8 @@
                 user = userStr ? JSON.parse(userStr) : null;
             } catch (e) {
                 console.error('Error parsing user data:', e);
+                localStorage.removeItem('user');
+                localStorage.removeItem('authToken');
             }
 
             if (token && user && user.first_name) {
@@ -273,9 +593,29 @@
             if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('user');
-                location.href = '{% url "home" %}';
+                showToast('Logged out successfully');
+                setTimeout(() => {
+                    location.href = '{% url "home" %}';
+                }, 1000);
             }
         }
+
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const navLinks = document.getElementById('navLinks');
+
+        mobileMenuToggle?.addEventListener('click', function() {
+            this.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+
+        // Close mobile menu when clicking a link
+        navLinks?.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenuToggle.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
 
         // Toggle dropdown on click for mobile
         document.getElementById('profileIcon')?.addEventListener('click', function(e) {
@@ -296,8 +636,31 @@
             }
         });
 
+        // Highlight active nav link
+        function highlightActiveLink() {
+            const currentPath = window.location.pathname;
+            const links = document.querySelectorAll('.nav-links a');
+
+            links.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Keyboard navigation support
+        document.querySelectorAll('[role="button"]').forEach(el => {
+            el.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+        });
+
         // Initialize on load
         checkAuth();
+        highlightActiveLink();
 
         {% block extra_scripts %}{% endblock %}
     </script>
