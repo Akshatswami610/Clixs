@@ -456,7 +456,8 @@
             </div>
 
             <div class="form-group price-group" id="rentPriceGroup">
-                <label class="form-label">Rental Prices (₹) *</label>
+                <label class="form-label">Rental Prices (₹)</label>
+                <p class="form-label" style="font-size: 0.85rem; color: #b0b0b0; margin-top: -0.5rem;">At least one price required *</p>
                 <div class="rent-prices">
                     <div>
                         <label class="form-label" style="font-size: 0.85rem;">Daily</label>
@@ -501,6 +502,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const API_BASE = "/api/v1";
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%231a1a2e'/%3E%3Cg transform='translate(200, 150)'%3E%3Ccircle cx='0' cy='-20' r='40' fill='%233498db' opacity='0.3'/%3E%3Crect x='-30' y='10' width='60' height='40' rx='5' fill='%233498db' opacity='0.3'/%3E%3Cpolygon points='0,-10 -25,25 25,25' fill='%233498db' opacity='0.5'/%3E%3C/g%3E%3Ctext x='200' y='250' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%23666'%3ENo Image%3C/text%3E%3C/svg%3E";
+
+// Utility function to escape HTML and prevent XSS
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text ? String(text).replace(/[&<>"']/g, m => map[m]) : '';
+}
 
 function formatINR(amount) {
     if (!amount || isNaN(amount)) return "";
@@ -564,15 +577,25 @@ function togglePriceFields() {
         sellPriceGroup.classList.add('active');
         rentPriceGroup.classList.remove('active');
         document.querySelector('[name="sell_price"]').required = true;
+        // Clear rent price requirements
         document.querySelector('[name="rent_daily"]').required = false;
+        document.querySelector('[name="rent_weekly"]').required = false;
+        document.querySelector('[name="rent_monthly"]').required = false;
     } else if (itemType === 'RENT') {
         sellPriceGroup.classList.remove('active');
         rentPriceGroup.classList.add('active');
         document.querySelector('[name="sell_price"]').required = false;
-        document.querySelector('[name="rent_daily"]').required = true;
+        // No HTML5 required for rent prices - validated in JS
+        document.querySelector('[name="rent_daily"]').required = false;
+        document.querySelector('[name="rent_weekly"]').required = false;
+        document.querySelector('[name="rent_monthly"]').required = false;
     } else {
         sellPriceGroup.classList.remove('active');
         rentPriceGroup.classList.remove('active');
+        document.querySelector('[name="sell_price"]').required = false;
+        document.querySelector('[name="rent_daily"]').required = false;
+        document.querySelector('[name="rent_weekly"]').required = false;
+        document.querySelector('[name="rent_monthly"]').required = false;
     }
 }
 
@@ -593,7 +616,7 @@ fileInput.addEventListener('change', function() {
     if (files.length === 0) {
         fileName.textContent = 'No files selected';
     } else if (files.length === 1) {
-        fileName.textContent = files[0].name;
+        fileName.textContent = escapeHtml(files[0].name);
     } else {
         fileName.textContent = `${files.length} files selected`;
     }
@@ -621,16 +644,25 @@ async function fetchItems() {
             if (response.status === 401) {
                 container.innerHTML = '<div class="error">Please login to view items. <a href="/login" style="color: #3498db; text-decoration: underline;">Login here</a></div>';
                 return;
+            } else if (response.status === 403) {
+                container.innerHTML = '<div class="error">Access denied. Please check your permissions.</div>';
+                return;
+            } else if (response.status === 404) {
+                container.innerHTML = '<div class="error">Items endpoint not found. Please contact support.</div>';
+                return;
+            } else if (response.status >= 500) {
+                container.innerHTML = '<div class="error">Server error. Please try again later.</div>';
+                return;
             }
-            throw new Error("Failed to fetch items");
+            throw new Error(`Failed to fetch items: ${response.status}`);
         }
 
         const items = await response.json();
         displayItems(items);
     } catch (error) {
-        console.error(error);
+        console.error('Fetch error:', error);
         container.innerHTML =
-            '<div class="error">Failed to load items. Please try again later.</div>';
+            '<div class="error">Failed to load items. Please check your connection and try again.</div>';
     }
 }
 
@@ -638,7 +670,7 @@ function displayItems(items) {
     const container = document.getElementById("itemsContainer");
     if (!container) return;
 
-    if (!items.length) {
+    if (!items || !items.length) {
         container.innerHTML = '<div class="loading">No items available yet.</div>';
         return;
     }
@@ -667,33 +699,41 @@ function displayItems(items) {
             const weekly = item.rent_prices?.weekly;
             const monthly = item.rent_prices?.monthly;
 
+            const displayPrice = daily || weekly || monthly;
+
             priceHtml = `
                 <div class="item-price">
-                    ${daily ? `${formatINR(daily)}/day` : ""}
+                    ${daily ? `${formatINR(daily)}/day` : weekly ? `${formatINR(weekly)}/week` : monthly ? `${formatINR(monthly)}/month` : "Contact for price"}
                 </div>
-                <div class="price-details">
-                    ${weekly ? `Weekly: ${formatINR(weekly)}` : ""}
-                    ${monthly ? ` | Monthly: ${formatINR(monthly)}` : ""}
-                </div>
+                ${(daily && (weekly || monthly)) || (weekly && monthly) ? `<div class="price-details">
+                    ${weekly && !daily ? `Weekly: ${formatINR(weekly)}` : ""}
+                    ${monthly ? `${weekly && !daily ? " | " : ""}Monthly: ${formatINR(monthly)}` : ""}
+                </div>` : ""}
             `;
         }
 
+        // Escape user-generated content
+        const safeTitle = escapeHtml(item.title);
+        const safeCategory = escapeHtml(item.category);
+        const safeItemType = escapeHtml(item.item_type);
+        const safeStatus = escapeHtml(item.status);
+
         return `
-            <div class="item-card" data-item-id="${item.id}">
-                <img src="${imageUrl}"
+            <div class="item-card" data-item-id="${escapeHtml(item.id)}">
+                <img src="${escapeHtml(imageUrl)}"
                      class="item-image"
-                     alt="${item.title}"
+                     alt="${safeTitle}"
                      loading="lazy"
                      onerror="this.src='${PLACEHOLDER}'">
                 <div class="item-content">
                     <div class="item-header">
                         <div>
-                            <div class="item-title">${item.title}</div>
-                            <div class="item-category">${item.category}</div>
+                            <div class="item-title">${safeTitle}</div>
+                            <div class="item-category">${safeCategory}</div>
                         </div>
                         <div class="badges">
-                            <span class="badge ${typeClass}">${item.item_type}</span>
-                            <span class="badge ${statusClass}">${item.status}</span>
+                            <span class="badge ${typeClass}">${safeItemType}</span>
+                            <span class="badge ${statusClass}">${safeStatus}</span>
                         </div>
                     </div>
                     ${priceHtml}
@@ -711,7 +751,7 @@ if (itemsContainer) {
         if (card) {
             const itemId = card.dataset.itemId;
             if (itemId) {
-                window.location.href = `/item-detail?id=${itemId}`;
+                window.location.href = `/item-detail?id=${encodeURIComponent(itemId)}`;
             }
         }
     });
@@ -737,38 +777,53 @@ if (form) {
         const formData = new FormData(form);
         const itemType = formData.get('item_type');
 
-        if (itemType === 'SELL' && !formData.get('sell_price')) {
-            showAlert('Selling price is required', 'error');
-            return;
-        }
-
-        if (itemType === 'RENT') {
+        // Validate based on item type
+        if (itemType === 'SELL') {
+            const sellPrice = formData.get('sell_price');
+            if (!sellPrice || parseFloat(sellPrice) <= 0) {
+                showAlert('Please enter a valid selling price', 'error');
+                return;
+            }
+        } else if (itemType === 'RENT') {
             const daily = formData.get('rent_daily');
             const weekly = formData.get('rent_weekly');
             const monthly = formData.get('rent_monthly');
 
             if (!daily && !weekly && !monthly) {
-                showAlert('At least one rental price is required', 'error');
+                showAlert('Please enter at least one rental price', 'error');
                 return;
             }
 
             const rentPrices = {};
-            if (daily) rentPrices.daily = parseFloat(daily);
-            if (weekly) rentPrices.weekly = parseFloat(weekly);
-            if (monthly) rentPrices.monthly = parseFloat(monthly);
+            if (daily && parseFloat(daily) > 0) rentPrices.daily = parseFloat(daily);
+            if (weekly && parseFloat(weekly) > 0) rentPrices.weekly = parseFloat(weekly);
+            if (monthly && parseFloat(monthly) > 0) rentPrices.monthly = parseFloat(monthly);
+
+            if (Object.keys(rentPrices).length === 0) {
+                showAlert('Please enter at least one valid rental price greater than 0', 'error');
+                return;
+            }
 
             formData.set('rent_prices', JSON.stringify(rentPrices));
             formData.delete('rent_daily');
             formData.delete('rent_weekly');
             formData.delete('rent_monthly');
+        } else {
+            showAlert('Please select an item type', 'error');
+            return;
+        }
+
+        // Validate file count
+        const files = fileInput.files;
+        if (files.length > 5) {
+            showAlert('Maximum 5 images allowed', 'error');
+            return;
         }
 
         submitBtn.disabled = true;
         submitBtn.textContent = 'Adding Item...';
 
         try {
-            console.log('Submitting item with token:', token ? 'Token exists' : 'No token');
-
             const response = await fetch(`${API_BASE}/items/`, {
                 method: 'POST',
                 headers: {
@@ -776,8 +831,6 @@ if (form) {
                 },
                 body: formData
             });
-
-            console.log('Response status:', response.status);
 
             if (response.ok) {
                 showAlert('Item added successfully!', 'success');
@@ -799,13 +852,21 @@ if (form) {
                         localStorage.removeItem('authToken');
                         window.location.href = '/login';
                     }, 2000);
+                } else if (response.status === 403) {
+                    showAlert('You do not have permission to add items.', 'error');
+                } else if (response.status === 400) {
+                    showAlert(errorData.detail || errorData.message || 'Invalid data. Please check your input.', 'error');
+                } else if (response.status === 413) {
+                    showAlert('Files are too large. Please upload smaller images.', 'error');
+                } else if (response.status >= 500) {
+                    showAlert('Server error. Please try again later.', 'error');
                 } else {
                     showAlert(errorData.detail || errorData.message || 'Failed to add item. Please try again.', 'error');
                 }
             }
         } catch (error) {
             console.error('Submission error:', error);
-            showAlert('An error occurred. Please check your connection and try again.', 'error');
+            showAlert('Network error. Please check your connection and try again.', 'error');
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Add Item';
@@ -813,6 +874,7 @@ if (form) {
     });
 }
 
+// Initial load
 fetchItems();
 
 });
