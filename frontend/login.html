@@ -3,50 +3,213 @@
 {% block title %}Clixs - Login{% endblock %}
 
 {% block extra_styles %}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
 }
 
 .auth-container {
     flex: 1;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
     min-height: calc(100vh - 80px);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Left side - Animation */
+.auth-left {
+    flex: 1;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.animation-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 3rem;
+    max-width: 500px;
+}
+
+.brand-logo {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 2rem;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    animation: float 3s ease-in-out infinite;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+.brand-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 1rem;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.brand-subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Floating particles animation */
+.particle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: rise 15s infinite ease-in;
+}
+
+.particle:nth-child(1) {
+    width: 80px;
+    height: 80px;
+    left: 10%;
+    animation-delay: 0s;
+    animation-duration: 12s;
+}
+
+.particle:nth-child(2) {
+    width: 50px;
+    height: 50px;
+    left: 30%;
+    animation-delay: 2s;
+    animation-duration: 15s;
+}
+
+.particle:nth-child(3) {
+    width: 100px;
+    height: 100px;
+    left: 60%;
+    animation-delay: 4s;
+    animation-duration: 18s;
+}
+
+.particle:nth-child(4) {
+    width: 60px;
+    height: 60px;
+    left: 80%;
+    animation-delay: 6s;
+    animation-duration: 14s;
+}
+
+@keyframes rise {
+    0% {
+        bottom: -150px;
+        opacity: 0;
+        transform: translateX(0) rotate(0deg);
+    }
+    50% {
+        opacity: 0.5;
+        transform: translateX(100px) rotate(180deg);
+    }
+    100% {
+        bottom: 110%;
+        opacity: 0;
+        transform: translateX(-100px) rotate(360deg);
+    }
+}
+
+/* Right side - Form */
+.auth-right {
+    flex: 1;
+    background: #1a1a2e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+}
+
+.auth-right::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(102, 126, 234, 0.1), transparent 50%);
+    pointer-events: none;
 }
 
 .auth-box {
-    background: rgba(30, 30, 45, 0.9);
+    background: rgba(30, 30, 45, 0.8);
+    backdrop-filter: blur(10px);
     padding: 3rem;
     border-radius: 25px;
     width: 100%;
     max-width: 450px;
-    box-shadow: 0 15px 60px rgba(0, 0, 0, 0.7);
-    animation: slideUp 0.6s ease;
+    box-shadow: 0 15px 60px rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    animation: slideIn 0.6s ease;
+    position: relative;
+    z-index: 1;
 }
 
-@keyframes slideUp {
+@keyframes slideIn {
     from {
         opacity: 0;
-        transform: translateY(50px);
+        transform: translateX(50px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
     }
+}
+
+.auth-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border: 3px solid rgba(102, 126, 234, 0.3);
 }
 
 .auth-title {
     font-size: 2rem;
     font-weight: 700;
     text-align: center;
-    margin-bottom: 2rem;
-    background: linear-gradient(135deg, #3498db, #9b59b6);
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: #b0b0b0;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
 }
 
 .form-group {
@@ -58,28 +221,40 @@ body {
     margin-bottom: 0.5rem;
     color: #e0e0e0;
     font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.required {
+    color: #e74c3c;
+    margin-left: 0.2rem;
 }
 
 .form-input {
     width: 100%;
     padding: 1rem;
     background: rgba(20, 20, 30, 0.8);
-    border: 2px solid rgba(52, 152, 219, 0.3);
+    border: 2px solid rgba(102, 126, 234, 0.3);
     border-radius: 12px;
     color: #ffffff;
     font-size: 1rem;
     transition: all 0.3s ease;
-    box-sizing: border-box;
 }
 
 .form-input:focus {
     outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
+    border-color: #667eea;
+    box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
 }
 
 .form-input.error {
     border-color: #e74c3c;
+    animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
 }
 
 .field-error {
@@ -91,6 +266,12 @@ body {
 
 .field-error.show {
     display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .password-toggle {
@@ -106,19 +287,37 @@ body {
     border: none;
     color: #b0b0b0;
     cursor: pointer;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     padding: 0.5rem;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
+    border-radius: 8px;
 }
 
 .toggle-password:hover {
-    color: #3498db;
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.forgot-password {
+    text-align: right;
+    margin-top: 0.5rem;
+}
+
+.forgot-password a {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.forgot-password a:hover {
+    color: #764ba2;
 }
 
 .submit-btn {
     width: 100%;
     padding: 1rem;
-    background: linear-gradient(135deg, #3498db, #9b59b6);
+    background: linear-gradient(135deg, #667eea, #764ba2);
     border: none;
     border-radius: 12px;
     color: white;
@@ -126,18 +325,38 @@ body {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
     margin-top: 1rem;
+    position: relative;
+    overflow: hidden;
 }
 
 .submit-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
+    box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
 }
 
 .submit-btn:disabled {
-    opacity: 0.6;
+    opacity: 0.7;
     cursor: not-allowed;
+}
+
+.submit-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 .auth-link {
@@ -147,116 +366,230 @@ body {
 }
 
 .auth-link a {
-    color: #3498db;
+    color: #667eea;
     text-decoration: none;
     font-weight: 600;
     transition: color 0.3s ease;
 }
 
 .auth-link a:hover {
-    color: #00d4ff;
+    color: #764ba2;
 }
 
 .message {
     padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
     text-align: center;
-    animation: fadeIn 0.3s ease;
+    animation: slideDown 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .error-message {
     background: rgba(231, 76, 60, 0.2);
-    border: 1px solid #e74c3c;
+    border: 2px solid #e74c3c;
     color: #e74c3c;
 }
 
 .success-message {
     background: rgba(46, 204, 113, 0.2);
-    border: 1px solid #2ecc71;
+    border: 2px solid #2ecc71;
     color: #2ecc71;
 }
 
-.forgot-password {
-    text-align: right;
-    margin-top: 0.5rem;
-}
-
-.forgot-password a {
-    color: #3498db;
-    text-decoration: none;
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+    color: #b0b0b0;
     font-size: 0.9rem;
-    transition: color 0.3s ease;
 }
 
-.forgot-password a:hover {
-    color: #00d4ff;
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.divider::before {
+    margin-right: 1rem;
+}
+
+.divider::after {
+    margin-left: 1rem;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #b0b0b0;
+    font-size: 1.2rem;
+    pointer-events: none;
+}
+
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon .form-input {
+    padding-left: 3rem;
+}
+
+/* Responsive Design */
+@media (max-width: 968px) {
+    .auth-container {
+        flex-direction: column;
+    }
+
+    .auth-left {
+        min-height: 40vh;
+    }
+
+    .brand-title {
+        font-size: 2rem;
+    }
+
+    .brand-subtitle {
+        font-size: 1rem;
+    }
+
+    .brand-logo {
+        width: 80px;
+        height: 80px;
+        font-size: 3rem;
+    }
+
+    .auth-right {
+        min-height: 60vh;
+    }
 }
 
 @media (max-width: 768px) {
     .auth-box {
-        padding: 2rem;
+        padding: 2rem 1.5rem;
     }
 
     .auth-title {
-        font-size: 1.5rem;
+        font-size: 1.6rem;
+    }
+
+    .auth-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.8rem;
+    }
+
+    .animation-content {
+        padding: 2rem;
     }
 }
 {% endblock %}
 
 {% block content %}
 <div class="auth-container">
-    <div class="auth-box">
-        <h1 class="auth-title">Welcome Back</h1>
+    <!-- Left Side - Animations -->
+    <div class="auth-left">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
 
-        <div id="messageContainer"></div>
+        <div class="animation-content">
+            <div class="brand-logo">🔐</div>
+            <h1 class="brand-title">Clixs</h1>
+            <p class="brand-subtitle">
+                Your gateway to seamless digital experiences.
+                Join thousands of users who trust us every day.
+            </p>
+        </div>
+    </div>
 
-        <form id="loginForm" novalidate>
-            <div class="form-group">
-                <label class="form-label" for="phone">Phone Number</label>
-                <input
-                    type="tel"
-                    class="form-input"
-                    id="phone"
-                    name="phone"
-                    required
-                    placeholder="+1234567890"
-                    autocomplete="tel"
-                >
-                <div class="field-error" id="phoneError"></div>
-            </div>
+    <!-- Right Side - Form -->
+    <div class="auth-right">
+        <div class="auth-box">
+            <div class="auth-icon">👋</div>
+            <h1 class="auth-title">Welcome Back</h1>
+            <p class="auth-subtitle">Login to access your account</p>
 
-            <div class="form-group">
-                <label class="form-label" for="password">Password</label>
-                <div class="password-toggle">
-                    <input
-                        type="password"
-                        class="form-input"
-                        id="password"
-                        name="password"
-                        required
-                        autocomplete="current-password"
-                    >
-                    <button type="button" class="toggle-password" id="togglePassword" aria-label="Toggle password visibility">
-                        👁️
-                    </button>
+            <div id="messageContainer"></div>
+
+            <form id="loginForm" novalidate>
+                <div class="form-group">
+                    <label class="form-label" for="phone">
+                        Phone Number <span class="required">*</span>
+                    </label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">📱</span>
+                        <input
+                            type="tel"
+                            class="form-input"
+                            id="phone"
+                            name="phone"
+                            required
+                            placeholder="+1234567890"
+                            autocomplete="tel"
+                        >
+                    </div>
+                    <div class="field-error" id="phoneError"></div>
                 </div>
-                <div class="field-error" id="passwordError"></div>
 
+                <div class="form-group">
+                    <label class="form-label" for="password">
+                        Password <span class="required">*</span>
+                    </label>
+                    <div class="password-toggle">
+                        <input
+                            type="password"
+                            class="form-input"
+                            id="password"
+                            name="password"
+                            required
+                            autocomplete="current-password"
+                            placeholder="Enter your password"
+                        >
+                        <button
+                            type="button"
+                            class="toggle-password"
+                            id="togglePassword"
+                            aria-label="Toggle password visibility"
+                            title="Show password">
+                            👁️
+                        </button>
+                    </div>
+                    <div class="field-error" id="passwordError"></div>
+                    <div class="forgot-password">
+                        <a href="#" onclick="showForgotPassword(event)">Forgot Password?</a>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Login
+                </button>
+            </form>
+
+            <div class="divider">OR</div>
+
+            <div class="auth-link">
+                Don't have an account? <a href="{% url 'signup' %}">Sign Up</a>
             </div>
-
-            <button type="submit" class="submit-btn" id="submitBtn">
-                Login
-            </button>
-        </form>
-
-        <div class="auth-link">
-            Don't have an account? <a href="{% url 'signup' %}">Sign Up</a>
         </div>
     </div>
 </div>
@@ -267,12 +600,26 @@ const API_BASE = '/api/v1';
 const TOKEN_KEY = 'authToken';
 const USER_KEY = 'user';
 
-// Utility Functions
+// Utility function to escape HTML
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text ? String(text).replace(/[&<>"']/g, m => map[m]) : '';
+}
+
+// Show message function
 const showMessage = (message, type = 'error') => {
     const container = document.getElementById('messageContainer');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}-message`;
-    messageDiv.textContent = message;
+
+    const icon = type === 'success' ? '✅' : '❌';
+    messageDiv.innerHTML = `<span>${icon}</span><span>${escapeHtml(message)}</span>`;
     messageDiv.setAttribute('role', 'alert');
 
     container.innerHTML = '';
@@ -307,9 +654,9 @@ const clearAllErrors = () => {
 };
 
 const validatePhone = (phone) => {
-    // Basic phone validation - adjust regex based on your requirements
-    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-    return phoneRegex.test(phone.replace(/[\s-]/g, ''));
+    const cleaned = phone.replace(/[\s-]/g, '');
+    const phoneRegex = /^\+?[1-9]\d{9,14}$/;
+    return phoneRegex.test(cleaned);
 };
 
 const setAuthToken = (token) => {
@@ -342,28 +689,26 @@ const fetchWithAuth = async (url, token, options = {}) => {
     return fetch(url, { ...options, headers });
 };
 
-// Password Toggle
-document.getElementById('togglePassword').addEventListener('click', () => {
-    const passwordInput = document.getElementById('password');
-    const toggleBtn = document.getElementById('togglePassword');
+function showForgotPassword(event) {
+    event.preventDefault();
+    showMessage('Password reset functionality coming soon! Please contact support.', 'error');
+}
 
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        toggleBtn.textContent = '🙈';
-    } else {
-        passwordInput.type = 'password';
-        toggleBtn.textContent = '👁️';
-    }
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const isPassword = passwordInput.type === 'password';
+
+    passwordInput.type = isPassword ? 'text' : 'password';
+    this.textContent = isPassword ? '🙈' : '👁️';
+    this.title = isPassword ? 'Hide password' : 'Show password';
 });
 
-// Clear errors on input
 ['phone', 'password'].forEach(fieldId => {
     document.getElementById(fieldId).addEventListener('input', () => {
         clearFieldError(fieldId);
     });
 });
 
-// Form Submission
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     clearAllErrors();
@@ -371,35 +716,38 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const submitBtn = document.getElementById('submitBtn');
     const originalText = submitBtn.textContent;
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Logging in...';
+    submitBtn.classList.add('loading');
+    submitBtn.textContent = '';
 
     const phone = document.getElementById('phone').value.trim();
     const password = document.getElementById('password').value;
 
-    // Client-side validation - only check if fields are empty
     let isValid = true;
 
     if (!phone) {
         showFieldError('phone', 'Phone number is required');
         isValid = false;
     } else if (!validatePhone(phone)) {
-        showFieldError('phone', 'Please enter a valid phone number');
+        showFieldError('phone', 'Please enter a valid phone number (10-15 digits)');
         isValid = false;
     }
 
     if (!password) {
         showFieldError('password', 'Password is required');
         isValid = false;
+    } else if (password.length < 6) {
+        showFieldError('password', 'Password must be at least 6 characters');
+        isValid = false;
     }
 
     if (!isValid) {
         submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
         submitBtn.textContent = originalText;
         return;
     }
 
     try {
-        // Attempt login
         const response = await fetch(`${API_BASE}/auth/login/`, {
             method: 'POST',
             headers: {
@@ -414,13 +762,11 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const data = await response.json();
 
         if (!response.ok) {
-            // Handle specific error cases
             if (response.status === 401) {
                 throw new Error('Invalid phone number or password');
             } else if (response.status === 429) {
                 throw new Error('Too many login attempts. Please try again later');
             } else if (response.status === 400) {
-                // Handle field-specific errors from backend
                 if (data.phone_number) {
                     showFieldError('phone', Array.isArray(data.phone_number) ? data.phone_number[0] : data.phone_number);
                 }
@@ -428,12 +774,13 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
                     showFieldError('password', Array.isArray(data.password) ? data.password[0] : data.password);
                 }
                 throw new Error(data.detail || data.message || data.error || 'Please check your input');
+            } else if (response.status >= 500) {
+                throw new Error('Server error. Please try again later');
             } else {
                 throw new Error(data.detail || data.message || data.error || 'Login failed');
             }
         }
 
-        // Extract JWT access token - SimpleJWT returns 'access' and 'refresh'
         const token = data.access;
 
         if (!token) {
@@ -442,12 +789,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
         console.log('JWT token received');
 
-        // Store token
         if (!setAuthToken(token)) {
             throw new Error('Failed to save authentication. Please check your browser settings');
         }
 
-        // Now fetch user profile with the JWT token
         let userData = null;
 
         try {
@@ -456,7 +801,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
             if (profileResponse.ok) {
                 userData = await profileResponse.json();
-                console.log('User data fetched:', userData);
+                console.log('User data fetched successfully');
                 setUserData(userData);
             } else {
                 const errorText = await profileResponse.text();
@@ -468,15 +813,12 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             throw new Error('Login successful but could not load profile. Please refresh the page.');
         }
 
-        // Show success message
         showMessage('Login successful! Redirecting...', 'success');
 
-        // Manually trigger navbar update if checkAuth function exists
         if (typeof checkAuth === 'function') {
             checkAuth();
         }
 
-        // Redirect after short delay
         setTimeout(() => {
             window.location.href = '{% url "home" %}';
         }, 1000);
@@ -484,34 +826,39 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     } catch (error) {
         console.error('Login error:', error);
         showMessage(error.message);
+    } finally {
         submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
         submitBtn.textContent = originalText;
     }
 });
 
-// Check if already logged in
 window.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem(TOKEN_KEY);
     const user = localStorage.getItem(USER_KEY);
 
-    // Only redirect if we have both token AND user data
     if (token && user) {
         try {
             const userData = JSON.parse(user);
-            // Verify user data has required fields
             if (userData && (userData.first_name || userData.name || userData.phone_number)) {
                 window.location.href = '{% url "home" %}';
                 return;
             }
         } catch (e) {
             console.error('Invalid user data in localStorage:', e);
+            localStorage.removeItem(TOKEN_KEY);
+            localStorage.removeItem(USER_KEY);
         }
-    }
-
-    // If we only have token but no user data, clear everything
-    if (token && !user) {
+    } else if (token && !user) {
         console.log('Token exists but no user data, clearing...');
         localStorage.removeItem(TOKEN_KEY);
+    }
+});
+
+document.getElementById('togglePassword').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.click();
     }
 });
 {% endblock %}
