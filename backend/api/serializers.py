@@ -38,6 +38,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         validators=[validate_password],
         style={"input_type": "password"},
     )
+    confirm_password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
@@ -45,17 +46,26 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "phone_number",
             "first_name",
             "last_name",
+            "registration_number",  # ✅ REQUIRED
             "password",
+            "confirm_password",
         )
+
+    def validate(self, data):
+        if data["password"] != data["confirm_password"]:
+            raise serializers.ValidationError("Passwords do not match")
+        return data
 
     def create(self, validated_data):
-        password = validated_data.pop("password")
-        user = User.objects.create_user(
-            password=password,
-            **validated_data
-        )
-        return user
+        validated_data.pop("confirm_password")
 
+        return User.objects.create_user(
+            phone_number=validated_data["phone_number"],
+            password=validated_data["password"],
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"],
+            registration_number=validated_data.get("registration_number"),
+        )
 
 # =========================
 # Item Image Serializer
