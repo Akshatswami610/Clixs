@@ -27,7 +27,7 @@ body {
 /* Left side - Animation */
 .auth-left {
     flex: 1;
-    background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 50%, #1a2942 100%);
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f1729 100%);
     position: relative;
     display: flex;
     align-items: center;
@@ -50,6 +50,10 @@ body {
     margin-bottom: 1.5rem;
     text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     line-height: 1.2;
+    background: linear-gradient(135deg, #3498db, #00d4ff, #9b59b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .brand-subtitle {
@@ -94,7 +98,7 @@ body {
 .feature-icon {
     width: 28px;
     height: 28px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(52, 152, 219, 0.2);
     backdrop-filter: blur(10px);
     border-radius: 50%;
     display: flex;
@@ -102,13 +106,13 @@ body {
     justify-content: center;
     font-size: 0.9rem;
     flex-shrink: 0;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(52, 152, 219, 0.3);
 }
 
 /* Floating particles animation */
 .particle {
     position: absolute;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(52, 152, 219, 0.15);
     border-radius: 50%;
     animation: rise 15s infinite ease-in;
 }
@@ -197,7 +201,7 @@ body {
 /* Right side - Form */
 .auth-right {
     flex: 1;
-    background: #1a2332;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -213,7 +217,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 80% 20%, rgba(79, 70, 229, 0.05), transparent 50%);
+    background: radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.1), transparent 50%);
     pointer-events: none;
 }
 
@@ -243,12 +247,15 @@ body {
     font-weight: 700;
     text-align: left;
     margin-bottom: 0.5rem;
-    color: white;
+    background: linear-gradient(135deg, #3498db, #00d4ff, #9b59b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .auth-subtitle {
     text-align: left;
-    color: #94a3b8;
+    color: #b0b0b0;
     margin-bottom: 2.5rem;
     font-size: 0.95rem;
 }
@@ -266,7 +273,7 @@ body {
 .form-label {
     display: block;
     margin-bottom: 0.75rem;
-    color: #e2e8f0;
+    color: #e0e0e0;
     font-weight: 500;
     font-size: 0.95rem;
 }
@@ -274,10 +281,10 @@ body {
 .form-input {
     width: 100%;
     padding: 1rem;
-    background: rgba(30, 41, 59, 0.8);
-    border: 1px solid rgba(71, 85, 105, 0.5);
-    border-radius: 10px;
-    color: #cbd5e1;
+    background: rgba(20, 20, 30, 0.8);
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 12px;
+    color: #ffffff;
     font-size: 1rem;
     transition: all 0.3s ease;
 }
@@ -288,9 +295,9 @@ body {
 
 .form-input:focus {
     outline: none;
-    border-color: #4f46e5;
-    background: rgba(30, 41, 59, 1);
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    border-color: #3498db;
+    background: rgba(20, 20, 30, 1);
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
 }
 
 .form-input.error {
@@ -305,7 +312,7 @@ body {
 }
 
 .field-error {
-    color: #ef4444;
+    color: #e74c3c;
     font-size: 0.875rem;
     margin-top: 0.5rem;
     display: block;
@@ -314,9 +321,9 @@ body {
 .submit-btn {
     width: 100%;
     padding: 1rem;
-    background: #4f46e5;
+    background: linear-gradient(135deg, #3498db, #9b59b6);
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     color: white;
     font-size: 1rem;
     font-weight: 600;
@@ -327,10 +334,13 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
 }
 
 .submit-btn:hover:not(:disabled) {
-    background: #4338ca;
+    background: linear-gradient(135deg, #2980b9, #8e44ad);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
 }
 
 .submit-btn:disabled {
@@ -342,27 +352,27 @@ body {
     text-align: center;
     margin-top: 2rem;
     padding-top: 2rem;
-    border-top: 1px solid rgba(71, 85, 105, 0.3);
-    color: #94a3b8;
+    border-top: 1px solid rgba(52, 152, 219, 0.2);
+    color: #b0b0b0;
 }
 
 .auth-link a {
-    color: #6366f1;
+    color: #3498db;
     text-decoration: none;
     font-weight: 600;
     transition: color 0.3s ease;
 }
 
 .auth-link a:hover {
-    color: #818cf8;
+    color: #00d4ff;
 }
 
 .error-message {
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #ef4444;
+    background: rgba(231, 76, 60, 0.2);
+    border: 2px solid #e74c3c;
+    color: #e74c3c;
     padding: 1rem;
-    border-radius: 10px;
+    border-radius: 12px;
     margin-bottom: 1.5rem;
     text-align: center;
     animation: slideDown 0.3s ease;
@@ -598,4 +608,110 @@ body {
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+// Password toggle functionality
+function setupPasswordToggle(toggleId, inputId) {
+    const toggleBtn = document.getElementById(toggleId);
+    const input = document.getElementById(inputId);
+
+    if (toggleBtn && input) {
+        // Create toggle button
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'toggle-password';
+        button.textContent = '👁️';
+        button.setAttribute('aria-label', 'Toggle password visibility');
+        button.style.cssText = `
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #b0b0b0;
+            cursor: pointer;
+            font-size: 1.3rem;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        `;
+
+        // Make input parent position relative
+        input.parentElement.style.position = 'relative';
+        input.parentElement.appendChild(button);
+
+        button.addEventListener('click', function() {
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            this.textContent = isPassword ? '🙈' : '👁️';
+        });
+
+        button.addEventListener('mouseenter', function() {
+            this.style.color = '#3498db';
+            this.style.background = 'rgba(52, 152, 219, 0.1)';
+        });
+
+        button.addEventListener('mouseleave', function() {
+            this.style.color = '#b0b0b0';
+            this.style.background = 'none';
+        });
+    }
+}
+
+// Initialize password toggles
+document.addEventListener('DOMContentLoaded', function() {
+    // Add password toggles
+    const passwordInput = document.getElementById('id_password');
+    const confirmPasswordInput = document.getElementById('id_confirm_password');
+
+    if (passwordInput && passwordInput.parentElement) {
+        setupPasswordToggle(null, 'id_password');
+    }
+
+    if (confirmPasswordInput && confirmPasswordInput.parentElement) {
+        setupPasswordToggle(null, 'id_confirm_password');
+    }
+
+    // Form submission enhancement
+    const form = document.querySelector('form');
+    const submitBtn = document.querySelector('.submit-btn');
+
+    if (form && submitBtn) {
+        form.addEventListener('submit', function() {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
+            submitBtn.innerHTML = '<span>Creating account...</span>';
+        });
+    }
+
+    // Client-side validation
+    if (passwordInput && confirmPasswordInput) {
+        form.addEventListener('submit', function(e) {
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.innerHTML = '<span>→</span><span>Create Account</span>';
+            }
+        });
+    }
+});
+
+// Show Django messages as styled alerts
+{% if messages %}
+    window.addEventListener('DOMContentLoaded', function() {
+        {% for message in messages %}
+            const messageDiv = document.querySelector('.error-message');
+            if (messageDiv) {
+                messageDiv.style.animation = 'slideDown 0.3s ease';
+            }
+        {% endfor %}
+    });
+{% endif %}
 {% endblock %}
