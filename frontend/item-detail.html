@@ -504,31 +504,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `;
         } else {
+            const hourly = item.rent_prices?.hourly;
             const daily = item.rent_prices?.daily;
             const weekly = item.rent_prices?.weekly;
-            const monthly = item.rent_prices?.monthly;
 
             priceHtml = `
                 <div class="price-section">
                     <div class="price-label">Rental Prices</div>
-                    ${daily ? `<div class="main-price">${formatINR(daily)}<span style="font-size: 1.2rem; color: #b0b0b0;">/day</span></div>` : ''}
+                    ${hourly ? `<div class="main-price">${formatINR(hourly)}<span style="font-size: 1.2rem; color: #b0b0b0;">/day</span></div>` : ''}
                     <div class="rent-prices-grid">
+                        ${hourly ? `
+                            <div class="rent-price-item">
+                                <div class="rent-price-period">hourly</div>
+                                <div class="rent-price-amount">${formatINR(hourly)}</div>
+                            </div>
+                        ` : ''}
                         ${daily ? `
                             <div class="rent-price-item">
-                                <div class="rent-price-period">Daily</div>
+                                <div class="rent-price-period">daily</div>
                                 <div class="rent-price-amount">${formatINR(daily)}</div>
                             </div>
                         ` : ''}
                         ${weekly ? `
                             <div class="rent-price-item">
-                                <div class="rent-price-period">Weekly</div>
+                                <div class="rent-price-period">weekly</div>
                                 <div class="rent-price-amount">${formatINR(weekly)}</div>
-                            </div>
-                        ` : ''}
-                        ${monthly ? `
-                            <div class="rent-price-item">
-                                <div class="rent-price-period">Monthly</div>
-                                <div class="rent-price-amount">${formatINR(monthly)}</div>
                             </div>
                         ` : ''}
                     </div>

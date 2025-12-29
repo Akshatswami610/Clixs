@@ -460,16 +460,16 @@
                 <p class="form-label" style="font-size: 0.85rem; color: #b0b0b0; margin-top: -0.5rem;">At least one price required *</p>
                 <div class="rent-prices">
                     <div>
-                        <label class="form-label" style="font-size: 0.85rem;">Daily</label>
+                        <label class="form-label" style="font-size: 0.85rem;">Hourly</label>
+                        <input type="number" class="form-input" name="rent_hourly" min="0" step="0.01">
+                    </div>
+                    <div>
+                        <label class="form-label" style="font-size: 0.85rem;">hourly</label>
                         <input type="number" class="form-input" name="rent_daily" min="0" step="0.01">
                     </div>
                     <div>
-                        <label class="form-label" style="font-size: 0.85rem;">Weekly</label>
+                        <label class="form-label" style="font-size: 0.85rem;">daily</label>
                         <input type="number" class="form-input" name="rent_weekly" min="0" step="0.01">
-                    </div>
-                    <div>
-                        <label class="form-label" style="font-size: 0.85rem;">Monthly</label>
-                        <input type="number" class="form-input" name="rent_monthly" min="0" step="0.01">
                     </div>
                 </div>
             </div>
@@ -623,24 +623,24 @@ function togglePriceFields() {
         rentPriceGroup.classList.remove('active');
         document.querySelector('[name="sell_price"]').required = true;
         // Clear rent price requirements
+        document.querySelector('[name="rent_hourly"]').required = false;
         document.querySelector('[name="rent_daily"]').required = false;
         document.querySelector('[name="rent_weekly"]').required = false;
-        document.querySelector('[name="rent_monthly"]').required = false;
     } else if (itemType === 'RENT') {
         sellPriceGroup.classList.remove('active');
         rentPriceGroup.classList.add('active');
         document.querySelector('[name="sell_price"]').required = false;
         // No HTML5 required for rent prices - validated in JS
+        document.querySelector('[name="rent_hourly"]').required = false;
         document.querySelector('[name="rent_daily"]').required = false;
         document.querySelector('[name="rent_weekly"]').required = false;
-        document.querySelector('[name="rent_monthly"]').required = false;
     } else {
         sellPriceGroup.classList.remove('active');
         rentPriceGroup.classList.remove('active');
         document.querySelector('[name="sell_price"]').required = false;
+        document.querySelector('[name="rent_hourly"]').required = false;
         document.querySelector('[name="rent_daily"]').required = false;
         document.querySelector('[name="rent_weekly"]').required = false;
-        document.querySelector('[name="rent_monthly"]').required = false;
     }
 }
 
@@ -763,19 +763,19 @@ function displayItems(items) {
         if (item.item_type === "SELL") {
             priceHtml = `<div class="item-price">${formatINR(item.sell_price)}</div>`;
         } else {
+            const hourly = item.rent_prices?.hourly;
             const daily = item.rent_prices?.daily;
             const weekly = item.rent_prices?.weekly;
-            const monthly = item.rent_prices?.monthly;
 
-            const displayPrice = daily || weekly || monthly;
+            const displayPrice = hourly || daily || weekly;
 
             priceHtml = `
                 <div class="item-price">
-                    ${daily ? `${formatINR(daily)}/day` : weekly ? `${formatINR(weekly)}/week` : monthly ? `${formatINR(monthly)}/month` : "Contact for price"}
+                    ${hourly ? `${formatINR(hourly)}/day` : daily ? `${formatINR(daily)}/week` : weekly ? `${formatINR(weekly)}/month` : "Contact for price"}
                 </div>
-                ${(daily && (weekly || monthly)) || (weekly && monthly) ? `<div class="price-details">
-                    ${weekly && !daily ? `Weekly: ${formatINR(weekly)}` : ""}
-                    ${monthly ? `${weekly && !daily ? " | " : ""}Monthly: ${formatINR(monthly)}` : ""}
+                ${(hourly && (daily || weekly)) || (daily && weekly) ? `<div class="price-details">
+                    ${daily && !hourly ? `daily: ${formatINR(daily)}` : ""}
+                    ${weekly ? `${daily && !hourly ? " | " : ""}weekly: ${formatINR(weekly)}` : ""}
                 </div>` : ""}
             `;
         }
@@ -853,19 +853,19 @@ if (form) {
                 return;
             }
         } else if (itemType === 'RENT') {
+            const hourly = formData.get('rent_hourly');
             const daily = formData.get('rent_daily');
             const weekly = formData.get('rent_weekly');
-            const monthly = formData.get('rent_monthly');
 
-            if (!daily && !weekly && !monthly) {
+            if (!hourly && !daily && !weekly) {
                 showAlert('Please enter at least one rental price', 'error');
                 return;
             }
 
             const rentPrices = {};
+            if (hourly && parseFloat(hourly) > 0) rentPrices.hourly = parseFloat(hourly);
             if (daily && parseFloat(daily) > 0) rentPrices.daily = parseFloat(daily);
             if (weekly && parseFloat(weekly) > 0) rentPrices.weekly = parseFloat(weekly);
-            if (monthly && parseFloat(monthly) > 0) rentPrices.monthly = parseFloat(monthly);
 
             if (Object.keys(rentPrices).length === 0) {
                 showAlert('Please enter at least one valid rental price greater than 0', 'error');
@@ -873,9 +873,9 @@ if (form) {
             }
 
             formData.set('rent_prices', JSON.stringify(rentPrices));
+            formData.delete('rent_hourly');
             formData.delete('rent_daily');
             formData.delete('rent_weekly');
-            formData.delete('rent_monthly');
         } else {
             showAlert('Please select an item type', 'error');
             return;
