@@ -537,15 +537,60 @@ function showAlert(message, type = 'success') {
     }, 5000);
 }
 
-function getImageUrl(imagePath) {
-    if (!imagePath) return PLACEHOLDER;
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-        return imagePath;
+// FIXED: Updated getImageUrl function to properly handle Django backend
+function getImageUrl(imageData) {
+    if (!imageData) return PLACEHOLDER;
+
+    // If imageData is a string (direct path/URL from Django)
+    if (typeof imageData === 'string') {
+        // Full URL
+        if (imageData.startsWith('http://') || imageData.startsWith('https://')) {
+            return imageData;
+        }
+        // Already has /media/ prefix
+        if (imageData.startsWith('/media/')) {
+            return imageData;
+        }
+        // Django upload path (e.g., "clixs/items/image.jpg")
+        return `/media/${imageData}`;
     }
-    if (imagePath.startsWith('/media/')) {
-        return imagePath;
+
+    // If imageData is an object (serialized ItemImage model)
+    if (typeof imageData === 'object') {
+        // Try using the API endpoint if ID exists
+        if (imageData.id) {
+            // First check if image field has the path
+            if (imageData.image) {
+                if (typeof imageData.image === 'string') {
+                    if (imageData.image.startsWith('http://') || imageData.image.startsWith('https://')) {
+                        return imageData.image;
+                    }
+                    if (imageData.image.startsWith('/media/')) {
+                        return imageData.image;
+                    }
+                    // Django upload path
+                    return `/media/${imageData.image}`;
+                }
+            }
+            // Fallback to API endpoint
+            return `${API_BASE}/item-images/${imageData.id}`;
+        }
+
+        // If only image field exists (no id)
+        if (imageData.image) {
+            if (typeof imageData.image === 'string') {
+                if (imageData.image.startsWith('http://') || imageData.image.startsWith('https://')) {
+                    return imageData.image;
+                }
+                if (imageData.image.startsWith('/media/')) {
+                    return imageData.image;
+                }
+                return `/media/${imageData.image}`;
+            }
+        }
     }
-    return `/media/${imagePath}`;
+
+    return PLACEHOLDER;
 }
 
 window.openModal = function() {
@@ -658,6 +703,18 @@ async function fetchItems() {
         }
 
         const items = await response.json();
+
+        // DEBUG: Log the items data to see structure
+        console.log('=== FETCHED ITEMS ===');
+        console.log('Total items:', items.length);
+        if (items.length > 0) {
+            console.log('First item:', items[0]);
+            console.log('First item images:', items[0].images);
+            if (items[0].images && items[0].images.length > 0) {
+                console.log('First image data:', items[0].images[0]);
+            }
+        }
+
         displayItems(items);
     } catch (error) {
         console.error('Fetch error:', error);
@@ -678,8 +735,19 @@ function displayItems(items) {
     container.innerHTML = items.map((item) => {
         let imageUrl = PLACEHOLDER;
 
+        // DEBUG: Log image processing
+        console.log('=== PROCESSING ITEM ===');
+        console.log('Item ID:', item.id);
+        console.log('Item title:', item.title);
+        console.log('Item images array:', item.images);
+
+        // FIXED: Properly handle image data from backend
         if (item.images && item.images.length > 0) {
-            imageUrl = getImageUrl(item.images[0].image);
+            console.log('First image before processing:', item.images[0]);
+            imageUrl = getImageUrl(item.images[0]);
+            console.log('Generated image URL:', imageUrl);
+        } else {
+            console.log('No images found for this item');
         }
 
         const typeClass = item.item_type === "SELL" ? "badge-sell" : "badge-rent";
