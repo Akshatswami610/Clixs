@@ -11,7 +11,7 @@ from .views import (
     about,
     addpost,
     contactus,
-    chat,
+    chats,
     itemdetail,
 )
 
@@ -41,7 +41,7 @@ urlpatterns = [
     path('item-detail', itemdetail, name='item-detail'),
     path('about/', about, name='about'),
     path('addpost/', addpost, name='addpost'),
-    path('chat/', chat, name='chat'),
+    path('chats/', chats, name='chats'),
     path('contact/', contactus, name='contactus'),
 ]
 

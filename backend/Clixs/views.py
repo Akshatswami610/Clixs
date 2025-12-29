@@ -30,8 +30,8 @@ def addpost(request):
     return render(request, 'addpost.html')
 
 
-def chat(request):
-    return render(request, 'chat.html')
+def chats(request):
+    return render(request, 'chats.html')
 
 
 def contactus(request):
