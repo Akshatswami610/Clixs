@@ -71,7 +71,7 @@ def signup(request):
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name")
         phone_number = request.POST.get("phone")
-        reg_no = request.POST.get("registration_number")
+        registration_number = request.POST.get("registration_number")
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirm_password")
 
@@ -88,7 +88,7 @@ def signup(request):
             password=password,
             first_name=first_name,
             last_name=last_name,
-            reg_no=reg_no,
+            registration_number=registration_number,
         )
 
         messages.success(request, "Account created successfully")
