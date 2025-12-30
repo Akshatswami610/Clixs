@@ -185,6 +185,7 @@
     font-size: 0.8rem;
     color: #b0b0b0;
     margin-bottom: 0.5rem;
+    text-transform: capitalize;
 }
 
 .rent-price-amount {
@@ -409,10 +410,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function formatDate(dateString) {
         if (!dateString) return "";
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         });
     }
 
@@ -459,6 +460,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error("Item not found");
                 }
                 if (response.status === 401) {
+                    // Try without authentication for public viewing
+                    const publicResponse = await fetch(`${API_BASE}/items/${itemId}/`);
+                    if (publicResponse.ok) {
+                        const item = await publicResponse.json();
+                        displayItemDetail(item);
+                        return;
+                    }
                     container.innerHTML = `
                         <div class="error-container">
                             <div class="error-message">Please login to view item details</div>
@@ -485,13 +493,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function displayItemDetail(item) {
         const container = document.getElementById("itemDetailContainer");
-        
-        const images = item.images && item.images.length > 0 
+
+        const images = item.images && item.images.length > 0
             ? item.images.map(img => getImageUrl(img.image))
             : [PLACEHOLDER];
 
         const typeClass = item.item_type === "SELL" ? "badge-sell" : "badge-rent";
-        const statusClass = 
+        const statusClass =
             item.status === "ACTIVE" ? "badge-active" :
             item.status === "SOLD" ? "badge-sold" : "badge-rented";
 
@@ -508,26 +516,30 @@ document.addEventListener("DOMContentLoaded", () => {
             const daily = item.rent_prices?.daily;
             const weekly = item.rent_prices?.weekly;
 
+            // Determine which price to show as main
+            const mainPrice = hourly || daily || weekly;
+            const mainPeriod = hourly ? '/hr' : daily ? '/day' : '/week';
+
             priceHtml = `
                 <div class="price-section">
                     <div class="price-label">Rental Prices</div>
-                    ${hourly ? `<div class="main-price">${formatINR(hourly)}<span style="font-size: 1.2rem; color: #b0b0b0;">/day</span></div>` : ''}
+                    ${mainPrice ? `<div class="main-price">${formatINR(mainPrice)}<span style="font-size: 1.2rem; color: #b0b0b0;">${mainPeriod}</span></div>` : ''}
                     <div class="rent-prices-grid">
                         ${hourly ? `
                             <div class="rent-price-item">
-                                <div class="rent-price-period">hourly</div>
+                                <div class="rent-price-period">Hourly</div>
                                 <div class="rent-price-amount">${formatINR(hourly)}</div>
                             </div>
                         ` : ''}
                         ${daily ? `
                             <div class="rent-price-item">
-                                <div class="rent-price-period">daily</div>
+                                <div class="rent-price-period">Daily</div>
                                 <div class="rent-price-amount">${formatINR(daily)}</div>
                             </div>
                         ` : ''}
                         ${weekly ? `
                             <div class="rent-price-item">
-                                <div class="rent-price-period">weekly</div>
+                                <div class="rent-price-period">Weekly</div>
                                 <div class="rent-price-amount">${formatINR(weekly)}</div>
                             </div>
                         ` : ''}
@@ -539,8 +551,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const thumbnailsHtml = images.length > 1 ? `
             <div class="image-thumbnails">
                 ${images.map((img, index) => `
-                    <img src="${img}" 
-                         class="thumbnail ${index === 0 ? 'active' : ''}" 
+                    <img src="${img}"
+                         class="thumbnail ${index === 0 ? 'active' : ''}"
                          alt="Thumbnail ${index + 1}"
                          data-index="${index}"
                          onerror="this.src='${PLACEHOLDER}'">
@@ -551,8 +563,8 @@ document.addEventListener("DOMContentLoaded", () => {
         container.innerHTML = `
             <div class="detail-content">
                 <div class="image-section">
-                    <img src="${images[0]}" 
-                         class="main-image" 
+                    <img src="${images[0]}"
+                         class="main-image"
                          id="mainImage"
                          alt="${item.title}"
                          onerror="this.src='${PLACEHOLDER}'">
@@ -615,7 +627,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const index = parseInt(this.dataset.index);
                     const mainImage = document.getElementById('mainImage');
                     mainImage.src = images[index];
-                    
+
                     document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
                     this.classList.add('active');
                 });
@@ -625,18 +637,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Global functions for button actions
     window.chatWithSeller = function(itemId, sellerId) {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            alert('Please login to chat with seller');
+            window.location.href = '/login';
+            return;
+        }
+
         // Store item context for chat
         localStorage.setItem('chatContext', JSON.stringify({
             itemId: itemId,
             sellerId: sellerId,
             timestamp: Date.now()
         }));
-        
+
         // Redirect to chat page
         window.location.href = `/chat?user=${sellerId}&item=${itemId}`;
     };
 
     window.makeOffer = function(itemId) {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            alert('Please login to make an offer');
+            window.location.href = '/login';
+            return;
+        }
         alert('Make offer functionality - Coming soon!');
         // You can implement this later
     };
