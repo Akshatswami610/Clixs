@@ -26,6 +26,13 @@
     background-clip: text;
     animation: fadeInDown 0.8s ease;
     margin: 0;
+    flex: 1;
+}
+
+.search-filter-wrapper {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
 }
 
 @keyframes fadeInDown {
@@ -41,8 +48,7 @@
 
 .search-container {
     position: relative;
-    flex: 1;
-    max-width: 300px;
+    width: 300px;
 }
 
 .search-wrapper {
@@ -96,6 +102,10 @@
     cursor: pointer;
     transition: all 0.3s ease;
     white-space: nowrap;
+}
+
+.filter-icon {
+    font-size: 1.1rem;
 }
 
 .filter-btn:hover {
@@ -603,6 +613,7 @@
     .top-bar {
         flex-direction: column;
         align-items: stretch;
+        gap: 1.5rem;
     }
 
     .page-heading {
@@ -610,8 +621,13 @@
         text-align: center;
     }
 
+    .search-filter-wrapper {
+        flex-direction: column;
+        width: 100%;
+    }
+
     .search-container {
-        max-width: 100%;
+        width: 100%;
     }
 
     .filter-btn {
@@ -646,66 +662,68 @@
     <div class="top-bar">
         <h1 class="page-heading">Discover Amazing Items</h1>
 
-        <div class="search-container">
-            <div class="search-wrapper">
-                <span class="search-icon">🔍</span>
-                <input
-                    type="text"
-                    class="search-input"
-                    id="searchInput"
-                    placeholder="Search items..."
-                    autocomplete="off">
+        <div class="search-filter-wrapper">
+            <div class="search-container">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input
+                        type="text"
+                        class="search-input"
+                        id="searchInput"
+                        placeholder="Search items..."
+                        autocomplete="off">
+                </div>
             </div>
-        </div>
 
-        <div style="position: relative;">
-            <button class="filter-btn" id="filterBtn" onclick="toggleFilterPopover()">
-                <span>🎛️</span>
-                <span>Filters</span>
-                <span class="filter-count" id="filterCount" style="display: none;">0</span>
-            </button>
+            <div style="position: relative;">
+                <button class="filter-btn" id="filterBtn" onclick="toggleFilterPopover()">
+                    <span class="filter-icon">⚙️</span>
+                    <span>Filters</span>
+                    <span class="filter-count" id="filterCount" style="display: none;">0</span>
+                </button>
 
-            <div class="filter-popover" id="filterPopover">
-                <div class="filter-header">
-                    <h3 class="filter-title">Filter Items</h3>
-                    <span class="clear-filters-link" onclick="clearFilters()">Clear All</span>
-                </div>
+                <div class="filter-popover" id="filterPopover">
+                    <div class="filter-header">
+                        <h3 class="filter-title">Filter Items</h3>
+                        <span class="clear-filters-link" onclick="clearFilters()">Clear All</span>
+                    </div>
 
-                <div class="filter-group">
-                    <label class="filter-label">Category</label>
-                    <select class="filter-select" id="categoryFilter" onchange="applyFilters()">
-                        <option value="">All Categories</option>
-                        <option value="Electronics">Electronics</option>
-                        <option value="Furniture">Furniture</option>
-                        <option value="Vehicles">Vehicles</option>
-                        <option value="Books">Books</option>
-                        <option value="Clothing">Clothing</option>
-                        <option value="Sports">Sports</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Category</label>
+                        <select class="filter-select" id="categoryFilter" onchange="applyFilters()">
+                            <option value="">All Categories</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Vehicles">Vehicles</option>
+                            <option value="Books">Books</option>
+                            <option value="Clothing">Clothing</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
 
-                <div class="filter-group">
-                    <label class="filter-label">Type</label>
-                    <select class="filter-select" id="typeFilter" onchange="applyFilters()">
-                        <option value="">All Types</option>
-                        <option value="SELL">Sell</option>
-                        <option value="RENT">Rent</option>
-                    </select>
-                </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Type</label>
+                        <select class="filter-select" id="typeFilter" onchange="applyFilters()">
+                            <option value="">All Types</option>
+                            <option value="SELL">Sell</option>
+                            <option value="RENT">Rent</option>
+                        </select>
+                    </div>
 
-                <div class="filter-group">
-                    <label class="filter-label">Status</label>
-                    <select class="filter-select" id="statusFilter" onchange="applyFilters()">
-                        <option value="">All Status</option>
-                        <option value="ACTIVE">Active</option>
-                        <option value="SOLD">Sold</option>
-                        <option value="RENTED">Rented</option>
-                    </select>
-                </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Status</label>
+                        <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+                            <option value="">All Status</option>
+                            <option value="ACTIVE">Active</option>
+                            <option value="SOLD">Sold</option>
+                            <option value="RENTED">Rented</option>
+                        </select>
+                    </div>
 
-                <div class="filter-actions">
-                    <button class="apply-filters-btn" onclick="toggleFilterPopover()">Done</button>
+                    <div class="filter-actions">
+                        <button class="apply-filters-btn" onclick="toggleFilterPopover()">Done</button>
+                    </div>
                 </div>
             </div>
         </div>
