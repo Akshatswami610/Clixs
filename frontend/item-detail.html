@@ -362,54 +362,6 @@
     }
 }
 
-.loading-text {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #00d4ff;
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.5;
-    }
-}
-
-.loading-dots {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.loading-dot {
-    width: 10px;
-    height: 10px;
-    background: linear-gradient(135deg, #3498db, #9b59b6);
-    border-radius: 50%;
-    animation: bounce 1.4s ease-in-out infinite;
-}
-
-.loading-dot:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.loading-dot:nth-child(3) {
-    animation-delay: 0.4s;
-}
-
-@keyframes bounce {
-    0%, 80%, 100% {
-        transform: translateY(0);
-        opacity: 0.5;
-    }
-    40% {
-        transform: translateY(-20px);
-        opacity: 1;
-    }
-}
-
 .error-container {
     display: flex;
     flex-direction: column;
@@ -433,17 +385,169 @@
 
 .toast {
     position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(30, 30, 45, 0.98);
+    border: 2px solid rgba(52, 152, 219, 0.5);
+    border-radius: 20px;
+    padding: 2rem 2.5rem;
+    min-width: 400px;
+    max-width: 600px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    animation: scaleIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.5rem;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes scaleOut {
+    to {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+}
+
+.toast.closing {
+    animation: scaleOut 0.3s ease forwards;
+}
+
+.toast-icon {
+    font-size: 3.5rem;
+    flex-shrink: 0;
+    animation: iconBounce 0.6s ease;
+}
+
+@keyframes iconBounce {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+.toast-content {
+    flex: 1;
+}
+
+.toast-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.8rem;
+}
+
+.toast-message {
+    font-size: 1.1rem;
+    color: #b0b0b0;
+    line-height: 1.6;
+}
+
+.toast-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #b0b0b0;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.toast-close:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.toast-info {
+    border-color: rgba(52, 152, 219, 0.6);
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
+}
+
+.toast-success {
+    border-color: rgba(39, 174, 96, 0.6);
+    background: linear-gradient(135deg, rgba(39, 174, 96, 0.1), rgba(46, 204, 113, 0.1));
+}
+
+.toast-warning {
+    border-color: rgba(243, 156, 18, 0.6);
+    background: linear-gradient(135deg, rgba(243, 156, 18, 0.1), rgba(230, 126, 34, 0.1));
+}
+
+.toast-error {
+    border-color: rgba(231, 76, 60, 0.6);
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(192, 57, 43, 0.1));
+}
+
+.toast-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    animation: fadeIn 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.toast-overlay.closing {
+    animation: fadeOut 0.3s ease forwards;
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+    }
+}
+
+.notification {
+    position: fixed;
     top: 2rem;
     right: 2rem;
     background: rgba(30, 30, 45, 0.98);
     border: 2px solid rgba(52, 152, 219, 0.5);
     border-radius: 15px;
     padding: 1.2rem 1.5rem;
-    min-width: 300px;
-    max-width: 500px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    min-width: 320px;
+    max-width: 450px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
     z-index: 10000;
-    animation: slideInRight 0.4s ease, fadeOut 0.4s ease 2.6s;
+    animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -451,7 +555,7 @@
 
 @keyframes slideInRight {
     from {
-        transform: translateX(400px);
+        transform: translateX(450px);
         opacity: 0;
     }
     to {
@@ -460,36 +564,40 @@
     }
 }
 
-@keyframes fadeOut {
+.notification.closing {
+    animation: slideOutRight 0.4s ease forwards;
+}
+
+@keyframes slideOutRight {
     to {
+        transform: translateX(450px);
         opacity: 0;
-        transform: translateX(400px);
     }
 }
 
-.toast-icon {
-    font-size: 1.8rem;
+.notification-icon {
+    font-size: 2rem;
     flex-shrink: 0;
 }
 
-.toast-content {
+.notification-content {
     flex: 1;
 }
 
-.toast-title {
+.notification-title {
     font-size: 1.1rem;
     font-weight: 700;
     color: #ffffff;
     margin-bottom: 0.3rem;
 }
 
-.toast-message {
+.notification-message {
     font-size: 0.95rem;
     color: #b0b0b0;
     line-height: 1.4;
 }
 
-.toast-close {
+.notification-close {
     background: none;
     border: none;
     color: #b0b0b0;
@@ -506,29 +614,49 @@
     flex-shrink: 0;
 }
 
-.toast-close:hover {
+.notification-close:hover {
     color: #ffffff;
     background: rgba(255, 255, 255, 0.1);
+    transform: rotate(90deg);
 }
 
-.toast-info {
-    border-color: rgba(52, 152, 219, 0.5);
+.notification-info {
+    border-color: rgba(52, 152, 219, 0.6);
 }
 
-.toast-success {
-    border-color: rgba(39, 174, 96, 0.5);
+.notification-success {
+    border-color: rgba(39, 174, 96, 0.6);
 }
 
-.toast-warning {
-    border-color: rgba(243, 156, 18, 0.5);
+.notification-warning {
+    border-color: rgba(243, 156, 18, 0.6);
 }
 
-.toast-error {
-    border-color: rgba(231, 76, 60, 0.5);
+.notification-error {
+    border-color: rgba(231, 76, 60, 0.6);
 }
 
 @media (max-width: 768px) {
     .toast {
+        min-width: auto;
+        width: 90%;
+        max-width: 90%;
+        padding: 1.5rem 2rem;
+    }
+
+    .toast-icon {
+        font-size: 2.5rem;
+    }
+
+    .toast-title {
+        font-size: 1.3rem;
+    }
+
+    .toast-message {
+        font-size: 1rem;
+    }
+
+    .notification {
         top: 1rem;
         right: 1rem;
         left: 1rem;
@@ -591,9 +719,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%231a1a2e'/%3E%3Cg transform='translate(200, 150)'%3E%3Ccircle cx='0' cy='-20' r='40' fill='%233498db' opacity='0.3'/%3E%3Crect x='-30' y='10' width='60' height='40' rx='5' fill='%233498db' opacity='0.3'/%3E%3Cpolygon points='0,-10 -25,25 25,25' fill='%233498db' opacity='0.5'/%3E%3C/g%3E%3Ctext x='200' y='250' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%23666'%3ENo Image%3C/text%3E%3C/svg%3E";
 
     function showToast(title, message, type = 'info') {
-        // Remove any existing toasts
+        // Remove any existing toasts and overlays
         const existingToasts = document.querySelectorAll('.toast');
+        const existingOverlays = document.querySelectorAll('.toast-overlay');
         existingToasts.forEach(toast => toast.remove());
+        existingOverlays.forEach(overlay => overlay.remove());
 
         const icons = {
             info: 'ℹ️',
@@ -602,26 +732,98 @@ document.addEventListener("DOMContentLoaded", () => {
             error: '❌'
         };
 
+        // Create overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'toast-overlay';
+        overlay.onclick = function() {
+            closeToast();
+        };
+
+        // Create toast
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
         toast.innerHTML = `
+            <button class="toast-close" onclick="closeToast()">×</button>
             <div class="toast-icon">${icons[type]}</div>
             <div class="toast-content">
                 <div class="toast-title">${title}</div>
                 <div class="toast-message">${message}</div>
             </div>
-            <button class="toast-close" onclick="this.parentElement.remove()">×</button>
         `;
 
+        document.body.appendChild(overlay);
         document.body.appendChild(toast);
 
         // Auto remove after 3 seconds
         setTimeout(() => {
+            closeToast();
+        }, 3000);
+    }
+
+    window.closeToast = function() {
+        const toast = document.querySelector('.toast');
+        const overlay = document.querySelector('.toast-overlay');
+
+        if (toast) {
+            toast.classList.add('closing');
+        }
+        if (overlay) {
+            overlay.classList.add('closing');
+        }
+
+        setTimeout(() => {
             if (toast && toast.parentElement) {
                 toast.remove();
             }
+            if (overlay && overlay.parentElement) {
+                overlay.remove();
+            }
+        }, 300);
+    };
+
+    function showNotification(title, message, type = 'info') {
+        // Remove any existing notifications
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(notification => notification.remove());
+
+        const icons = {
+            info: 'ℹ️',
+            success: '✅',
+            warning: '⚠️',
+            error: '❌'
+        };
+
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-icon">${icons[type]}</div>
+            <div class="notification-content">
+                <div class="notification-title">${title}</div>
+                <div class="notification-message">${message}</div>
+            </div>
+            <button class="notification-close" onclick="closeNotification(this)">×</button>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            closeNotification(notification.querySelector('.notification-close'));
         }, 3000);
     }
+
+    window.closeNotification = function(btn) {
+        const notification = btn ? btn.closest('.notification') : document.querySelector('.notification');
+
+        if (notification) {
+            notification.classList.add('closing');
+            setTimeout(() => {
+                if (notification && notification.parentElement) {
+                    notification.remove();
+                }
+            }, 400);
+        }
+    };
 
     function formatINR(amount) {
         if (!amount || isNaN(amount)) return "";
@@ -673,7 +875,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        container.innerHTML = '<div class="loading-container"><div class="loading-spinner"><div class="spinner-ring"></div><div class="spinner-ring"></div><div class="spinner-ring"></div></div><div class="loading-text">Loading item details</div><div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div></div>';
+        container.innerHTML = '<div class="loading-container"><div class="loading-spinner"><div class="spinner-ring"></div><div class="spinner-ring"></div><div class="spinner-ring"></div></div></div>';
 
         try {
             const token = localStorage.getItem('authToken');
@@ -885,11 +1087,8 @@ document.addEventListener("DOMContentLoaded", () => {
             timestamp: Date.now()
         }));
 
-        showToast('Redirecting...', 'Opening chat with seller', 'success');
-
-        setTimeout(() => {
-            window.location.href = `/chat?user=${sellerId}&item=${itemId}`;
-        }, 800);
+        // Redirect to chat page directly
+        window.location.href = `/chat?user=${sellerId}&item=${itemId}`;
     };
 
     window.makeOffer = function(itemId) {
@@ -901,7 +1100,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 1500);
             return;
         }
-        showToast('Coming Soon', 'Make offer functionality will be available soon!', 'info');
+        showNotification('Coming Soon', 'Make offer functionality will be available soon!', 'info');
     };
 
     // Fetch item details on page load
