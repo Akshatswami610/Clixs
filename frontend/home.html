@@ -9,16 +9,23 @@
     padding: 3rem 2rem;
 }
 
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    gap: 2rem;
+}
+
 .page-heading {
-    text-align: center;
     font-size: 2.5rem;
     font-weight: 700;
-    margin-bottom: 2rem;
     background: linear-gradient(135deg, #3498db, #00d4ff, #9b59b6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     animation: fadeInDown 0.8s ease;
+    margin: 0;
 }
 
 @keyframes fadeInDown {
@@ -32,40 +39,187 @@
     }
 }
 
-.search-filter-section {
-    max-width: 1200px;
-    margin: 0 auto 2rem;
-    padding: 1.5rem;
-    background: rgba(30, 30, 45, 0.8);
-    border-radius: 20px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+.search-container {
+    position: relative;
+    flex: 1;
+    max-width: 300px;
 }
 
-.search-bar {
+.search-wrapper {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    align-items: center;
+    background: rgba(30, 30, 45, 0.9);
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.search-wrapper:focus-within {
+    border-color: #3498db;
+    box-shadow: 0 6px 25px rgba(52, 152, 219, 0.4);
+    transform: translateY(-2px);
+}
+
+.search-icon {
+    font-size: 1.2rem;
+    color: #3498db;
+    margin-right: 0.8rem;
 }
 
 .search-input {
     flex: 1;
-    padding: 0.9rem 1.2rem;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 1rem;
+    padding: 0.5rem 0;
+    outline: none;
+}
+
+.search-input::placeholder {
+    color: #b0b0b0;
+}
+
+.filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    background: rgba(52, 152, 219, 0.1);
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 50px;
+    color: #3498db;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.filter-btn:hover {
+    background: rgba(52, 152, 219, 0.2);
+    border-color: #3498db;
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, #3498db, #9b59b6);
+    border-color: transparent;
+    color: white;
+}
+
+.filter-count {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.filter-popover {
+    position: absolute;
+    top: calc(100% + 1rem);
+    right: 0;
+    background: rgba(30, 30, 45, 0.98);
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 20px;
+    padding: 2rem;
+    min-width: 350px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: none;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.filter-popover.active {
+    display: block;
+}
+
+.filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+.filter-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.clear-filters-link {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.clear-filters-link:hover {
+    color: #c0392b;
+    text-decoration: underline;
+}
+
+.filter-group {
+    margin-bottom: 1.5rem;
+}
+
+.filter-label {
+    display: block;
+    margin-bottom: 0.7rem;
+    color: #00d4ff;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 0.8rem;
     background: rgba(20, 20, 30, 0.8);
     border: 2px solid rgba(52, 152, 219, 0.3);
     border-radius: 12px;
     color: #ffffff;
-    font-size: 1rem;
+    font-size: 0.95rem;
     transition: all 0.3s ease;
+    cursor: pointer;
 }
 
-.search-input:focus {
+.filter-select:focus {
     outline: none;
     border-color: #3498db;
-    box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
 }
 
-.search-btn {
-    padding: 0.9rem 2rem;
+.filter-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+.apply-filters-btn {
+    flex: 1;
+    padding: 0.8rem;
     background: linear-gradient(135deg, #3498db, #9b59b6);
     border: none;
     border-radius: 12px;
@@ -76,64 +230,16 @@
     transition: all 0.3s ease;
 }
 
-.search-btn:hover {
+.apply-filters-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
-}
-
-.filters {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.filter-label {
-    font-size: 0.85rem;
-    color: #b0b0b0;
-    margin-bottom: 0.5rem;
-}
-
-.filter-select {
-    padding: 0.7rem;
-    background: rgba(20, 20, 30, 0.8);
-    border: 2px solid rgba(52, 152, 219, 0.3);
-    border-radius: 12px;
-    color: #ffffff;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-}
-
-.filter-select:focus {
-    outline: none;
-    border-color: #3498db;
-}
-
-.clear-filters {
-    padding: 0.7rem 1.5rem;
-    background: rgba(231, 76, 60, 0.2);
-    border: 1px solid #e74c3c;
-    border-radius: 12px;
-    color: #e74c3c;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    align-self: end;
-}
-
-.clear-filters:hover {
-    background: rgba(231, 76, 60, 0.3);
 }
 
 .items-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 2rem;
-    animation: fadeIn 1s ease;
+    animation: fadeIn 0.5s ease;
 }
 
 @keyframes fadeIn {
@@ -458,17 +564,6 @@
     animation: slideDown 0.3s ease;
 }
 
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 .alert-success {
     background: rgba(39, 174, 96, 0.2);
     border: 1px solid #27ae60;
@@ -481,9 +576,54 @@
     color: #e74c3c;
 }
 
+.no-results {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #b0b0b0;
+}
+
+.no-results-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.no-results-text {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.no-results-subtext {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
 @media (max-width: 768px) {
+    .top-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
     .page-heading {
         font-size: 2rem;
+        text-align: center;
+    }
+
+    .search-container {
+        max-width: 100%;
+    }
+
+    .filter-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .filter-popover {
+        left: 0;
+        right: 0;
+        min-width: auto;
+        margin: 0 1rem;
     }
 
     .items-grid {
@@ -498,62 +638,76 @@
     .rent-prices {
         grid-template-columns: 1fr;
     }
-
-    .search-bar {
-        flex-direction: column;
-    }
-
-    .filters {
-        grid-template-columns: 1fr;
-    }
 }
 {% endblock %}
 
 {% block content %}
 <div class="container">
-    <h1 class="page-heading">Discover Amazing Items</h1>
+    <div class="top-bar">
+        <h1 class="page-heading">Discover Amazing Items</h1>
 
-    <div class="search-filter-section">
-        <div class="search-bar">
-            <input type="text" class="search-input" id="searchInput" placeholder="Search items by title or description...">
-            <button class="search-btn" onclick="applyFilters()">Search</button>
+        <div class="search-container">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input
+                    type="text"
+                    class="search-input"
+                    id="searchInput"
+                    placeholder="Search items..."
+                    autocomplete="off">
+            </div>
         </div>
 
-        <div class="filters">
-            <div class="filter-group">
-                <label class="filter-label">Category</label>
-                <select class="filter-select" id="categoryFilter" onchange="applyFilters()">
-                    <option value="">All Categories</option>
-                    <option value="Electronics">Electronics</option>
-                    <option value="Furniture">Furniture</option>
-                    <option value="Vehicles">Vehicles</option>
-                    <option value="Books">Books</option>
-                    <option value="Clothing">Clothing</option>
-                    <option value="Sports">Sports</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
+        <div style="position: relative;">
+            <button class="filter-btn" id="filterBtn" onclick="toggleFilterPopover()">
+                <span>🎛️</span>
+                <span>Filters</span>
+                <span class="filter-count" id="filterCount" style="display: none;">0</span>
+            </button>
 
-            <div class="filter-group">
-                <label class="filter-label">Type</label>
-                <select class="filter-select" id="typeFilter" onchange="applyFilters()">
-                    <option value="">All Types</option>
-                    <option value="SELL">Sell</option>
-                    <option value="RENT">Rent</option>
-                </select>
-            </div>
+            <div class="filter-popover" id="filterPopover">
+                <div class="filter-header">
+                    <h3 class="filter-title">Filter Items</h3>
+                    <span class="clear-filters-link" onclick="clearFilters()">Clear All</span>
+                </div>
 
-            <div class="filter-group">
-                <label class="filter-label">Status</label>
-                <select class="filter-select" id="statusFilter" onchange="applyFilters()">
-                    <option value="">All Status</option>
-                    <option value="ACTIVE">Active</option>
-                    <option value="SOLD">Sold</option>
-                    <option value="RENTED">Rented</option>
-                </select>
-            </div>
+                <div class="filter-group">
+                    <label class="filter-label">Category</label>
+                    <select class="filter-select" id="categoryFilter" onchange="applyFilters()">
+                        <option value="">All Categories</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Furniture">Furniture</option>
+                        <option value="Vehicles">Vehicles</option>
+                        <option value="Books">Books</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Sports">Sports</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
 
-            <button class="clear-filters" onclick="clearFilters()">Clear Filters</button>
+                <div class="filter-group">
+                    <label class="filter-label">Type</label>
+                    <select class="filter-select" id="typeFilter" onchange="applyFilters()">
+                        <option value="">All Types</option>
+                        <option value="SELL">Sell</option>
+                        <option value="RENT">Rent</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Status</label>
+                    <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+                        <option value="">All Status</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="SOLD">Sold</option>
+                        <option value="RENTED">Rented</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button class="apply-filters-btn" onclick="toggleFilterPopover()">Done</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -653,10 +807,9 @@ document.addEventListener("DOMContentLoaded", () => {
 const API_BASE = "/api/v1";
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%231a1a2e'/%3E%3Cg transform='translate(200, 150)'%3E%3Ccircle cx='0' cy='-20' r='40' fill='%233498db' opacity='0.3'/%3E%3Crect x='-30' y='10' width='60' height='40' rx='5' fill='%233498db' opacity='0.3'/%3E%3Cpolygon points='0,-10 -25,25 25,25' fill='%233498db' opacity='0.5'/%3E%3C/g%3E%3Ctext x='200' y='250' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%23666'%3ENo Image%3C/text%3E%3C/svg%3E";
 
-// Store all items for filtering
 let allItems = [];
+let searchTimeout;
 
-// Utility function to escape HTML and prevent XSS
 function escapeHtml(text) {
     const map = {
         '&': '&amp;',
@@ -735,6 +888,13 @@ function getImageUrl(imageData) {
     return PLACEHOLDER;
 }
 
+window.toggleFilterPopover = function() {
+    const popover = document.getElementById('filterPopover');
+    const btn = document.getElementById('filterBtn');
+    popover.classList.toggle('active');
+    btn.classList.toggle('active');
+}
+
 window.openModal = function() {
     const token = localStorage.getItem('authToken');
     if (!token) {
@@ -755,6 +915,18 @@ window.closeModal = function() {
 document.getElementById('addItemModal')?.addEventListener('click', function(e) {
     if (e.target === this) {
         closeModal();
+    }
+});
+
+document.addEventListener('click', function(e) {
+    const popover = document.getElementById('filterPopover');
+    const filterBtn = document.getElementById('filterBtn');
+
+    if (popover.classList.contains('active') &&
+        !popover.contains(e.target) &&
+        !filterBtn.contains(e.target)) {
+        popover.classList.remove('active');
+        filterBtn.classList.remove('active');
     }
 });
 
@@ -812,12 +984,32 @@ fileInput.addEventListener('change', function() {
     }
 });
 
-// Search and Filter Functions
+function updateFilterCount() {
+    const category = document.getElementById('categoryFilter').value;
+    const type = document.getElementById('typeFilter').value;
+    const status = document.getElementById('statusFilter').value;
+
+    const count = [category, type, status].filter(v => v).length;
+    const countBadge = document.getElementById('filterCount');
+    const filterBtn = document.getElementById('filterBtn');
+
+    if (count > 0) {
+        countBadge.textContent = count;
+        countBadge.style.display = 'flex';
+        filterBtn.classList.add('active');
+    } else {
+        countBadge.style.display = 'none';
+        filterBtn.classList.remove('active');
+    }
+}
+
 window.applyFilters = function() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const category = document.getElementById('categoryFilter').value;
     const type = document.getElementById('typeFilter').value;
     const status = document.getElementById('statusFilter').value;
+
+    updateFilterCount();
 
     const filteredItems = allItems.filter(item => {
         const matchesSearch = !searchTerm ||
@@ -839,14 +1031,15 @@ window.clearFilters = function() {
     document.getElementById('categoryFilter').value = '';
     document.getElementById('typeFilter').value = '';
     document.getElementById('statusFilter').value = '';
+    updateFilterCount();
     displayItems(allItems);
 }
 
-// Allow Enter key to trigger search
-document.getElementById('searchInput')?.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
+document.getElementById('searchInput')?.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
         applyFilters();
-    }
+    }, 300);
 });
 
 async function fetchItems() {
@@ -868,9 +1061,7 @@ async function fetchItems() {
         });
 
         if (!response.ok) {
-            // Allow viewing items without authentication
             if (response.status === 401) {
-                // Try without auth header
                 const publicResponse = await fetch(`${API_BASE}/items/`);
                 if (publicResponse.ok) {
                     const items = await publicResponse.json();
@@ -908,7 +1099,13 @@ function displayItems(items) {
     if (!container) return;
 
     if (!items || !items.length) {
-        container.innerHTML = '<div class="loading">No items available yet.</div>';
+        container.innerHTML = `
+            <div class="no-results">
+                <div class="no-results-icon">🔍</div>
+                <div class="no-results-text">No items found</div>
+                <div class="no-results-subtext">Try adjusting your search or filters</div>
+            </div>
+        `;
         return;
     }
 
@@ -935,8 +1132,6 @@ function displayItems(items) {
             const hourly = item.rent_prices?.hourly;
             const daily = item.rent_prices?.daily;
             const weekly = item.rent_prices?.weekly;
-
-            const displayPrice = hourly || daily || weekly;
 
             priceHtml = `
                 <div class="item-price">
