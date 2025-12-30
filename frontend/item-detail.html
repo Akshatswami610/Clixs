@@ -431,6 +431,111 @@
     margin-top: 0.5rem;
 }
 
+.toast {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    background: rgba(30, 30, 45, 0.98);
+    border: 2px solid rgba(52, 152, 219, 0.5);
+    border-radius: 15px;
+    padding: 1.2rem 1.5rem;
+    min-width: 300px;
+    max-width: 500px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    animation: slideInRight 0.4s ease, fadeOut 0.4s ease 2.6s;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: translateX(400px);
+    }
+}
+
+.toast-icon {
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.toast-content {
+    flex: 1;
+}
+
+.toast-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.3rem;
+}
+
+.toast-message {
+    font-size: 0.95rem;
+    color: #b0b0b0;
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: #b0b0b0;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.toast-close:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.toast-info {
+    border-color: rgba(52, 152, 219, 0.5);
+}
+
+.toast-success {
+    border-color: rgba(39, 174, 96, 0.5);
+}
+
+.toast-warning {
+    border-color: rgba(243, 156, 18, 0.5);
+}
+
+.toast-error {
+    border-color: rgba(231, 76, 60, 0.5);
+}
+
+@media (max-width: 768px) {
+    .toast {
+        top: 1rem;
+        right: 1rem;
+        left: 1rem;
+        min-width: auto;
+    }
+}
+
 @media (max-width: 968px) {
     .detail-content {
         grid-template-columns: 1fr;
@@ -485,6 +590,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const API_BASE = "/api/v1";
     const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%231a1a2e'/%3E%3Cg transform='translate(200, 150)'%3E%3Ccircle cx='0' cy='-20' r='40' fill='%233498db' opacity='0.3'/%3E%3Crect x='-30' y='10' width='60' height='40' rx='5' fill='%233498db' opacity='0.3'/%3E%3Cpolygon points='0,-10 -25,25 25,25' fill='%233498db' opacity='0.5'/%3E%3C/g%3E%3Ctext x='200' y='250' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%23666'%3ENo Image%3C/text%3E%3C/svg%3E";
 
+    function showToast(title, message, type = 'info') {
+        // Remove any existing toasts
+        const existingToasts = document.querySelectorAll('.toast');
+        existingToasts.forEach(toast => toast.remove());
+
+        const icons = {
+            info: 'ℹ️',
+            success: '✅',
+            warning: '⚠️',
+            error: '❌'
+        };
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
+            <div class="toast-icon">${icons[type]}</div>
+            <div class="toast-content">
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+            </div>
+            <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+        `;
+
+        document.body.appendChild(toast);
+
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            if (toast && toast.parentElement) {
+                toast.remove();
+            }
+        }, 3000);
+    }
+
     function formatINR(amount) {
         if (!amount || isNaN(amount)) return "";
         return "₹" + Number(amount).toLocaleString("en-IN");
@@ -535,7 +673,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        container.innerHTML = '<div class="loading-container">Loading item details...</div>';
+        container.innerHTML = '<div class="loading-container"><div class="loading-spinner"><div class="spinner-ring"></div><div class="spinner-ring"></div><div class="spinner-ring"></div></div><div class="loading-text">Loading item details</div><div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div></div>';
 
         try {
             const token = localStorage.getItem('authToken');
@@ -733,8 +871,10 @@ document.addEventListener("DOMContentLoaded", () => {
     window.chatWithSeller = function(itemId, sellerId) {
         const token = localStorage.getItem('authToken');
         if (!token) {
-            alert('Please login to chat with seller');
-            window.location.href = '/login';
+            showToast('Login Required', 'Please login to chat with the seller', 'warning');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 1500);
             return;
         }
 
@@ -745,19 +885,23 @@ document.addEventListener("DOMContentLoaded", () => {
             timestamp: Date.now()
         }));
 
-        // Redirect to chat page
-        window.location.href = `/chat?user=${sellerId}&item=${itemId}`;
+        showToast('Redirecting...', 'Opening chat with seller', 'success');
+
+        setTimeout(() => {
+            window.location.href = `/chat?user=${sellerId}&item=${itemId}`;
+        }, 800);
     };
 
     window.makeOffer = function(itemId) {
         const token = localStorage.getItem('authToken');
         if (!token) {
-            alert('Please login to make an offer');
-            window.location.href = '/login';
+            showToast('Login Required', 'Please login to make an offer', 'warning');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 1500);
             return;
         }
-        alert('Make offer functionality - Coming soon!');
-        // You can implement this later
+        showToast('Coming Soon', 'Make offer functionality will be available soon!', 'info');
     };
 
     // Fetch item details on page load
