@@ -13,7 +13,7 @@
     text-align: center;
     font-size: 2.5rem;
     font-weight: 700;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
     background: linear-gradient(135deg, #3498db, #00d4ff, #9b59b6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -30,6 +30,103 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.search-filter-section {
+    max-width: 1200px;
+    margin: 0 auto 2rem;
+    padding: 1.5rem;
+    background: rgba(30, 30, 45, 0.8);
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.search-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.search-input {
+    flex: 1;
+    padding: 0.9rem 1.2rem;
+    background: rgba(20, 20, 30, 0.8);
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
+}
+
+.search-btn {
+    padding: 0.9rem 2rem;
+    background: linear-gradient(135deg, #3498db, #9b59b6);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-label {
+    font-size: 0.85rem;
+    color: #b0b0b0;
+    margin-bottom: 0.5rem;
+}
+
+.filter-select {
+    padding: 0.7rem;
+    background: rgba(20, 20, 30, 0.8);
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.clear-filters {
+    padding: 0.7rem 1.5rem;
+    background: rgba(231, 76, 60, 0.2);
+    border: 1px solid #e74c3c;
+    border-radius: 12px;
+    color: #e74c3c;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    align-self: end;
+}
+
+.clear-filters:hover {
+    background: rgba(231, 76, 60, 0.3);
 }
 
 .items-grid {
@@ -401,12 +498,65 @@
     .rent-prices {
         grid-template-columns: 1fr;
     }
+
+    .search-bar {
+        flex-direction: column;
+    }
+
+    .filters {
+        grid-template-columns: 1fr;
+    }
 }
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <h1 class="page-heading">Discover Amazing Items</h1>
+
+    <div class="search-filter-section">
+        <div class="search-bar">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search items by title or description...">
+            <button class="search-btn" onclick="applyFilters()">Search</button>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label class="filter-label">Category</label>
+                <select class="filter-select" id="categoryFilter" onchange="applyFilters()">
+                    <option value="">All Categories</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Furniture">Furniture</option>
+                    <option value="Vehicles">Vehicles</option>
+                    <option value="Books">Books</option>
+                    <option value="Clothing">Clothing</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Type</label>
+                <select class="filter-select" id="typeFilter" onchange="applyFilters()">
+                    <option value="">All Types</option>
+                    <option value="SELL">Sell</option>
+                    <option value="RENT">Rent</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Status</label>
+                <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+                    <option value="">All Status</option>
+                    <option value="ACTIVE">Active</option>
+                    <option value="SOLD">Sold</option>
+                    <option value="RENTED">Rented</option>
+                </select>
+            </div>
+
+            <button class="clear-filters" onclick="clearFilters()">Clear Filters</button>
+        </div>
+    </div>
+
     <div class="items-grid" id="itemsContainer"></div>
 </div>
 
@@ -464,11 +614,11 @@
                         <input type="number" class="form-input" name="rent_hourly" min="0" step="0.01">
                     </div>
                     <div>
-                        <label class="form-label" style="font-size: 0.85rem;">hourly</label>
+                        <label class="form-label" style="font-size: 0.85rem;">Daily</label>
                         <input type="number" class="form-input" name="rent_daily" min="0" step="0.01">
                     </div>
                     <div>
-                        <label class="form-label" style="font-size: 0.85rem;">daily</label>
+                        <label class="form-label" style="font-size: 0.85rem;">Weekly</label>
                         <input type="number" class="form-input" name="rent_weekly" min="0" step="0.01">
                     </div>
                 </div>
@@ -502,6 +652,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const API_BASE = "/api/v1";
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%231a1a2e'/%3E%3Cg transform='translate(200, 150)'%3E%3Ccircle cx='0' cy='-20' r='40' fill='%233498db' opacity='0.3'/%3E%3Crect x='-30' y='10' width='60' height='40' rx='5' fill='%233498db' opacity='0.3'/%3E%3Cpolygon points='0,-10 -25,25 25,25' fill='%233498db' opacity='0.5'/%3E%3C/g%3E%3Ctext x='200' y='250' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%23666'%3ENo Image%3C/text%3E%3C/svg%3E";
+
+// Store all items for filtering
+let allItems = [];
 
 // Utility function to escape HTML and prevent XSS
 function escapeHtml(text) {
@@ -537,29 +690,21 @@ function showAlert(message, type = 'success') {
     }, 5000);
 }
 
-// FIXED: Updated getImageUrl function to properly handle Django backend
 function getImageUrl(imageData) {
     if (!imageData) return PLACEHOLDER;
 
-    // If imageData is a string (direct path/URL from Django)
     if (typeof imageData === 'string') {
-        // Full URL
         if (imageData.startsWith('http://') || imageData.startsWith('https://')) {
             return imageData;
         }
-        // Already has /media/ prefix
         if (imageData.startsWith('/media/')) {
             return imageData;
         }
-        // Django upload path (e.g., "clixs/items/image.jpg")
         return `/media/${imageData}`;
     }
 
-    // If imageData is an object (serialized ItemImage model)
     if (typeof imageData === 'object') {
-        // Try using the API endpoint if ID exists
         if (imageData.id) {
-            // First check if image field has the path
             if (imageData.image) {
                 if (typeof imageData.image === 'string') {
                     if (imageData.image.startsWith('http://') || imageData.image.startsWith('https://')) {
@@ -568,15 +713,12 @@ function getImageUrl(imageData) {
                     if (imageData.image.startsWith('/media/')) {
                         return imageData.image;
                     }
-                    // Django upload path
                     return `/media/${imageData.image}`;
                 }
             }
-            // Fallback to API endpoint
             return `${API_BASE}/item-images/${imageData.id}`;
         }
 
-        // If only image field exists (no id)
         if (imageData.image) {
             if (typeof imageData.image === 'string') {
                 if (imageData.image.startsWith('http://') || imageData.image.startsWith('https://')) {
@@ -594,6 +736,11 @@ function getImageUrl(imageData) {
 }
 
 window.openModal = function() {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        window.location.href = '/login';
+        return;
+    }
     document.getElementById('addItemModal').classList.add('active');
 }
 
@@ -622,7 +769,6 @@ function togglePriceFields() {
         sellPriceGroup.classList.add('active');
         rentPriceGroup.classList.remove('active');
         document.querySelector('[name="sell_price"]').required = true;
-        // Clear rent price requirements
         document.querySelector('[name="rent_hourly"]').required = false;
         document.querySelector('[name="rent_daily"]').required = false;
         document.querySelector('[name="rent_weekly"]').required = false;
@@ -630,7 +776,6 @@ function togglePriceFields() {
         sellPriceGroup.classList.remove('active');
         rentPriceGroup.classList.add('active');
         document.querySelector('[name="sell_price"]').required = false;
-        // No HTML5 required for rent prices - validated in JS
         document.querySelector('[name="rent_hourly"]').required = false;
         document.querySelector('[name="rent_daily"]').required = false;
         document.querySelector('[name="rent_weekly"]').required = false;
@@ -667,6 +812,43 @@ fileInput.addEventListener('change', function() {
     }
 });
 
+// Search and Filter Functions
+window.applyFilters = function() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const category = document.getElementById('categoryFilter').value;
+    const type = document.getElementById('typeFilter').value;
+    const status = document.getElementById('statusFilter').value;
+
+    const filteredItems = allItems.filter(item => {
+        const matchesSearch = !searchTerm ||
+            item.title.toLowerCase().includes(searchTerm) ||
+            (item.description && item.description.toLowerCase().includes(searchTerm));
+
+        const matchesCategory = !category || item.category === category;
+        const matchesType = !type || item.item_type === type;
+        const matchesStatus = !status || item.status === status;
+
+        return matchesSearch && matchesCategory && matchesType && matchesStatus;
+    });
+
+    displayItems(filteredItems);
+}
+
+window.clearFilters = function() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('categoryFilter').value = '';
+    document.getElementById('typeFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    displayItems(allItems);
+}
+
+// Allow Enter key to trigger search
+document.getElementById('searchInput')?.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        applyFilters();
+    }
+});
+
 async function fetchItems() {
     const container = document.getElementById("itemsContainer");
     if (!container) return;
@@ -686,10 +868,19 @@ async function fetchItems() {
         });
 
         if (!response.ok) {
+            // Allow viewing items without authentication
             if (response.status === 401) {
-                container.innerHTML = '<div class="error">Please login to view items. <a href="/login" style="color: #3498db; text-decoration: underline;">Login here</a></div>';
-                return;
-            } else if (response.status === 403) {
+                // Try without auth header
+                const publicResponse = await fetch(`${API_BASE}/items/`);
+                if (publicResponse.ok) {
+                    const items = await publicResponse.json();
+                    allItems = items;
+                    displayItems(items);
+                    return;
+                }
+            }
+
+            if (response.status === 403) {
                 container.innerHTML = '<div class="error">Access denied. Please check your permissions.</div>';
                 return;
             } else if (response.status === 404) {
@@ -703,18 +894,7 @@ async function fetchItems() {
         }
 
         const items = await response.json();
-
-        // DEBUG: Log the items data to see structure
-        console.log('=== FETCHED ITEMS ===');
-        console.log('Total items:', items.length);
-        if (items.length > 0) {
-            console.log('First item:', items[0]);
-            console.log('First item images:', items[0].images);
-            if (items[0].images && items[0].images.length > 0) {
-                console.log('First image data:', items[0].images[0]);
-            }
-        }
-
+        allItems = items;
         displayItems(items);
     } catch (error) {
         console.error('Fetch error:', error);
@@ -735,19 +915,8 @@ function displayItems(items) {
     container.innerHTML = items.map((item) => {
         let imageUrl = PLACEHOLDER;
 
-        // DEBUG: Log image processing
-        console.log('=== PROCESSING ITEM ===');
-        console.log('Item ID:', item.id);
-        console.log('Item title:', item.title);
-        console.log('Item images array:', item.images);
-
-        // FIXED: Properly handle image data from backend
         if (item.images && item.images.length > 0) {
-            console.log('First image before processing:', item.images[0]);
             imageUrl = getImageUrl(item.images[0]);
-            console.log('Generated image URL:', imageUrl);
-        } else {
-            console.log('No images found for this item');
         }
 
         const typeClass = item.item_type === "SELL" ? "badge-sell" : "badge-rent";
@@ -771,16 +940,15 @@ function displayItems(items) {
 
             priceHtml = `
                 <div class="item-price">
-                    ${hourly ? `${formatINR(hourly)}/day` : daily ? `${formatINR(daily)}/week` : weekly ? `${formatINR(weekly)}/month` : "Contact for price"}
+                    ${hourly ? `${formatINR(hourly)}/hr` : daily ? `${formatINR(daily)}/day` : weekly ? `${formatINR(weekly)}/week` : "Contact for price"}
                 </div>
                 ${(hourly && (daily || weekly)) || (daily && weekly) ? `<div class="price-details">
-                    ${daily && !hourly ? `daily: ${formatINR(daily)}` : ""}
-                    ${weekly ? `${daily && !hourly ? " | " : ""}weekly: ${formatINR(weekly)}` : ""}
+                    ${daily && !hourly ? `Daily: ${formatINR(daily)}` : ""}
+                    ${weekly ? `${daily && !hourly ? " | " : ""}Weekly: ${formatINR(weekly)}` : ""}
                 </div>` : ""}
             `;
         }
 
-        // Escape user-generated content
         const safeTitle = escapeHtml(item.title);
         const safeCategory = escapeHtml(item.category);
         const safeItemType = escapeHtml(item.item_type);
@@ -811,7 +979,6 @@ function displayItems(items) {
     }).join("");
 }
 
-// Event delegation for item clicks
 const itemsContainer = document.getElementById('itemsContainer');
 if (itemsContainer) {
     itemsContainer.addEventListener('click', function(e) {
@@ -845,7 +1012,6 @@ if (form) {
         const formData = new FormData(form);
         const itemType = formData.get('item_type');
 
-        // Validate based on item type
         if (itemType === 'SELL') {
             const sellPrice = formData.get('sell_price');
             if (!sellPrice || parseFloat(sellPrice) <= 0) {
@@ -881,7 +1047,6 @@ if (form) {
             return;
         }
 
-        // Validate file count
         const files = fileInput.files;
         if (files.length > 5) {
             showAlert('Maximum 5 images allowed', 'error');
@@ -942,7 +1107,6 @@ if (form) {
     });
 }
 
-// Initial load
 fetchItems();
 
 });
