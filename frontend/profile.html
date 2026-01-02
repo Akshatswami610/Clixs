@@ -896,7 +896,7 @@
     </div>
 </div>
 
-<!-- Delete Account Modal -->
+<!-- Delete Account Modal - Step 1 -->
 <div class="modal" id="deleteAccountModal">
     <div class="modal-content">
         <div class="modal-icon">⚠️</div>
@@ -908,6 +908,32 @@
         </p>
         <div class="modal-buttons">
             <button class="modal-btn cancel-btn" onclick="closeDeleteAccountModal()">Cancel</button>
+            <button class="modal-btn confirm-btn" onclick="showDeleteAccountConfirmStep2()">Continue</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal - Step 2 -->
+<div class="modal" id="deleteAccountConfirmModal">
+    <div class="modal-content">
+        <div class="modal-icon">🔐</div>
+        <h2 class="modal-title">Final Confirmation Required</h2>
+        <p class="modal-message">
+            Type <strong style="color: #00d4ff;">DELETE</strong> (in capital letters) to confirm account deletion:
+        </p>
+        <form class="edit-form" id="deleteConfirmForm">
+            <div class="form-group">
+                <input type="text"
+                       class="form-input"
+                       id="deleteConfirmInput"
+                       placeholder="Type DELETE here"
+                       autocomplete="off"
+                       style="text-align: center; font-size: 1.2rem; font-weight: 600;">
+                <div class="error-message hidden" id="deleteConfirmError" style="text-align: center;"></div>
+            </div>
+        </form>
+        <div class="modal-buttons">
+            <button class="modal-btn cancel-btn" onclick="closeDeleteAccountConfirmModal()">Cancel</button>
             <button class="modal-btn confirm-btn" id="confirmDeleteAccountBtn" onclick="confirmDeleteAccount()">Delete My Account</button>
         </div>
     </div>
@@ -1444,74 +1470,182 @@ function closeEditProfileModal() {
     document.getElementById('editProfileModal').classList.remove('active');
 }
 
-// Show delete account confirmation
+// Show delete account confirmation - Step 1
 function showDeleteAccountConfirmation() {
     document.getElementById('deleteAccountModal').classList.add('active');
 }
 
-// Close delete account modal
+// Close delete account modal - Step 1
 function closeDeleteAccountModal() {
     document.getElementById('deleteAccountModal').classList.remove('active');
 }
 
+// Show delete account confirmation - Step 2
+function showDeleteAccountConfirmStep2() {
+    closeDeleteAccountModal();
+    document.getElementById('deleteAccountConfirmModal').classList.add('active');
+    document.getElementById('deleteConfirmInput').value = '';
+    document.getElementById('deleteConfirmError').classList.add('hidden');
+    document.getElementById('deleteConfirmInput').focus();
+}
+
+// Close delete account confirm modal - Step 2
+function closeDeleteAccountConfirmModal() {
+    document.getElementById('deleteAccountConfirmModal').classList.remove('active');
+    document.getElementById('deleteConfirmInput').value = '';
+    document.getElementById('deleteConfirmError').classList.add('hidden');
+}
+
 // Confirm delete account
 async function confirmDeleteAccount() {
-    const token = localStorage.getItem('authToken');
+    const confirmInput = document.getElementById('deleteConfirmInput').value;
+    const errorEl = document.getElementById('deleteConfirmError');
     const confirmBtn = document.getElementById('confirmDeleteAccountBtn');
 
-    if (!confirm('Are you ABSOLUTELY sure? Type "DELETE" to confirm:')) {
+    // Validate input
+    if (confirmInput !== 'DELETE') {
+        errorEl.textContent = 'Please type DELETE exactly as shown';
+        errorEl.classList.remove('hidden');
+        document.getElementById('deleteConfirmInput').focus();
         return;
     }
 
-    const finalConfirm = prompt('Type DELETE (in capital letters) to permanently delete your account:');
-    if (finalConfirm !== 'DELETE') {
-        showToast('Account deletion cancelled', 'info');
-        return;
-    }
+    const token = localStorage.getItem('authToken');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     confirmBtn.disabled = true;
     confirmBtn.textContent = 'Deleting...';
+    errorEl.classList.add('hidden');
 
     try {
-        const response = await fetch(`${API_BASE}/auth/profile/`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        // Try multiple possible endpoints for account deletion
+        let response;
+        let deleteEndpoint = '';
 
-        if (!response.ok) {
-            if (response.status === 401) {
-                showToast('Session expired. Please login again.', 'error');
-                setTimeout(() => {
-                    localStorage.removeItem('authToken');
-                    localStorage.removeItem('user');
-                    location.href = '{% url "login" %}';
-                }, 2000);
+        // Try endpoint 1: /auth/delete-account/
+        try {
+            response = await fetch(`${API_BASE}/auth/delete-account/`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            deleteEndpoint = '/auth/delete-account/';
+
+            if (response.ok) {
+                // Success with this endpoint
+                handleSuccessfulAccountDeletion();
                 return;
             }
-
-            const errorData = await response.json().catch(() => ({}));
-            const errorMsg = errorData.detail || errorData.error || 'Failed to delete account';
-            throw new Error(errorMsg);
+        } catch (e) {
+            console.log('Endpoint 1 failed, trying next...');
         }
 
-        showToast('Account deleted successfully. Goodbye!', 'info');
+        // Try endpoint 2: /auth/user/delete/
+        try {
+            response = await fetch(`${API_BASE}/auth/user/delete/`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            deleteEndpoint = '/auth/user/delete/';
 
-        // Clear all user data
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
+            if (response.ok) {
+                handleSuccessfulAccountDeletion();
+                return;
+            }
+        } catch (e) {
+            console.log('Endpoint 2 failed, trying next...');
+        }
 
-        // Redirect after delay
-        setTimeout(() => {
-            location.href = '{% url "home" %}';
-        }, 2000);
+        // Try endpoint 3: /auth/profile/ with DELETE (original)
+        try {
+            response = await fetch(`${API_BASE}/auth/profile/`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            deleteEndpoint = '/auth/profile/';
+
+            if (response.ok) {
+                handleSuccessfulAccountDeletion();
+                return;
+            }
+        } catch (e) {
+            console.log('Endpoint 3 failed, trying next...');
+        }
+
+        // Try endpoint 4: /users/{id}/ (REST pattern)
+        if (user.id) {
+            try {
+                response = await fetch(`${API_BASE}/users/${user.id}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                deleteEndpoint = `/users/${user.id}/`;
+
+                if (response.ok) {
+                    handleSuccessfulAccountDeletion();
+                    return;
+                }
+            } catch (e) {
+                console.log('Endpoint 4 failed...');
+            }
+        }
+
+        // If we get here, none of the endpoints worked
+        if (!response) {
+            throw new Error('Unable to connect to account deletion service. Please check your connection.');
+        }
+
+        // Handle error response
+        if (response.status === 401) {
+            showToast('Session expired. Please login again.', 'error');
+            setTimeout(() => {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('user');
+                location.href = '{% url "login" %}';
+            }, 2000);
+            return;
+        } else if (response.status === 405) {
+            throw new Error('Account deletion is currently unavailable. Please contact support.');
+        } else if (response.status === 403) {
+            throw new Error('You do not have permission to delete this account.');
+        }
+
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = errorData.detail || errorData.error || errorData.message || `Failed to delete account (tried endpoint: ${deleteEndpoint})`;
+        throw new Error(errorMsg);
+
     } catch (error) {
         console.error('Error deleting account:', error);
-        showToast(error.message || 'Failed to delete account. Please try again.', 'error');
+        showToast(error.message || 'Failed to delete account. Please try again or contact support.', 'error');
         confirmBtn.disabled = false;
         confirmBtn.textContent = 'Delete My Account';
     }
+}
+
+// Handle successful account deletion
+function handleSuccessfulAccountDeletion() {
+    closeDeleteAccountConfirmModal();
+    showToast('Account deleted successfully. Goodbye! 👋', 'info');
+
+    // Clear all user data
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+
+    // Redirect after delay
+    setTimeout(() => {
+        location.href = '{% url "home" %}';
+    }, 2500);
 }
 
 // Logout function
@@ -1537,6 +1671,8 @@ document.addEventListener('click', (e) => {
             closeEditProfileModal();
         } else if (e.target.id === 'deleteAccountModal') {
             closeDeleteAccountModal();
+        } else if (e.target.id === 'deleteAccountConfirmModal') {
+            closeDeleteAccountConfirmModal();
         }
     }
 });
@@ -1554,6 +1690,8 @@ document.addEventListener('keydown', (e) => {
                 closeEditProfileModal();
             } else if (activeModal.id === 'deleteAccountModal') {
                 closeDeleteAccountModal();
+            } else if (activeModal.id === 'deleteAccountConfirmModal') {
+                closeDeleteAccountConfirmModal();
             }
         }
     }
