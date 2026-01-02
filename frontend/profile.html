@@ -1081,11 +1081,19 @@ async function loadProfile() {
                 <div class="info-label">Registration Number</div>
                 <div class="info-value">${escapeHtml(user.registration_number || 'Not Provided')}</div>
             </div>
+            const memberSince = user.date_joined
+                ? new Date(user.date_joined).toLocaleDateString('en-IN', {
+                    year: 'numeric',
+                    month: 'long'
+                  })
+                : 'Not Available';
+
             <div class="info-card">
                 <div class="info-icon">📅</div>
                 <div class="info-label">Member Since</div>
-                <div class="info-value">${new Date().getFullYear()}</div>
+                <div class="info-value">${memberSince}</div>
             </div>
+
         `;
     } catch (error) {
         console.error('Error loading profile:', error);
@@ -1299,7 +1307,7 @@ function validateEditForm() {
     return isValid;
 }
 
-// Save item edit
+// Save item edit - FIXED VERSION
 async function saveItemEdit() {
     if (!itemToEdit) return;
 
@@ -1310,28 +1318,30 @@ async function saveItemEdit() {
 
     const token = localStorage.getItem('authToken');
     const saveBtn = document.getElementById('saveEditBtn');
-
     const status = document.getElementById('editStatus').value;
 
-    let updateData = {
-        status: status
-    };
+    // Create FormData
+    const formData = new FormData();
+    formData.append('status', status);
 
     // Add price data based on item type
     if (itemToEdit.item_type === 'SELL') {
         const sellPrice = document.getElementById('editSellPrice').value;
         if (sellPrice) {
-            updateData.sell_price = parseFloat(sellPrice);
+            formData.append('sell_price', sellPrice);
         }
     } else {
         const daily = document.getElementById('editRentDaily').value;
         const weekly = document.getElementById('editRentWeekly').value;
         const monthly = document.getElementById('editRentMonthly').value;
 
-        updateData.rent_prices = {};
-        if (daily) updateData.rent_prices.daily = parseFloat(daily);
-        if (weekly) updateData.rent_prices.weekly = parseFloat(weekly);
-        if (monthly) updateData.rent_prices.monthly = parseFloat(monthly);
+        const rentPrices = {};
+        if (daily) rentPrices.daily = parseFloat(daily);
+        if (weekly) rentPrices.weekly = parseFloat(weekly);
+        if (monthly) rentPrices.monthly = parseFloat(monthly);
+
+        // Send rent_prices as JSON string
+        formData.append('rent_prices', JSON.stringify(rentPrices));
     }
 
     saveBtn.disabled = true;
@@ -1341,10 +1351,10 @@ async function saveItemEdit() {
         const response = await fetch(`${API_BASE}/items/${itemToEdit.id}/`, {
             method: 'PATCH',
             headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                'Authorization': `Bearer ${token}`
+                // ❌ DO NOT set Content-Type - browser sets it automatically with boundary
             },
-            body: JSON.stringify(updateData)
+            body: formData
         });
 
         if (!response.ok) {
@@ -1353,7 +1363,7 @@ async function saveItemEdit() {
                 setTimeout(() => {
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('user');
-                    location.href = '{% url "login" %}';
+                    location.href = '/login/';
                 }, 2000);
                 return;
             } else if (response.status === 404) {
@@ -1437,7 +1447,7 @@ async function confirmDelete() {
                 setTimeout(() => {
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('user');
-                    location.href = '{% url "login" %}';
+                    location.href = '/login/';
                 }, 2000);
                 return;
             } else if (response.status === 404) {
@@ -1518,7 +1528,6 @@ async function confirmDeleteAccount() {
     errorEl.classList.add('hidden');
 
     try {
-        // Try multiple possible endpoints for account deletion
         let response;
         let deleteEndpoint = '';
 
@@ -1534,7 +1543,6 @@ async function confirmDeleteAccount() {
             deleteEndpoint = '/auth/delete-account/';
 
             if (response.ok) {
-                // Success with this endpoint
                 handleSuccessfulAccountDeletion();
                 return;
             }
@@ -1561,7 +1569,7 @@ async function confirmDeleteAccount() {
             console.log('Endpoint 2 failed, trying next...');
         }
 
-        // Try endpoint 3: /auth/profile/ with DELETE (original)
+        // Try endpoint 3: /auth/profile/
         try {
             response = await fetch(`${API_BASE}/auth/profile/`, {
                 method: 'DELETE',
@@ -1580,7 +1588,7 @@ async function confirmDeleteAccount() {
             console.log('Endpoint 3 failed, trying next...');
         }
 
-        // Try endpoint 4: /users/{id}/ (REST pattern)
+        // Try endpoint 4: /users/{id}/
         if (user.id) {
             try {
                 response = await fetch(`${API_BASE}/users/${user.id}/`, {
@@ -1601,33 +1609,28 @@ async function confirmDeleteAccount() {
             }
         }
 
-        // If we get here, none of the endpoints worked
+        // Handle errors
         if (!response) {
-            throw new Error('Unable to connect to account deletion service. Please check your connection.');
+            throw new Error('Unable to connect to account deletion service.');
         }
 
-        // Handle error response
         if (response.status === 401) {
             showToast('Session expired. Please login again.', 'error');
             setTimeout(() => {
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('user');
-                location.href = '{% url "login" %}';
+                location.href = '/login/';
             }, 2000);
             return;
-        } else if (response.status === 405) {
-            throw new Error('Account deletion is currently unavailable. Please contact support.');
-        } else if (response.status === 403) {
-            throw new Error('You do not have permission to delete this account.');
         }
 
         const errorData = await response.json().catch(() => ({}));
-        const errorMsg = errorData.detail || errorData.error || errorData.message || `Failed to delete account (tried endpoint: ${deleteEndpoint})`;
+        const errorMsg = errorData.detail || errorData.error || `Failed to delete account (${deleteEndpoint})`;
         throw new Error(errorMsg);
 
     } catch (error) {
         console.error('Error deleting account:', error);
-        showToast(error.message || 'Failed to delete account. Please try again or contact support.', 'error');
+        showToast(error.message || 'Failed to delete account. Please try again.', 'error');
         confirmBtn.disabled = false;
         confirmBtn.textContent = 'Delete My Account';
     }
@@ -1638,13 +1641,11 @@ function handleSuccessfulAccountDeletion() {
     closeDeleteAccountConfirmModal();
     showToast('Account deleted successfully. Goodbye! 👋', 'info');
 
-    // Clear all user data
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
 
-    // Redirect after delay
     setTimeout(() => {
-        location.href = '{% url "home" %}';
+        location.href = '/';
     }, 2500);
 }
 
@@ -1655,7 +1656,7 @@ function logout() {
         localStorage.removeItem('user');
         showToast('Logged out successfully', 'info');
         setTimeout(() => {
-            location.href = '{% url "home" %}';
+            location.href = '/';
         }, 1000);
     }
 }
@@ -1719,7 +1720,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, observerOptions);
 
-    // Observe elements when they're added
     const observeNewElements = () => {
         document.querySelectorAll('.item-card, .info-card').forEach(el => {
             if (!el.dataset.observed) {
@@ -1732,10 +1732,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Initial observation
     observeNewElements();
 
-    // Re-observe when items are loaded
     const originalLoadUserItems = window.loadUserItems;
     if (originalLoadUserItems) {
         window.loadUserItems = async function() {
