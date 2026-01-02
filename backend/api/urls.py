@@ -16,6 +16,7 @@ from .views import (
     ReportPostListView,
     FeedbackCreateView,
     FeedbackListView,
+    DeleteAccountView
 )
 
 router = DefaultRouter()
@@ -30,6 +31,7 @@ urlpatterns = [
     path("auth/login/", TokenObtainPairView.as_view(), name="token-obtain"),
     path("auth/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
     path("auth/profile/", UserProfileView.as_view(), name="user-profile"),
+    path("auth/delete-account/", DeleteAccountView.as_view(), name="delete-account"),
 
     # =========================
     # ITEMS

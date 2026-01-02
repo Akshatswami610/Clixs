@@ -190,3 +190,22 @@ class FeedbackListView(generics.ListAPIView):
     queryset = Feedback.objects.select_related("user")
     serializer_class = FeedbackSerializer
     permission_classes = [permissions.IsAdminUser]
+
+
+class DeleteAccountView(generics.DestroyAPIView):
+    """
+    Delete logged-in user's account
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+
+        # OPTIONAL: delete related data manually if needed
+        # Item.objects.filter(owner=user).delete()
+
+        user.delete()
+        return Response(
+            {"detail": "Account deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
