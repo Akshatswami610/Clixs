@@ -648,6 +648,12 @@
     margin-top: 0.5rem;
 }
 
+.error-message {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
 /* Toast Notifications */
 .toast {
     position: fixed;
@@ -850,12 +856,14 @@
             <div class="form-group" id="sellPriceGroup">
                 <label class="form-label">Selling Price (₹)</label>
                 <input type="number" class="form-input" id="editSellPrice" min="0" step="0.01" placeholder="Enter selling price">
+                <div class="error-message hidden" id="sellPriceError"></div>
             </div>
 
             <div id="rentPricesGroup" class="hidden">
                 <div class="form-group">
                     <label class="form-label">Daily Rent (₹)</label>
                     <input type="number" class="form-input" id="editRentDaily" min="0" step="0.01" placeholder="Enter daily rent">
+                    <div class="error-message hidden" id="rentDailyError"></div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Weekly Rent (₹) <span style="color: #95a5a6;">(Optional)</span></label>
@@ -1024,9 +1032,11 @@ async function loadProfile() {
         }
 
         // Update hero section
-        const fullName = `${user.first_name} ${user.last_name}`;
+        const firstName = user.first_name || 'User';
+        const lastName = user.last_name || '';
+        const fullName = `${firstName} ${lastName}`.trim();
         heroName.textContent = fullName;
-        heroAvatar.textContent = user.first_name.charAt(0).toUpperCase();
+        heroAvatar.textContent = firstName.charAt(0).toUpperCase();
 
         // Update profile info cards
         profileInfo.innerHTML = `
@@ -1038,7 +1048,7 @@ async function loadProfile() {
             <div class="info-card">
                 <div class="info-icon">📱</div>
                 <div class="info-label">Phone Number</div>
-                <div class="info-value">${escapeHtml(user.phone_number)}</div>
+                <div class="info-value">${escapeHtml(user.phone_number || 'Not Provided')}</div>
             </div>
             <div class="info-card">
                 <div class="info-icon">🆔</div>
@@ -1086,9 +1096,10 @@ async function loadUserItems() {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
 
         // Filter items by current user
-        const userItems = items.filter(item =>
-            item.user_id === user.id || item.owner?.id === user.id
-        );
+        const userItems = items.filter(item => {
+            const itemUserId = item.user_id || (item.owner && item.owner.id);
+            return itemUserId === user.id;
+        });
 
         if (userItems.length === 0) {
             itemsContainer.innerHTML = `
@@ -1150,10 +1161,10 @@ async function loadUserItems() {
                         ${priceHtml}
                         ${safeDescription ? `<div class="item-description">${safeDescription}</div>` : ''}
                         <div class="item-actions">
-                            <button class="action-btn edit-btn" onclick='editItem(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
+                            <button class="action-btn edit-btn" onclick='handleEditItem(${item.id})'>
                                 <span>✏️</span> Edit
                             </button>
-                            <button class="action-btn delete-btn" onclick="showDeleteConfirmation(${item.id}, '${safeTitle.replace(/'/g, "&#39;")}')">
+                            <button class="action-btn delete-btn" onclick='showDeleteConfirmation(${item.id}, "${safeTitle.replace(/"/g, '&quot;')}")'>
                                 <span>🗑️</span> Delete
                             </button>
                         </div>
@@ -1168,9 +1179,38 @@ async function loadUserItems() {
     }
 }
 
+// Handle edit item - loads fresh data
+async function handleEditItem(itemId) {
+    const token = localStorage.getItem('authToken');
+
+    try {
+        const response = await fetch(`${API_BASE}/items/${itemId}/`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to load item details');
+        }
+
+        const item = await response.json();
+        editItem(item);
+    } catch (error) {
+        console.error('Error loading item:', error);
+        showToast('Failed to load item details', 'error');
+    }
+}
+
 // Edit item function
 function editItem(item) {
     itemToEdit = item;
+
+    // Clear any previous error messages
+    document.querySelectorAll('.error-message').forEach(el => {
+        el.classList.add('hidden');
+        el.textContent = '';
+    });
 
     // Set status
     document.getElementById('editStatus').value = item.status;
@@ -1183,20 +1223,64 @@ function editItem(item) {
         sellPriceGroup.classList.remove('hidden');
         rentPricesGroup.classList.add('hidden');
         document.getElementById('editSellPrice').value = item.sell_price || '';
+        // Clear rent inputs
+        document.getElementById('editRentDaily').value = '';
+        document.getElementById('editRentWeekly').value = '';
+        document.getElementById('editRentMonthly').value = '';
     } else {
         sellPriceGroup.classList.add('hidden');
         rentPricesGroup.classList.remove('hidden');
         document.getElementById('editRentDaily').value = item.rent_prices?.daily || '';
         document.getElementById('editRentWeekly').value = item.rent_prices?.weekly || '';
         document.getElementById('editRentMonthly').value = item.rent_prices?.monthly || '';
+        // Clear sell input
+        document.getElementById('editSellPrice').value = '';
     }
 
     document.getElementById('editItemModal').classList.add('active');
 }
 
+// Validate edit form
+function validateEditForm() {
+    let isValid = true;
+
+    // Clear previous errors
+    document.querySelectorAll('.error-message').forEach(el => {
+        el.classList.add('hidden');
+        el.textContent = '';
+    });
+
+    if (!itemToEdit) return false;
+
+    if (itemToEdit.item_type === 'SELL') {
+        const sellPrice = document.getElementById('editSellPrice').value;
+        if (!sellPrice || parseFloat(sellPrice) <= 0) {
+            const errorEl = document.getElementById('sellPriceError');
+            errorEl.textContent = 'Please enter a valid selling price';
+            errorEl.classList.remove('hidden');
+            isValid = false;
+        }
+    } else {
+        const daily = document.getElementById('editRentDaily').value;
+        if (!daily || parseFloat(daily) <= 0) {
+            const errorEl = document.getElementById('rentDailyError');
+            errorEl.textContent = 'Please enter a valid daily rent price';
+            errorEl.classList.remove('hidden');
+            isValid = false;
+        }
+    }
+
+    return isValid;
+}
+
 // Save item edit
 async function saveItemEdit() {
     if (!itemToEdit) return;
+
+    if (!validateEditForm()) {
+        showToast('Please fix the errors before saving', 'error');
+        return;
+    }
 
     const token = localStorage.getItem('authToken');
     const saveBtn = document.getElementById('saveEditBtn');
@@ -1251,12 +1335,16 @@ async function saveItemEdit() {
             } else if (response.status === 403) {
                 throw new Error('You do not have permission to edit this item');
             }
-            throw new Error('Failed to update item');
+
+            // Try to get error message from response
+            const errorData = await response.json().catch(() => ({}));
+            const errorMsg = errorData.detail || errorData.error || 'Failed to update item';
+            throw new Error(errorMsg);
         }
 
         showToast('Item updated successfully!', 'success');
         closeEditItemModal();
-        loadUserItems();
+        await loadUserItems();
     } catch (error) {
         console.error('Error updating item:', error);
         showToast(error.message || 'Failed to update item. Please try again.', 'error');
@@ -1270,6 +1358,19 @@ async function saveItemEdit() {
 function closeEditItemModal() {
     itemToEdit = null;
     document.getElementById('editItemModal').classList.remove('active');
+
+    // Clear form
+    document.getElementById('editStatus').value = 'ACTIVE';
+    document.getElementById('editSellPrice').value = '';
+    document.getElementById('editRentDaily').value = '';
+    document.getElementById('editRentWeekly').value = '';
+    document.getElementById('editRentMonthly').value = '';
+
+    // Clear errors
+    document.querySelectorAll('.error-message').forEach(el => {
+        el.classList.add('hidden');
+        el.textContent = '';
+    });
 }
 
 // Show delete confirmation
@@ -1314,7 +1415,7 @@ async function confirmDelete() {
                 }, 2000);
                 return;
             } else if (response.status === 404) {
-                throw new Error('Item not found');
+                throw new Error('Item not found or already deleted');
             } else if (response.status === 403) {
                 throw new Error('You do not have permission to delete this item');
             }
@@ -1323,7 +1424,7 @@ async function confirmDelete() {
 
         showToast('Item deleted successfully!', 'success');
         closeDeleteModal();
-        loadUserItems();
+        await loadUserItems();
     } catch (error) {
         console.error('Error deleting item:', error);
         showToast(error.message || 'Failed to delete item. Please try again.', 'error');
@@ -1358,6 +1459,16 @@ async function confirmDeleteAccount() {
     const token = localStorage.getItem('authToken');
     const confirmBtn = document.getElementById('confirmDeleteAccountBtn');
 
+    if (!confirm('Are you ABSOLUTELY sure? Type "DELETE" to confirm:')) {
+        return;
+    }
+
+    const finalConfirm = prompt('Type DELETE (in capital letters) to permanently delete your account:');
+    if (finalConfirm !== 'DELETE') {
+        showToast('Account deletion cancelled', 'info');
+        return;
+    }
+
     confirmBtn.disabled = true;
     confirmBtn.textContent = 'Deleting...';
 
@@ -1379,13 +1490,19 @@ async function confirmDeleteAccount() {
                 }, 2000);
                 return;
             }
-            throw new Error('Failed to delete account');
+
+            const errorData = await response.json().catch(() => ({}));
+            const errorMsg = errorData.detail || errorData.error || 'Failed to delete account';
+            throw new Error(errorMsg);
         }
 
-        showToast('Account deleted successfully', 'info');
+        showToast('Account deleted successfully. Goodbye!', 'info');
+
+        // Clear all user data
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
 
+        // Redirect after delay
         setTimeout(() => {
             location.href = '{% url "home" %}';
         }, 2000);
@@ -1424,6 +1541,24 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// Close modals on ESC key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const activeModal = document.querySelector('.modal.active');
+        if (activeModal) {
+            if (activeModal.id === 'deleteModal') {
+                closeDeleteModal();
+            } else if (activeModal.id === 'editItemModal') {
+                closeEditItemModal();
+            } else if (activeModal.id === 'editProfileModal') {
+                closeEditProfileModal();
+            } else if (activeModal.id === 'deleteAccountModal') {
+                closeDeleteAccountModal();
+            }
+        }
+    }
+});
+
 // Initialize
 if (checkAuthRequired()) {
     loadProfile();
@@ -1446,11 +1581,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, observerOptions);
 
-    document.querySelectorAll('.item-card, .info-card').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-    });
+    // Observe elements when they're added
+    const observeNewElements = () => {
+        document.querySelectorAll('.item-card, .info-card').forEach(el => {
+            if (!el.dataset.observed) {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+                el.dataset.observed = 'true';
+            }
+        });
+    };
+
+    // Initial observation
+    observeNewElements();
+
+    // Re-observe when items are loaded
+    const originalLoadUserItems = window.loadUserItems;
+    if (originalLoadUserItems) {
+        window.loadUserItems = async function() {
+            await originalLoadUserItems();
+            setTimeout(observeNewElements, 100);
+        };
+    }
 });
 {% endblock %}
