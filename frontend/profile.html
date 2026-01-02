@@ -940,6 +940,7 @@
 </div>
 {% endblock %}
 
+
 {% block extra_scripts %}
 const API_BASE = '/api/v1';
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%231a1a2e'/%3E%3Cg transform='translate(200, 150)'%3E%3Ccircle cx='0' cy='-20' r='40' fill='%233498db' opacity='0.3'/%3E%3Crect x='-30' y='10' width='60' height='40' rx='5' fill='%233498db' opacity='0.3'/%3E%3Cpolygon points='0,-10 -25,25 25,25' fill='%233498db' opacity='0.5'/%3E%3C/g%3E%3Ctext x='200' y='250' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%23666'%3ENo Image%3C/text%3E%3C/svg%3E";
@@ -1081,19 +1082,11 @@ async function loadProfile() {
                 <div class="info-label">Registration Number</div>
                 <div class="info-value">${escapeHtml(user.registration_number || 'Not Provided')}</div>
             </div>
-            const memberSince = user.date_joined
-                ? new Date(user.date_joined).toLocaleDateString('en-IN', {
-                    year: 'numeric',
-                    month: 'long'
-                  })
-                : 'Not Available';
-
             <div class="info-card">
                 <div class="info-icon">📅</div>
                 <div class="info-label">Member Since</div>
-                <div class="info-value">${memberSince}</div>
+                <div class="info-value">${new Date().getFullYear()}</div>
             </div>
-
         `;
     } catch (error) {
         console.error('Error loading profile:', error);
@@ -1307,7 +1300,7 @@ function validateEditForm() {
     return isValid;
 }
 
-// Save item edit - FIXED VERSION
+// Save item edit
 async function saveItemEdit() {
     if (!itemToEdit) return;
 
@@ -1318,30 +1311,28 @@ async function saveItemEdit() {
 
     const token = localStorage.getItem('authToken');
     const saveBtn = document.getElementById('saveEditBtn');
+
     const status = document.getElementById('editStatus').value;
 
-    // Create FormData
-    const formData = new FormData();
-    formData.append('status', status);
+    let updateData = {
+        status: status
+    };
 
     // Add price data based on item type
     if (itemToEdit.item_type === 'SELL') {
         const sellPrice = document.getElementById('editSellPrice').value;
         if (sellPrice) {
-            formData.append('sell_price', sellPrice);
+            updateData.sell_price = parseFloat(sellPrice);
         }
     } else {
         const daily = document.getElementById('editRentDaily').value;
         const weekly = document.getElementById('editRentWeekly').value;
         const monthly = document.getElementById('editRentMonthly').value;
 
-        const rentPrices = {};
-        if (daily) rentPrices.daily = parseFloat(daily);
-        if (weekly) rentPrices.weekly = parseFloat(weekly);
-        if (monthly) rentPrices.monthly = parseFloat(monthly);
-
-        // Send rent_prices as JSON string
-        formData.append('rent_prices', JSON.stringify(rentPrices));
+        updateData.rent_prices = {};
+        if (daily) updateData.rent_prices.daily = parseFloat(daily);
+        if (weekly) updateData.rent_prices.weekly = parseFloat(weekly);
+        if (monthly) updateData.rent_prices.monthly = parseFloat(monthly);
     }
 
     saveBtn.disabled = true;
@@ -1351,10 +1342,10 @@ async function saveItemEdit() {
         const response = await fetch(`${API_BASE}/items/${itemToEdit.id}/`, {
             method: 'PATCH',
             headers: {
-                'Authorization': `Bearer ${token}`
-                // ❌ DO NOT set Content-Type - browser sets it automatically with boundary
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             },
-            body: formData
+            body: JSON.stringify(updateData)
         });
 
         if (!response.ok) {
@@ -1363,7 +1354,7 @@ async function saveItemEdit() {
                 setTimeout(() => {
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('user');
-                    location.href = '/login/';
+                    location.href = '{% url "login" %}';
                 }, 2000);
                 return;
             } else if (response.status === 404) {
@@ -1447,7 +1438,7 @@ async function confirmDelete() {
                 setTimeout(() => {
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('user');
-                    location.href = '/login/';
+                    location.href = '{% url "login" %}';
                 }, 2000);
                 return;
             } else if (response.status === 404) {
@@ -1528,6 +1519,7 @@ async function confirmDeleteAccount() {
     errorEl.classList.add('hidden');
 
     try {
+        // Try multiple possible endpoints for account deletion
         let response;
         let deleteEndpoint = '';
 
@@ -1543,6 +1535,7 @@ async function confirmDeleteAccount() {
             deleteEndpoint = '/auth/delete-account/';
 
             if (response.ok) {
+                // Success with this endpoint
                 handleSuccessfulAccountDeletion();
                 return;
             }
@@ -1569,7 +1562,7 @@ async function confirmDeleteAccount() {
             console.log('Endpoint 2 failed, trying next...');
         }
 
-        // Try endpoint 3: /auth/profile/
+        // Try endpoint 3: /auth/profile/ with DELETE (original)
         try {
             response = await fetch(`${API_BASE}/auth/profile/`, {
                 method: 'DELETE',
@@ -1588,7 +1581,7 @@ async function confirmDeleteAccount() {
             console.log('Endpoint 3 failed, trying next...');
         }
 
-        // Try endpoint 4: /users/{id}/
+        // Try endpoint 4: /users/{id}/ (REST pattern)
         if (user.id) {
             try {
                 response = await fetch(`${API_BASE}/users/${user.id}/`, {
@@ -1609,28 +1602,33 @@ async function confirmDeleteAccount() {
             }
         }
 
-        // Handle errors
+        // If we get here, none of the endpoints worked
         if (!response) {
-            throw new Error('Unable to connect to account deletion service.');
+            throw new Error('Unable to connect to account deletion service. Please check your connection.');
         }
 
+        // Handle error response
         if (response.status === 401) {
             showToast('Session expired. Please login again.', 'error');
             setTimeout(() => {
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('user');
-                location.href = '/login/';
+                location.href = '{% url "login" %}';
             }, 2000);
             return;
+        } else if (response.status === 405) {
+            throw new Error('Account deletion is currently unavailable. Please contact support.');
+        } else if (response.status === 403) {
+            throw new Error('You do not have permission to delete this account.');
         }
 
         const errorData = await response.json().catch(() => ({}));
-        const errorMsg = errorData.detail || errorData.error || `Failed to delete account (${deleteEndpoint})`;
+        const errorMsg = errorData.detail || errorData.error || errorData.message || `Failed to delete account (tried endpoint: ${deleteEndpoint})`;
         throw new Error(errorMsg);
 
     } catch (error) {
         console.error('Error deleting account:', error);
-        showToast(error.message || 'Failed to delete account. Please try again.', 'error');
+        showToast(error.message || 'Failed to delete account. Please try again or contact support.', 'error');
         confirmBtn.disabled = false;
         confirmBtn.textContent = 'Delete My Account';
     }
@@ -1641,11 +1639,13 @@ function handleSuccessfulAccountDeletion() {
     closeDeleteAccountConfirmModal();
     showToast('Account deleted successfully. Goodbye! 👋', 'info');
 
+    // Clear all user data
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
 
+    // Redirect after delay
     setTimeout(() => {
-        location.href = '/';
+        location.href = '{% url "home" %}';
     }, 2500);
 }
 
@@ -1656,7 +1656,7 @@ function logout() {
         localStorage.removeItem('user');
         showToast('Logged out successfully', 'info');
         setTimeout(() => {
-            location.href = '/';
+            location.href = '{% url "home" %}';
         }, 1000);
     }
 }
@@ -1720,6 +1720,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, observerOptions);
 
+    // Observe elements when they're added
     const observeNewElements = () => {
         document.querySelectorAll('.item-card, .info-card').forEach(el => {
             if (!el.dataset.observed) {
@@ -1732,8 +1733,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // Initial observation
     observeNewElements();
 
+    // Re-observe when items are loaded
     const originalLoadUserItems = window.loadUserItems;
     if (originalLoadUserItems) {
         window.loadUserItems = async function() {
