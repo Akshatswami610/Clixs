@@ -352,6 +352,7 @@
             align-items: center;
             gap: 1rem;
             max-width: 400px;
+            backdrop-filter: blur(10px);
         }
 
         @keyframes slideInRight {
@@ -383,6 +384,19 @@
         .toast-info {
             background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+
+        .toast::before {
+            content: '✓';
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* Responsive Design */
@@ -583,16 +597,19 @@
             }
         }
 
-        // Logout function
+        // Logout function - Direct logout without confirmation
         function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('user');
-                showToast('Logged out successfully');
-                setTimeout(() => {
-                    location.href = '{% url "home" %}';
-                }, 1000);
-            }
+            // Clear localStorage
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+
+            // Show success notification
+            showToast('Logged out successfully', 'success');
+
+            // Redirect to home page after 1 second
+            setTimeout(() => {
+                location.href = '{% url "home" %}';
+            }, 1000);
         }
 
         // Mobile menu toggle
