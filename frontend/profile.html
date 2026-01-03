@@ -669,6 +669,7 @@
     align-items: center;
     gap: 1rem;
     max-width: 400px;
+    backdrop-filter: blur(10px);
 }
 
 @keyframes slideInRight {
@@ -802,7 +803,7 @@
             <button class="profile-action-btn edit-profile-btn" onclick="showEditProfile()">
                 <span>✏️</span> Edit Profile
             </button>
-            <button class="profile-action-btn logout-btn" onclick="logout()">
+            <button class="profile-action-btn logout-btn" onclick="profileLogout()">
                 <span>🚪</span> Logout
             </button>
             <button class="profile-action-btn delete-account-btn" onclick="showDeleteAccountConfirmation()">
@@ -941,6 +942,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
+
 const API_BASE = '/api/v1';
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%231a1a2e'/%3E%3Cg transform='translate(200, 150)'%3E%3Ccircle cx='0' cy='-20' r='40' fill='%233498db' opacity='0.3'/%3E%3Crect x='-30' y='10' width='60' height='40' rx='5' fill='%233498db' opacity='0.3'/%3E%3Cpolygon points='0,-10 -25,25 25,25' fill='%233498db' opacity='0.5'/%3E%3C/g%3E%3Ctext x='200' y='250' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%23666'%3ENo Image%3C/text%3E%3C/svg%3E";
 
@@ -1648,16 +1650,19 @@ function handleSuccessfulAccountDeletion() {
     }, 2500);
 }
 
-// Logout function
-function logout() {
-    if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        showToast('Logged out successfully', 'info');
-        setTimeout(() => {
-            location.href = '{% url "home" %}';
-        }, 1000);
-    }
+// Logout function - Direct logout without confirmation
+function profileLogout() {
+    // Clear localStorage
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+
+    // Show success notification
+    showToast('Logged out successfully', 'success');
+
+    // Redirect to home page after 1 second
+    setTimeout(() => {
+        location.href = '{% url "home" %}';
+    }, 1000);
 }
 
 // Close modals on outside click
@@ -1744,4 +1749,5 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 });
+
 {% endblock %}
