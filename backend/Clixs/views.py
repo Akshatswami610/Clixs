@@ -70,7 +70,7 @@ def signup(request):
     if request.method == "POST":
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name")
-        phone_number = request.POST.get("phone")
+        phone = request.POST.get("phone")
         registration_number = request.POST.get("registration_number")
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirm_password")
@@ -79,23 +79,32 @@ def signup(request):
             messages.error(request, "Passwords do not match")
             return redirect("signup")
 
-        if User.objects.filter(phone_number=phone_number).exists():
-            messages.error(request, "Phone number already registered")
+        if User.objects.filter(registration_number=registration_number).exists():
+            messages.error(
+                request,
+                "This registration number is already registered."
+            )
             return redirect("signup")
 
-        user = User.objects.create_user(
-            phone_number=phone_number,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-            registration_number=registration_number,
-        )
+        try:
+            user = User.objects.create_user(
+                first_name=first_name,
+                last_name=last_name,
+                phone=phone,
+                registration_number=registration_number,
+                password=password,
+            )
+            messages.success(request, "Account created successfully!")
+            return redirect("login")
 
-        messages.success(request, "Account created successfully")
-        return redirect("login")
+        except IntegrityError:
+            messages.error(
+                request,
+                "This registration number is already registered."
+            )
+            return redirect("signup")
 
     return render(request, "signup.html")
-
 
 def itemdetail(request):
     return render(request, 'item-detail.html')
