@@ -389,6 +389,90 @@ body {
     }
 }
 
+/* Validation Message Styles */
+.validation-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 400px;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    animation: slideInRight 0.4s ease, fadeOut 0.4s ease 3.6s forwards;
+    z-index: 9999;
+    backdrop-filter: blur(10px);
+}
+
+.validation-message.error {
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.95), rgba(192, 57, 43, 0.95));
+    border: 2px solid rgba(231, 76, 60, 0.8);
+    color: white;
+}
+
+.validation-message.warning {
+    background: linear-gradient(135deg, rgba(241, 196, 15, 0.95), rgba(243, 156, 18, 0.95));
+    border: 2px solid rgba(241, 196, 15, 0.8);
+    color: #1a1a2e;
+}
+
+.validation-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.validation-text {
+    flex: 1;
+}
+
+.validation-close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.validation-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 968px) {
     .auth-container {
@@ -409,6 +493,13 @@ body {
 
     .auth-right {
         min-height: 60vh;
+    }
+
+    .validation-message {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
     }
 }
 
@@ -495,7 +586,7 @@ body {
                 </div>
             {% endif %}
 
-            <form method="post" action="{% url 'signup' %}">
+            <form method="post" action="{% url 'signup' %}" id="signupForm">
                 {% csrf_token %}
 
                 <div class="form-row">
@@ -611,13 +702,50 @@ body {
 {% endblock %}
 
 {% block extra_scripts %}
+<script>
+// Show validation message
+function showValidationMessage(message, type = 'error') {
+    // Remove any existing messages
+    const existing = document.querySelector('.validation-message');
+    if (existing) {
+        existing.remove();
+    }
+
+    // Create message element
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `validation-message ${type}`;
+
+    const icon = type === 'error' ? '⚠️' : '⚠️';
+
+    messageDiv.innerHTML = `
+        <span class="validation-icon">${icon}</span>
+        <span class="validation-text">${message}</span>
+        <button class="validation-close" aria-label="Close">×</button>
+    `;
+
+    document.body.appendChild(messageDiv);
+
+    // Close button functionality
+    const closeBtn = messageDiv.querySelector('.validation-close');
+    closeBtn.addEventListener('click', () => {
+        messageDiv.style.animation = 'fadeOut 0.3s ease forwards';
+        setTimeout(() => messageDiv.remove(), 300);
+    });
+
+    // Auto remove after 4 seconds
+    setTimeout(() => {
+        if (messageDiv.parentElement) {
+            messageDiv.style.animation = 'fadeOut 0.3s ease forwards';
+            setTimeout(() => messageDiv.remove(), 300);
+        }
+    }, 4000);
+}
+
 // Password toggle functionality
-function setupPasswordToggle(toggleId, inputId) {
-    const toggleBtn = document.getElementById(toggleId);
+function setupPasswordToggle(inputId) {
     const input = document.getElementById(inputId);
 
-    if (toggleBtn && input) {
-        // Create toggle button
+    if (input && input.parentElement) {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'toggle-password';
@@ -638,7 +766,6 @@ function setupPasswordToggle(toggleId, inputId) {
             border-radius: 8px;
         `;
 
-        // Make input parent position relative
         input.parentElement.style.position = 'relative';
         input.parentElement.appendChild(button);
 
@@ -660,58 +787,59 @@ function setupPasswordToggle(toggleId, inputId) {
     }
 }
 
-// Initialize password toggles
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     // Add password toggles
+    setupPasswordToggle('id_password');
+    setupPasswordToggle('id_confirm_password');
+
+    // Form submission enhancement
+    const form = document.getElementById('signupForm');
+    const submitBtn = document.querySelector('.submit-btn');
     const passwordInput = document.getElementById('id_password');
     const confirmPasswordInput = document.getElementById('id_confirm_password');
 
-    if (passwordInput && passwordInput.parentElement) {
-        setupPasswordToggle(null, 'id_password');
-    }
-
-    if (confirmPasswordInput && confirmPasswordInput.parentElement) {
-        setupPasswordToggle(null, 'id_confirm_password');
-    }
-
-    // Form submission enhancement
-    const form = document.querySelector('form');
-    const submitBtn = document.querySelector('.submit-btn');
-
     if (form && submitBtn) {
-        form.addEventListener('submit', function() {
+        form.addEventListener('submit', function(e) {
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                e.preventDefault();
+
+                // Add error class to inputs
+                confirmPasswordInput.classList.add('error');
+                passwordInput.classList.add('error');
+
+                // Show validation message
+                showValidationMessage('Passwords do not match! Please make sure both password fields are identical.', 'error');
+
+                // Remove error class after animation
+                setTimeout(() => {
+                    confirmPasswordInput.classList.remove('error');
+                    passwordInput.classList.remove('error');
+                }, 500);
+
+                return false;
+            }
+
+            // Disable button and show loading state
             submitBtn.disabled = true;
             submitBtn.style.opacity = '0.7';
             submitBtn.innerHTML = '<span>Creating account...</span>';
         });
     }
 
-    // Client-side validation
-    if (passwordInput && confirmPasswordInput) {
-        form.addEventListener('submit', function(e) {
-            const password = passwordInput.value;
-            const confirmPassword = confirmPasswordInput.value;
-
-            if (password !== confirmPassword) {
-                e.preventDefault();
-                alert('Passwords do not match!');
-                submitBtn.disabled = false;
-                submitBtn.style.opacity = '1';
-                submitBtn.innerHTML = '<span>→</span><span>Create Account</span>';
-            }
-        });
-    }
-});
-
-// Show Django messages as styled alerts
-{% if messages %}
-    window.addEventListener('DOMContentLoaded', function() {
+    // Show Django messages as styled alerts
+    {% if messages %}
         {% for message in messages %}
             const messageDiv = document.querySelector('.error-message');
             if (messageDiv) {
                 messageDiv.style.animation = 'slideDown 0.3s ease';
             }
         {% endfor %}
-    });
-{% endif %}
+    {% endif %}
+});
+</script>
 {% endblock %}
