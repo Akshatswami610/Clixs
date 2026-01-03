@@ -10,6 +10,7 @@ from .models import (
     ReportPost,
     Feedback,
 )
+
 from .serializers import (
     UserSerializer,
     UserRegisterSerializer,
@@ -61,6 +62,20 @@ class UserProfileView(generics.RetrieveAPIView):
         return self.request.user
 
 
+class DeleteAccountView(generics.DestroyAPIView):
+    """
+    Delete logged-in user's account
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        request.user.delete()
+        return Response(
+            {"detail": "Account deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+
 # =========================
 # Item Views
 # =========================
@@ -69,43 +84,33 @@ class ItemViewSet(viewsets.ModelViewSet):
     """
     CRUD for Items
     """
-    queryset = Item.objects.select_related("owner").prefetch_related("images").all()
+    queryset = Item.objects.select_related("owner").prefetch_related("images")
     serializer_class = ItemSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-    parser_classes = [MultiPartParser, FormParser]  # Added to handle file uploads
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        IsOwnerOrReadOnly
+    ]
+    parser_classes = [MultiPartParser, FormParser]
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
     def create(self, request, *args, **kwargs):
-        """
-        Override create to handle image uploads
-        """
-        # Serialize and validate item data
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # Create the item
         item = serializer.save(owner=request.user)
 
-        # Handle image uploads - get all images from request.FILES
-        images = request.FILES.getlist('images')
+        images = request.FILES.getlist("images")
+        for image in images:
+            ItemImage.objects.create(item=item, image=image)
 
-        # Create ItemImage objects for each uploaded image
-        for image_file in images:
-            ItemImage.objects.create(item=item, image=image_file)
-
-        # Refresh the item to include the newly created images
         item.refresh_from_db()
-
-        # Return the complete item data with images
         output_serializer = self.get_serializer(item)
-        headers = self.get_success_headers(output_serializer.data)
 
         return Response(
             output_serializer.data,
-            status=status.HTTP_201_CREATED,
-            headers=headers
+            status=status.HTTP_201_CREATED
         )
 
 
@@ -125,8 +130,7 @@ class ItemImageViewSet(viewsets.ModelViewSet):
         return ItemImage.objects.filter(item__owner=self.request.user)
 
     def perform_create(self, serializer):
-        item_id = self.request.data.get("item")
-        serializer.save(item_id=item_id)
+        serializer.save(item_id=self.request.data.get("item"))
 
 
 # =========================
@@ -190,22 +194,3 @@ class FeedbackListView(generics.ListAPIView):
     queryset = Feedback.objects.select_related("user")
     serializer_class = FeedbackSerializer
     permission_classes = [permissions.IsAdminUser]
-
-
-class DeleteAccountView(generics.DestroyAPIView):
-    """
-    Delete logged-in user's account
-    """
-    permission_classes = [permissions.IsAuthenticated]
-
-    def delete(self, request, *args, **kwargs):
-        user = request.user
-
-        # OPTIONAL: delete related data manually if needed
-        # Item.objects.filter(owner=user).delete()
-
-        user.delete()
-        return Response(
-            {"detail": "Account deleted successfully"},
-            status=status.HTTP_204_NO_CONTENT
-        )
