@@ -268,6 +268,7 @@ body {
 
 .form-group {
     margin-bottom: 1.5rem;
+    position: relative;
 }
 
 .form-label {
@@ -315,7 +316,15 @@ body {
     color: #e74c3c;
     font-size: 0.875rem;
     margin-top: 0.5rem;
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    animation: slideDown 0.3s ease;
+}
+
+.field-error::before {
+    content: '⚠️';
+    font-size: 0.85rem;
 }
 
 .submit-btn {
@@ -376,6 +385,15 @@ body {
     margin-bottom: 1.5rem;
     text-align: center;
     animation: slideDown 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.error-message::before {
+    content: '⚠️';
+    font-size: 1.2rem;
 }
 
 @keyframes slideDown {
@@ -412,12 +430,6 @@ body {
     background: linear-gradient(135deg, rgba(231, 76, 60, 0.95), rgba(192, 57, 43, 0.95));
     border: 2px solid rgba(231, 76, 60, 0.8);
     color: white;
-}
-
-.validation-message.warning {
-    background: linear-gradient(135deg, rgba(241, 196, 15, 0.95), rgba(243, 156, 18, 0.95));
-    border: 2px solid rgba(241, 196, 15, 0.8);
-    color: #1a1a2e;
 }
 
 .validation-icon {
@@ -669,6 +681,7 @@ body {
                         {% if form.password.errors %}
                             <div class="field-error">{{ form.password.errors.0 }}</div>
                         {% endif %}
+                        <div class="field-error" id="password-error" style="display: none;"></div>
                     </div>
 
                     <div class="form-group">
@@ -684,10 +697,11 @@ body {
                         {% if form.confirm_password.errors %}
                             <div class="field-error">{{ form.confirm_password.errors.0 }}</div>
                         {% endif %}
+                        <div class="field-error" id="confirm-password-error" style="display: none;"></div>
                     </div>
                 </div>
 
-                <button type="submit" class="submit-btn">
+                <button type="submit" class="submit-btn" id="submitBtn">
                     <span>→</span>
                     <span>Create Account</span>
                 </button>
@@ -703,7 +717,7 @@ body {
 
 {% block extra_scripts %}
 <script>
-// Show validation message
+// Show validation message (toast notification)
 function showValidationMessage(message, type = 'error') {
     // Remove any existing messages
     const existing = document.querySelector('.validation-message');
@@ -741,6 +755,36 @@ function showValidationMessage(message, type = 'error') {
     }, 4000);
 }
 
+// Show inline field error
+function showFieldError(inputId, errorId, message) {
+    const input = document.getElementById(inputId);
+    const errorDiv = document.getElementById(errorId);
+
+    if (input && errorDiv) {
+        input.classList.add('error');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'flex';
+
+        // Scroll to the error field
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Focus on the input
+        setTimeout(() => input.focus(), 300);
+    }
+}
+
+// Clear field error
+function clearFieldError(inputId, errorId) {
+    const input = document.getElementById(inputId);
+    const errorDiv = document.getElementById(errorId);
+
+    if (input && errorDiv) {
+        input.classList.remove('error');
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+    }
+}
+
 // Password toggle functionality
 function setupPasswordToggle(inputId) {
     const input = document.getElementById(inputId);
@@ -754,8 +798,7 @@ function setupPasswordToggle(inputId) {
         button.style.cssText = `
             position: absolute;
             right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
+            top: 38px;
             background: none;
             border: none;
             color: #b0b0b0;
@@ -764,9 +807,9 @@ function setupPasswordToggle(inputId) {
             padding: 0.5rem;
             transition: all 0.3s ease;
             border-radius: 8px;
+            z-index: 10;
         `;
 
-        input.parentElement.style.position = 'relative';
         input.parentElement.appendChild(button);
 
         button.addEventListener('click', function() {
@@ -793,14 +836,33 @@ document.addEventListener('DOMContentLoaded', function() {
     setupPasswordToggle('id_password');
     setupPasswordToggle('id_confirm_password');
 
-    // Form submission enhancement
+    // Get form elements
     const form = document.getElementById('signupForm');
-    const submitBtn = document.querySelector('.submit-btn');
+    const submitBtn = document.getElementById('submitBtn');
     const passwordInput = document.getElementById('id_password');
     const confirmPasswordInput = document.getElementById('id_confirm_password');
 
+    // Clear errors on input change
+    if (passwordInput) {
+        passwordInput.addEventListener('input', function() {
+            clearFieldError('id_password', 'password-error');
+            clearFieldError('id_confirm_password', 'confirm-password-error');
+        });
+    }
+
+    if (confirmPasswordInput) {
+        confirmPasswordInput.addEventListener('input', function() {
+            clearFieldError('id_confirm_password', 'confirm-password-error');
+        });
+    }
+
+    // Form submission validation
     if (form && submitBtn) {
         form.addEventListener('submit', function(e) {
+            // Clear previous errors
+            clearFieldError('id_password', 'password-error');
+            clearFieldError('id_confirm_password', 'confirm-password-error');
+
             const password = passwordInput.value;
             const confirmPassword = confirmPasswordInput.value;
 
@@ -808,30 +870,23 @@ document.addEventListener('DOMContentLoaded', function() {
             if (password !== confirmPassword) {
                 e.preventDefault();
 
-                // Add error class to inputs
-                confirmPasswordInput.classList.add('error');
-                passwordInput.classList.add('error');
+                // Show inline error under confirm password field
+                showFieldError('id_confirm_password', 'confirm-password-error', 'Passwords do not match');
 
-                // Show validation message
+                // Also show toast notification
                 showValidationMessage('Passwords do not match! Please make sure both password fields are identical.', 'error');
-
-                // Remove error class after animation
-                setTimeout(() => {
-                    confirmPasswordInput.classList.remove('error');
-                    passwordInput.classList.remove('error');
-                }, 500);
 
                 return false;
             }
 
-            // Disable button and show loading state
+            // If validation passes, show loading state
             submitBtn.disabled = true;
             submitBtn.style.opacity = '0.7';
             submitBtn.innerHTML = '<span>Creating account...</span>';
         });
     }
 
-    // Show Django messages as styled alerts
+    // Show Django messages with animation
     {% if messages %}
         {% for message in messages %}
             const messageDiv = document.querySelector('.error-message');
