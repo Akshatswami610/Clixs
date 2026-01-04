@@ -45,8 +45,8 @@ urlpatterns = [
     path('addpost/', addpost, name='addpost'),
     path('chats/', chats, name='chats'),
     path('contact/', contactus, name='contactus'),
-    path('terms/', views.terms, name='terms'),
-    path('privacy/', views.privacy, name='privacy'),
+    path('terms/', terms, name='terms'),
+    path('privacy/', privacy, name='privacy'),
 ]
 
 # =========================
