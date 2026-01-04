@@ -1,10 +1,392 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "basic.html" %}
 
-</body>
-</html>
+{% block title %}Terms of Service - Clixs{% endblock %}
+
+{% block extra_styles %}
+.terms-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
+
+.terms-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.terms-title {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #3498db, #00d4ff, #9b59b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+    animation: fadeInDown 0.8s ease;
+}
+
+.terms-subtitle {
+    color: #b0b0b0;
+    font-size: 1.1rem;
+}
+
+.terms-updated {
+    color: #00d4ff;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.terms-content {
+    background: rgba(30, 30, 45, 0.8);
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    animation: fadeIn 0.5s ease;
+}
+
+.terms-section {
+    margin-bottom: 3rem;
+}
+
+.terms-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.section-icon {
+    font-size: 1.5rem;
+}
+
+.section-text {
+    color: #e0e0e0;
+    line-height: 1.8;
+    font-size: 1.05rem;
+    margin-bottom: 1.5rem;
+}
+
+.terms-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.terms-list li {
+    color: #e0e0e0;
+    line-height: 1.8;
+    font-size: 1.05rem;
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+    position: relative;
+}
+
+.terms-list li::before {
+    content: "▸";
+    position: absolute;
+    left: 0.5rem;
+    color: #3498db;
+    font-size: 1.2rem;
+}
+
+.highlight-box {
+    background: rgba(52, 152, 219, 0.1);
+    border-left: 4px solid #3498db;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin: 1.5rem 0;
+}
+
+.highlight-text {
+    color: #00d4ff;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.contact-box {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    margin-top: 3rem;
+}
+
+.contact-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.contact-text {
+    color: #b0b0b0;
+    font-size: 1.05rem;
+    margin-bottom: 1.5rem;
+}
+
+.contact-link {
+    color: #00d4ff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.contact-link:hover {
+    color: #3498db;
+    text-decoration: underline;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .terms-container {
+        padding: 2rem 1rem;
+    }
+
+    .terms-title {
+        font-size: 2rem;
+    }
+
+    .terms-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .section-text,
+    .terms-list li {
+        font-size: 1rem;
+    }
+}
+{% endblock %}
+
+{% block content %}
+<div class="terms-container">
+    <div class="terms-header">
+        <h1 class="terms-title">Terms of Service</h1>
+        <p class="terms-subtitle">Please read these terms carefully before using Clixs</p>
+        <p class="terms-updated">Last Updated: January 4, 2026</p>
+    </div>
+
+    <div class="terms-content">
+        <div class="terms-section">
+            <h2 class="section-title">
+                <span class="section-icon">📜</span>
+                1. Acceptance of Terms
+            </h2>
+            <p class="section-text">
+                By accessing and using Clixs ("the Platform"), you accept and agree to be bound by the terms and provisions of this agreement. If you do not agree to these Terms of Service, please do not use our platform.
+            </p>
+            <div class="highlight-box">
+                <p class="highlight-text">
+                    Your continued use of Clixs constitutes your acceptance of these terms and any future modifications.
+                </p>
+            </div>
+        </div>
+
+        <div class="terms-section">
+            <h2 class="section-title">
+                <span class="section-icon">👤</span>
+                2. User Accounts
+            </h2>
+            <p class="section-text">
+                To access certain features of Clixs, you must create an account. You agree to:
+            </p>
+            <ul class="terms-list">
+                <li>Provide accurate, current, and complete information during registration</li>
+                <li>Maintain and promptly update your account information</li>
+                <li>Keep your password secure and confidential</li>
+                <li>Notify us immediately of any unauthorized access to your account</li>
+                <li>Be responsible for all activities that occur under your account</li>
+                <li>Not share your account credentials with others</li>
+            </ul>
+        </div>
+
+        <div class="terms-section">
+            <h2 class="section-title">
+                <span class="section-icon">🛒</span>
+                3. Marketplace Rules
+            </h2>
+            <p class="section-text">
+                Clixs is a platform for buying, selling, and renting items. All users must:
+            </p>
+            <ul class="terms-list">
+                <li>Provide accurate descriptions and pricing for listed items</li>
+                <li>Upload genuine images of the items being sold or rented</li>
+                <li>Comply with all applicable local, state, and federal laws</li>
+                <li>Not list prohibited items (illegal goods, weapons, counterfeit items, etc.)</li>
+                <li>Honor all transactions and agreements made through the platform</li>
+                <li>Communicate respectfully with other users</li>
+                <li>Not engage in fraudulent or deceptive practices</li>
+            </ul>
+        </div>
+
+        <div class="terms-section">
+            <h2 class="section-title">
+                <span class="section-icon">🚫</span>
+                4. Prohibited Activities
+            </h2>
+            <p class="section-text">
+                You may not use Clixs to:
+            </p>
+            <ul class="terms-list">
+                <li>Violate any laws or regulations</li>
+                <li>Infringe on intellectual property rights</li>
+                <li>Post false, misleading, or deceptive content</li>
+                <li>Harass, threaten, or abuse other users</li>
+                <li>Distribute spam or unsolicited messages</li>
+                <li>Upload malicious software or code</li>
+                <li>Attempt to gain unauthorized access to our systems</li>
+                <li>Scrape or collect data from the platform without permission</li>
+                <li>Create multiple accounts to manipulate the platform</li>
+            </ul>
+        </div>
+
+        <div class="terms-section">
+            <h2 class="section-title">
+                <span class="section-icon">💳</span>
+                5. Transactions and Payments
+            </h2>
+            <p class="section-text">
+                All transactions between buyers and sellers on Clixs are conducted directly between users. Clixs:
+            </p>
+            <ul class="terms-list">
+                <li>Acts as a facilitator and is not a party to transactions</li>
+                <li>Does not guarantee the quality, safety, or legality of items listed</li>
+                <li>Is not responsible for delivery, payment disputes, or item conditions</li>
+                <li>Recommends users verify items before completing transactions</li>
+                <li>Encourages secure payment methods and in-person inspections when possible</li>
+            </ul>
+            <div class="highlight-box">
+                <p class="highlight-text">
+                    Users are solely responsible for their transactions and should exercise caution when buying, selling, or renting items.
+                </p>
+            </div>
+        </div>
+
+        <div class="terms-section">
+            <h2 class="section-title">
+                <span class="section-icon">📝</span>
+                6. Content and Intellectual Property
+            </h2>
+            <p class="section-text">
+                By posting content on Clixs, you grant us a non-exclusive, worldwide, royalty-free license to use, display, and distribute your content on our platform. You represent that:
+            </p>
+            <ul class="terms-list">
+                <li>You own or have rights to all content you post</li>
+                <li>Your content does not infringe on others' rights</li>
+                <li>You have permission to use any images or descriptions posted</li>
+            </ul>
+            <p class="section-text">
+                Clixs retains all rights to the platform's design, features, and branding. You may not copy, modify, or distribute our intellectual property without permission.
+            </p>
+        </div>
+
+        <div class="terms-section">
+            <h2 class="section-title">
+                <span class="section-icon">⚖️</span>
+                7. Limitation of Liability
+            </h2>
+            <p class="section-text">
+                To the fullest extent permitted by law, Clixs and its affiliates shall not be liable for:
+            </p>
+            <ul class="terms-list">
+                <li>Any indirect, incidental, or consequential damages</li>
+                <li>Loss of profits, data, or business opportunities</li>
+                <li>Damages arising from user transactions or interactions</li>
+                <li>Unauthorized access to your account or data</li>
+                <li>Errors, bugs, or interruptions in service</li>
+            </ul>
+            <div class="highlight-box">
+                <p class="highlight-text">
+                    Clixs is provided "as is" without warranties of any kind, either express or implied.
+                </p>
+            </div>
+        </div>
+
+        <div class="terms-section">
+            <h2 class="section-title">
+                <span class="section-icon">🔐</span>
+                8. Privacy and Data Protection
+            </h2>
+            <p class="section-text">
+                Your use of Clixs is also governed by our Privacy Policy. We collect, use, and protect your personal information as described in our Privacy Policy. By using Clixs, you consent to our data practices.
+            </p>
+        </div>
+
+        <div class="terms-section">
+            <h2 class="section-title">
+                <span class="section-icon">⚠️</span>
+                9. Account Termination
+            </h2>
+            <p class="section-text">
+                We reserve the right to suspend or terminate your account at any time for:
+            </p>
+            <ul class="terms-list">
+                <li>Violation of these Terms of Service</li>
+                <li>Fraudulent or illegal activity</li>
+                <li>Repeated complaints from other users</li>
+                <li>Extended periods of inactivity</li>
+                <li>Any reason we deem necessary to protect the platform and its users</li>
+            </ul>
+            <p class="section-text">
+                You may also terminate your account at any time through your profile settings.
+            </p>
+        </div>
+
+        <div class="terms-section">
+            <h2 class="section-title">
+                <span class="section-icon">🔄</span>
+                10. Modifications to Terms
+            </h2>
+            <p class="section-text">
+                Clixs reserves the right to modify these Terms of Service at any time. We will notify users of significant changes through email or platform notifications. Your continued use of the platform after such modifications constitutes acceptance of the updated terms.
+            </p>
+        </div>
+
+        <div class="terms-section">
+            <h2 class="section-title">
+                <span class="section-icon">🌍</span>
+                11. Governing Law
+            </h2>
+            <p class="section-text">
+                These Terms of Service shall be governed by and construed in accordance with the laws of India. Any disputes arising from these terms shall be subject to the exclusive jurisdiction of the courts in Jalandhar, Punjab.
+            </p>
+        </div>
+
+        <div class="contact-box">
+            <h3 class="contact-title">Questions About Our Terms?</h3>
+            <p class="contact-text">
+                If you have any questions or concerns about these Terms of Service, please contact us:
+            </p>
+            <p class="contact-text">
+                📧 Email: <a href="mailto:support@clixs.com" class="contact-link">support@clixs.com</a><br>
+                📞 Phone: <a href="tel:+12345678900" class="contact-link">+1 (234) 567-890</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
