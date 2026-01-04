@@ -108,3 +108,9 @@ def signup(request):
 
 def itemdetail(request):
     return render(request, 'item-detail.html')
+
+def terms(request):
+    return render(request, 'terms.html')
+
+def privacy(request):
+    return render(request, 'privacy.html')
