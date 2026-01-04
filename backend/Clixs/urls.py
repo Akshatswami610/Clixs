@@ -13,6 +13,8 @@ from .views import (
     contactus,
     chats,
     itemdetail,
+    terms,
+    privacy,
 )
 
 urlpatterns = [
@@ -43,6 +45,8 @@ urlpatterns = [
     path('addpost/', addpost, name='addpost'),
     path('chats/', chats, name='chats'),
     path('contact/', contactus, name='contactus'),
+    path('terms/', views.terms, name='terms'),
+    path('privacy/', views.privacy, name='privacy'),
 ]
 
 # =========================
