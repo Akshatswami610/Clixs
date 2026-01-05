@@ -1,7 +1,11 @@
 from rest_framework import viewsets, generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.views import APIView
+
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from .models import (
     Item,
@@ -9,6 +13,8 @@ from .models import (
     ContactForm,
     ReportPost,
     Feedback,
+    Chat,
+    Message,
 )
 
 from .serializers import (
@@ -19,19 +25,17 @@ from .serializers import (
     ContactFormSerializer,
     ReportPostSerializer,
     FeedbackSerializer,
+    ChatSerializer,
+    MessageSerializer,
 )
 
 User = get_user_model()
 
-
 # =========================
 # Permissions
 # =========================
-
 class IsOwnerOrReadOnly(permissions.BasePermission):
-    """
-    Only owners can edit/delete objects
-    """
+    """Only owners can edit/delete objects"""
 
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
@@ -42,19 +46,12 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 # =========================
 # User Views
 # =========================
-
 class UserRegisterView(generics.CreateAPIView):
-    """
-    User Registration
-    """
     serializer_class = UserRegisterSerializer
     permission_classes = [permissions.AllowAny]
 
 
 class UserProfileView(generics.RetrieveAPIView):
-    """
-    Get logged-in user profile
-    """
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -63,32 +60,25 @@ class UserProfileView(generics.RetrieveAPIView):
 
 
 class DeleteAccountView(generics.DestroyAPIView):
-    """
-    Delete logged-in user's account
-    """
     permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, *args, **kwargs):
         request.user.delete()
         return Response(
             {"detail": "Account deleted successfully"},
-            status=status.HTTP_204_NO_CONTENT
+            status=status.HTTP_204_NO_CONTENT,
         )
 
 
 # =========================
 # Item Views
 # =========================
-
 class ItemViewSet(viewsets.ModelViewSet):
-    """
-    CRUD for Items
-    """
     queryset = Item.objects.select_related("owner").prefetch_related("images")
     serializer_class = ItemSerializer
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly
+        IsOwnerOrReadOnly,
     ]
     parser_classes = [MultiPartParser, FormParser]
 
@@ -98,7 +88,6 @@ class ItemViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         item = serializer.save(owner=request.user)
 
         images = request.FILES.getlist("images")
@@ -107,48 +96,40 @@ class ItemViewSet(viewsets.ModelViewSet):
 
         item.refresh_from_db()
         output_serializer = self.get_serializer(item)
-
         return Response(
             output_serializer.data,
-            status=status.HTTP_201_CREATED
+            status=status.HTTP_201_CREATED,
         )
 
 
 # =========================
 # Item Image Views
 # =========================
-
 class ItemImageViewSet(viewsets.ModelViewSet):
-    """
-    Upload & delete item images
-    """
     serializer_class = ItemImageSerializer
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
-        return ItemImage.objects.filter(item__owner=self.request.user)
+        return ItemImage.objects.filter(
+            item__owner=self.request.user
+        )
 
     def perform_create(self, serializer):
-        serializer.save(item_id=self.request.data.get("item"))
+        serializer.save(
+            item_id=self.request.data.get("item")
+        )
 
 
 # =========================
 # Contact Form Views
 # =========================
-
 class ContactFormCreateView(generics.CreateAPIView):
-    """
-    Public contact form submission
-    """
     serializer_class = ContactFormSerializer
     permission_classes = [permissions.AllowAny]
 
 
 class ContactFormListView(generics.ListAPIView):
-    """
-    Admin view for contact messages
-    """
     queryset = ContactForm.objects.all()
     serializer_class = ContactFormSerializer
     permission_classes = [permissions.IsAdminUser]
@@ -157,19 +138,12 @@ class ContactFormListView(generics.ListAPIView):
 # =========================
 # Report Post Views
 # =========================
-
 class ReportPostCreateView(generics.CreateAPIView):
-    """
-    Report an item
-    """
     serializer_class = ReportPostSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
 class ReportPostListView(generics.ListAPIView):
-    """
-    Admin view for reported posts
-    """
     queryset = ReportPost.objects.select_related("item", "user")
     serializer_class = ReportPostSerializer
     permission_classes = [permissions.IsAdminUser]
@@ -178,19 +152,93 @@ class ReportPostListView(generics.ListAPIView):
 # =========================
 # Feedback Views
 # =========================
-
 class FeedbackCreateView(generics.CreateAPIView):
-    """
-    Submit feedback
-    """
     serializer_class = FeedbackSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
 class FeedbackListView(generics.ListAPIView):
-    """
-    Admin view for feedback
-    """
     queryset = Feedback.objects.select_related("user")
     serializer_class = FeedbackSerializer
     permission_classes = [permissions.IsAdminUser]
+
+
+# =========================
+# Chat Views (NEW)
+# =========================
+class ChatCreateView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        item_id = request.data.get("item_id")
+        item = get_object_or_404(Item, id=item_id)
+
+        buyer = request.user
+        seller = item.owner
+
+        if buyer == seller:
+            return Response(
+                {"detail": "You cannot chat with yourself."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        chat, created = Chat.objects.get_or_create(
+            item=item,
+            buyer=buyer,
+            seller=seller,
+        )
+
+        return Response(
+            ChatSerializer(chat).data,
+            status=status.HTTP_200_OK,
+        )
+
+
+class ChatListView(generics.ListAPIView):
+    serializer_class = ChatSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Chat.objects.filter(
+            buyer=user
+        ) | Chat.objects.filter(
+            seller=user
+        )
+
+
+class ChatMessagesView(generics.ListAPIView):
+    serializer_class = MessageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        chat = get_object_or_404(Chat, id=self.kwargs["chat_id"])
+
+        if self.request.user not in [chat.buyer, chat.seller]:
+            return Message.objects.none()
+
+        return chat.messages.all()
+
+
+class SendMessageView(generics.CreateAPIView):
+    serializer_class = MessageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        chat = get_object_or_404(
+            Chat,
+            id=self.request.data.get("chat"),
+        )
+
+        if self.request.user not in [chat.buyer, chat.seller]:
+            raise permissions.PermissionDenied()
+
+        message = serializer.save(
+            chat=chat,
+            sender=self.request.user,
+        )
+
+        chat.last_message_at = timezone.now()
+        chat.save()
+
+        return message
