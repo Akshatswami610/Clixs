@@ -802,12 +802,12 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Images (Max 5)</label>
+                <label class="form-label">Image</label>
                 <div class="file-input-wrapper">
                     <input type="file" class="file-input" id="imageInput" name="images" accept="image/*" multiple>
                     <label for="imageInput" class="file-label">
                         <span>📷</span>
-                        <span>Choose Images</span>
+                        <span>Choose Image</span>
                     </label>
                     <div class="file-name" id="fileName">No files selected</div>
                 </div>
@@ -986,8 +986,8 @@ const fileName = document.getElementById('fileName');
 
 fileInput.addEventListener('change', function() {
     const files = this.files;
-    if (files.length > 5) {
-        showAlert('Maximum 5 images allowed', 'error');
+    if (files.length > 1) {
+        showAlert('Maximum 1 image allowed', 'error');
         this.value = '';
         fileName.textContent = 'No files selected';
         return;
@@ -1261,8 +1261,8 @@ if (form) {
         }
 
         const files = fileInput.files;
-        if (files.length > 5) {
-            showAlert('Maximum 5 images allowed', 'error');
+        if (files.length > 1) {
+            showAlert('Maximum 1 image allowed', 'error');
             return;
         }
 
