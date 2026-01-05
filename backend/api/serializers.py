@@ -8,6 +8,8 @@ from .models import (
     ContactForm,
     ReportPost,
     Feedback,
+    Chat,
+    Message,
 )
 
 User = get_user_model()
@@ -16,7 +18,6 @@ User = get_user_model()
 # =========================
 # User Serializers
 # =========================
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -46,7 +47,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "phone_number",
             "first_name",
             "last_name",
-            "registration_number",  # ✅ REQUIRED
+            "registration_number",
             "password",
             "confirm_password",
         )
@@ -58,7 +59,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop("confirm_password")
-
         return User.objects.create_user(
             phone_number=validated_data["phone_number"],
             password=validated_data["password"],
@@ -67,25 +67,20 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             registration_number=validated_data.get("registration_number"),
         )
 
+
 # =========================
 # Item Image Serializer
 # =========================
-
 class ItemImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ItemImage
-        fields = (
-            "id",
-            "image",
-            "uploaded_at",
-        )
+        fields = ("id", "image", "uploaded_at")
         read_only_fields = ("id", "uploaded_at")
 
 
 # =========================
-# Item Serializers
+# Item Serializer
 # =========================
-
 class ItemSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
     images = ItemImageSerializer(many=True, read_only=True)
@@ -105,11 +100,7 @@ class ItemSerializer(serializers.ModelSerializer):
             "images",
             "created_at",
         )
-        read_only_fields = (
-            "id",
-            "owner",
-            "created_at",
-        )
+        read_only_fields = ("id", "owner", "created_at")
 
     def validate(self, attrs):
         item_type = attrs.get("item_type")
@@ -152,7 +143,6 @@ class ItemSerializer(serializers.ModelSerializer):
 # =========================
 # Contact Form Serializer
 # =========================
-
 class ContactFormSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContactForm
@@ -166,11 +156,7 @@ class ContactFormSerializer(serializers.ModelSerializer):
             "status",
             "created_at",
         )
-        read_only_fields = (
-            "id",
-            "status",
-            "created_at",
-        )
+        read_only_fields = ("id", "status", "created_at")
 
     def validate(self, attrs):
         if not attrs.get("email") and not attrs.get("phone"):
@@ -183,7 +169,6 @@ class ContactFormSerializer(serializers.ModelSerializer):
 # =========================
 # Report Post Serializer
 # =========================
-
 class ReportPostSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
@@ -191,20 +176,13 @@ class ReportPostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ReportPost
-        fields = (
-            "id",
-            "item",
-            "user",
-            "reason",
-            "created_at",
-        )
+        fields = ("id", "item", "user", "reason", "created_at")
         read_only_fields = ("id", "created_at")
 
 
 # =========================
 # Feedback Serializer
 # =========================
-
 class FeedbackSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
@@ -212,10 +190,70 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Feedback
+        fields = ("id", "user", "feedback", "created_at")
+        read_only_fields = ("id", "created_at")
+
+
+# =========================
+# Chat Serializer (NEW)
+# =========================
+class ChatSerializer(serializers.ModelSerializer):
+    item_title = serializers.CharField(
+        source="item.title", read_only=True
+    )
+    buyer_phone = serializers.CharField(
+        source="buyer.phone_number", read_only=True
+    )
+    seller_phone = serializers.CharField(
+        source="seller.phone_number", read_only=True
+    )
+
+    class Meta:
+        model = Chat
         fields = (
             "id",
-            "user",
-            "feedback",
+            "item",
+            "item_title",
+            "buyer",
+            "buyer_phone",
+            "seller",
+            "seller_phone",
+            "created_at",
+            "last_message_at",
+        )
+        read_only_fields = (
+            "id",
+            "created_at",
+            "last_message_at",
+        )
+
+
+# =========================
+# Message Serializer (NEW)
+# =========================
+class MessageSerializer(serializers.ModelSerializer):
+    sender_phone = serializers.CharField(
+        source="sender.phone_number", read_only=True
+    )
+
+    class Meta:
+        model = Message
+        fields = (
+            "id",
+            "chat",
+            "sender",
+            "sender_phone",
+            "text",
+            "is_read",
             "created_at",
         )
-        read_only_fields = ("id", "created_at")
+        read_only_fields = (
+            "id",
+            "sender",
+            "created_at",
+        )
+
+    def create(self, validated_data):
+        request = self.context.get("request")
+        validated_data["sender"] = request.user
+        return super().create(validated_data)
