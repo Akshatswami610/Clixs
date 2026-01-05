@@ -18,7 +18,7 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("The phone number must be set")
 
         user = self.model(phone_number=phone_number, **extra_fields)
-        user.set_password(password)  # 🔐 HASHED
+        user.set_password(password)
         user.save(using=self._db)
         return user
 
@@ -41,10 +41,13 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=15, unique=True)
     registration_number = models.PositiveIntegerField(unique=True, null=True)
+
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+
     date_joined = models.DateTimeField(auto_now_add=True)
 
     objects = CustomUserManager()
@@ -158,16 +161,20 @@ class ContactForm(models.Model):
         ("PENDING", "Pending"),
         ("RESOLVED", "Resolved"),
     )
+
     name = models.CharField(max_length=50)
     email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
+
     subject = models.CharField(max_length=50)
     message = models.TextField()
+
     status = models.CharField(
         max_length=10,
         choices=STATUS,
         default="PENDING"
     )
+
     created_at = models.DateTimeField(default=timezone.now)
 
     def clean(self):
@@ -188,7 +195,7 @@ class ContactForm(models.Model):
 class ReportPost(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    reason = models.TextField(blank=False)
+    reason = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
 
 
@@ -197,5 +204,64 @@ class ReportPost(models.Model):
 # =========================
 class Feedback(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    feedback = models.TextField(blank=False)
+    feedback = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
+
+
+# =========================
+# Chat (NEW)
+# =========================
+class Chat(models.Model):
+    item = models.ForeignKey(
+        Item,
+        on_delete=models.CASCADE,
+        related_name="chats"
+    )
+
+    buyer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="buyer_chats"
+    )
+
+    seller = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="seller_chats"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_message_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ("item", "buyer", "seller")
+        ordering = ["-last_message_at"]
+
+    def __str__(self):
+        return f"Chat for {self.item.title}"
+
+
+# =========================
+# Message (NEW)
+# =========================
+class Message(models.Model):
+    chat = models.ForeignKey(
+        Chat,
+        on_delete=models.CASCADE,
+        related_name="messages"
+    )
+
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+
+    text = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"Message from {self.sender.phone_number}"
