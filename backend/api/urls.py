@@ -6,24 +6,42 @@ from rest_framework_simplejwt.views import (
 )
 
 from .views import (
+    # User
     UserRegisterView,
     UserProfileView,
+    DeleteAccountView,
+
+    # Items
     ItemViewSet,
     ItemImageViewSet,
+
+    # Contact / Report / Feedback
     ContactFormCreateView,
     ContactFormListView,
     ReportPostCreateView,
     ReportPostListView,
     FeedbackCreateView,
     FeedbackListView,
-    DeleteAccountView
+
+    # Chat
+    ChatCreateView,
+    ChatListView,
+    ChatMessagesView,
+    SendMessageView,
 )
 
+# =========================
+# Routers
+# =========================
 router = DefaultRouter()
 router.register(r"items", ItemViewSet, basename="item")
 router.register(r"item-images", ItemImageViewSet, basename="item-image")
 
+# =========================
+# URL Patterns
+# =========================
 urlpatterns = [
+
     # =========================
     # AUTH (JWT)
     # =========================
@@ -55,4 +73,20 @@ urlpatterns = [
     # =========================
     path("feedback/", FeedbackCreateView.as_view(), name="feedback-create"),
     path("feedback/list/", FeedbackListView.as_view(), name="feedback-list"),
+
+    # =========================
+    # CHAT (NEW)
+    # =========================
+    path("chats/", ChatListView.as_view(), name="chat-list"),
+    path("chats/create/", ChatCreateView.as_view(), name="chat-create"),
+    path(
+        "chats/<int:chat_id>/messages/",
+        ChatMessagesView.as_view(),
+        name="chat-messages",
+    ),
+    path(
+        "messages/send/",
+        SendMessageView.as_view(),
+        name="send-message",
+    ),
 ]
