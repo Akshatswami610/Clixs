@@ -75,7 +75,7 @@ urlpatterns = [
     path("feedback/list/", FeedbackListView.as_view(), name="feedback-list"),
 
     # =========================
-    # CHAT (NEW)
+    # CHAT
     # =========================
     path("chats/", ChatListView.as_view(), name="chat-list"),
     path("chats/create/", ChatCreateView.as_view(), name="chat-create"),
