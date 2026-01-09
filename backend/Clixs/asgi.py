@@ -8,11 +8,8 @@ import api.routing
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Clixs.settings")
 
-application = ProtocolTypeRouter(
-    {
-        "http": get_asgi_application(),
-        "websocket": AuthMiddlewareStack(
-            URLRouter(api.routing.websocket_urlpatterns)
-        ),
-    }
-)
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(),
+    "websocket": URLRouter(api.routing.websocket_urlpatterns),
+})
+
