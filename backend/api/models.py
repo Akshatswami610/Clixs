@@ -27,11 +27,6 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)
 
-        if extra_fields.get("is_staff") is not True:
-            raise ValueError("Superuser must have is_staff=True")
-        if extra_fields.get("is_superuser") is not True:
-            raise ValueError("Superuser must have is_superuser=True")
-
         return self.create_user(phone_number, password, **extra_fields)
 
 
@@ -57,11 +52,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.phone_number
-
-    class Meta:
-        verbose_name = "User"
-        verbose_name_plural = "Users"
-        ordering = ["-date_joined"]
 
 
 # =========================
@@ -116,18 +106,13 @@ class Item(models.Model):
     def clean(self):
         if self.item_type == "SELL":
             if not self.sell_price:
-                raise ValidationError("Sell price is required for SELL items.")
+                raise ValidationError("Sell price is required.")
             if self.rent_prices:
-                raise ValidationError("Rent prices are not allowed for SELL items.")
+                raise ValidationError("Rent prices not allowed for SELL items.")
 
         if self.item_type == "RENT":
-            if not self.rent_prices:
-                raise ValidationError("Rent pricing is required for RENT items.")
             if not isinstance(self.rent_prices, dict):
                 raise ValidationError("Rent prices must be a dictionary.")
-            for value in self.rent_prices.values():
-                if not isinstance(value, (int, float)):
-                    raise ValidationError("Rent prices must be numbers.")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -148,9 +133,6 @@ class ItemImage(models.Model):
     )
     image = models.ImageField(upload_to="clixs/items/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Image for {self.item.title}"
 
 
 # =========================
@@ -179,37 +161,14 @@ class ContactForm(models.Model):
 
     def clean(self):
         if not self.email and not self.phone:
-            raise ValidationError("Provide either email or phone.")
-
-    def __str__(self):
-        return self.name
+            raise ValidationError("Provide email or phone.")
 
     class Meta:
         ordering = ["-created_at"]
-        verbose_name_plural = "Contact Forms"
 
 
 # =========================
-# Report Post
-# =========================
-class ReportPost(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    reason = models.TextField()
-    created_at = models.DateTimeField(default=timezone.now)
-
-
-# =========================
-# Feedback
-# =========================
-class Feedback(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    feedback = models.TextField()
-    created_at = models.DateTimeField(default=timezone.now)
-
-
-# =========================
-# Chat (NEW)
+# Chat (Hardened)
 # =========================
 class Chat(models.Model):
     item = models.ForeignKey(
@@ -224,25 +183,38 @@ class Chat(models.Model):
         related_name="buyer_chats"
     )
 
-    seller = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="seller_chats"
-    )
-
     created_at = models.DateTimeField(auto_now_add=True)
     last_message_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        unique_together = ("item", "buyer", "seller")
+        unique_together = ("item", "buyer")
         ordering = ["-last_message_at"]
+        indexes = [
+            models.Index(fields=["buyer"]),
+            models.Index(fields=["item"]),
+        ]
+
+    @property
+    def seller(self):
+        return self.item.owner
+
+    def clean(self):
+        if self.buyer == self.item.owner:
+            raise ValidationError("You cannot chat with yourself.")
+
+        if self.item.status != "ACTIVE":
+            raise ValidationError("Cannot start chat on inactive item.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Chat for {self.item.title}"
 
 
 # =========================
-# Message (NEW)
+# Message (Hardened)
 # =========================
 class Message(models.Model):
     chat = models.ForeignKey(
@@ -256,12 +228,32 @@ class Message(models.Model):
         on_delete=models.CASCADE
     )
 
-    text = models.TextField()
-    is_read = models.BooleanField(default=False)
+    text = models.TextField(max_length=2000)
+    read_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         ordering = ["created_at"]
+        indexes = [
+            models.Index(fields=["chat"]),
+            models.Index(fields=["created_at"]),
+        ]
+
+    def clean(self):
+        if self.sender not in [self.chat.buyer, self.chat.seller]:
+            raise ValidationError("Sender must be part of the chat.")
+
+        if self.chat.item.status != "ACTIVE":
+            raise ValidationError("Messaging is closed for this item.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+        # Atomic update to avoid race conditions
+        Chat.objects.filter(id=self.chat_id).update(
+            last_message_at=self.created_at
+        )
 
     def __str__(self):
         return f"Message from {self.sender.phone_number}"
