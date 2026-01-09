@@ -422,9 +422,6 @@ body {
 .chat-header-left {
     position: relative;
     z-index: 1;
-}
-
-.chat-header-left {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -519,6 +516,8 @@ body {
     gap: 0.5rem;
     align-items: center;
     margin-left: 1rem;
+    position: relative;
+    z-index: 1;
 }
 
 .chat-action-btn {
@@ -802,6 +801,7 @@ body {
     flex-shrink: 0;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+    position: relative;
 }
 
 .send-btn:hover:not(:disabled) {
@@ -812,6 +812,72 @@ body {
 .send-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+}
+
+.send-btn.sending {
+    pointer-events: none;
+}
+
+.send-btn.sending::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* Connection Status */
+.connection-status {
+    position: fixed;
+    top: 80px;
+    right: 2rem;
+    padding: 0.75rem 1.25rem;
+    background: rgba(20, 20, 30, 0.95);
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 12px;
+    color: #e9edef;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.connection-status.connected {
+    border-color: rgba(39, 174, 96, 0.5);
+    background: rgba(39, 174, 96, 0.15);
+}
+
+.connection-status.disconnected {
+    border-color: rgba(231, 76, 60, 0.5);
+    background: rgba(231, 76, 60, 0.15);
+}
+
+.connection-status.reconnecting {
+    border-color: rgba(243, 156, 18, 0.5);
+    background: rgba(243, 156, 18, 0.15);
+}
+
+.connection-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #27ae60;
+}
+
+.connection-status.disconnected .connection-dot {
+    background: #e74c3c;
+}
+
+.connection-status.reconnecting .connection-dot {
+    background: #f39c12;
+    animation: pulse 1s ease-in-out infinite;
 }
 
 /* Empty State */
@@ -980,6 +1046,24 @@ body {
     font-weight: 500;
 }
 
+/* Error Message */
+.error-message {
+    background: rgba(231, 76, 60, 0.15);
+    border: 2px solid rgba(231, 76, 60, 0.4);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    color: #e74c3c;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.error-icon {
+    font-size: 20px;
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
     .chat-container {
@@ -1092,6 +1176,13 @@ body {
     .message-input-container {
         padding: 1rem 1.25rem;
     }
+
+    .connection-status {
+        top: 70px;
+        right: 1rem;
+        font-size: 0.8rem;
+        padding: 0.6rem 1rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1201,25 +1292,23 @@ body {
                 <div class="header-content">
                     <div class="header-top">
                         <h1 class="header-title">Messages</h1>
-
                     </div>
                     <div class="search-container">
                         <div class="search-wrapper">
                             <span class="search-icon">🔍</span>
-                            <input type="text" class="search-input" id="searchInput" placeholder="Search chats...">
+                            <input type="text" class="search-input" id="searchInput" placeholder="Search chats..." aria-label="Search chats">
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="filter-tabs">
-                <button class="filter-tab active">All</button>
-                <button class="filter-tab">Unread</button>
-
+                <button class="filter-tab active" aria-label="Show all chats">All</button>
+                <button class="filter-tab" aria-label="Show unread chats only">Unread</button>
             </div>
 
-            <div class="chats-list" id="chatsList">
-                <!-- chats will be loaded here -->
+            <div class="chats-list" id="chatsList" role="list" aria-label="Chat conversations">
+                <!-- Chats will be loaded here -->
             </div>
         </div>
 
@@ -1239,29 +1328,52 @@ body {
             </div>
         </div>
     </div>
+
+    <!-- Connection Status Indicator -->
+    <div id="connectionStatus" class="connection-status" style="display: none;">
+        <div class="connection-dot"></div>
+        <span id="connectionText">Connecting...</span>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
+// ============================================================
+// CHAT APPLICATION - WEBSOCKET VERSION
+// ============================================================
+
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE = '/api/v1';
-    const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%231a1a2e'/%3E%3Ctext x='50' y='50' font-size='40' text-anchor='middle' dy='.3em' fill='%233498db'%3E👤%3C/text%3E%3C/svg%3E";
+    // Configuration
+    const CONFIG = {
+        API_BASE: '/api/v1',
+        PLACEHOLDER_IMAGE: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%231a1a2e'/%3E%3Ctext x='50' y='50' font-size='40' text-anchor='middle' dy='.3em' fill='%233498db'%3E👤%3C/text%3E%3C/svg%3E",
+        WS_RECONNECT_DELAY: 3000,
+        MAX_RECONNECT_ATTEMPTS: 5,
+        MESSAGE_ID_CACHE_LIMIT: 1000
+    };
 
-    let currentUser = null;
-    let currentConversation = null;
-    let chats = [];
+    // Application State
+    const state = {
+        currentUser: null,
+        currentConversation: null,
+        chats: [],
+        chatSocket: null,
+        reconnectAttempts: 0,
+        reconnectTimer: null,
+        renderedMessageIds: new Set(),
+        isReconnecting: false
+    };
 
-    // ============================================================
-    // WEBSOCKET: Replaced polling with WebSocket connection
-    // ============================================================
-    let chatSocket = null; // WebSocket instance for current conversation
-
+    // Initialize application
     if (checkAuth()) {
-        loadchats();
+        loadChats();
         setupEventListeners();
         checkUrlParams();
     }
 
+    // ============================================================
+    // AUTHENTICATION
+    // ============================================================
     function checkAuth() {
         const token = localStorage.getItem('authToken');
         const userStr = localStorage.getItem('user');
@@ -1272,32 +1384,59 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            currentUser = JSON.parse(userStr);
+            state.currentUser = JSON.parse(userStr);
             return true;
         } catch (e) {
-            console.error('Auth error:', e);
+            console.error('[Auth] Parse error:', e);
             window.location.href = '/login';
             return false;
         }
     }
 
+    // ============================================================
+    // EVENT LISTENERS
+    // ============================================================
     function setupEventListeners() {
-        document.getElementById('searchInput')?.addEventListener('input', handleSearch);
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', handleSearch);
+        }
 
         document.querySelectorAll('.filter-tab').forEach(tab => {
             tab.addEventListener('click', function() {
                 document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
-                filterchats(this.textContent.trim());
+                filterChats(this.textContent.trim());
             });
         });
 
         window.addEventListener('resize', handleResize);
+        window.addEventListener('beforeunload', cleanup);
+
+        // Handle visibility change (tab switching)
+        document.addEventListener('visibilitychange', handleVisibilityChange);
     }
 
+    function handleVisibilityChange() {
+        if (!document.hidden && state.currentConversation) {
+            // Reconnect WebSocket if disconnected when tab becomes visible
+            if (!state.chatSocket || state.chatSocket.readyState !== WebSocket.OPEN) {
+                console.log('[Visibility] Tab visible, reconnecting WebSocket');
+                connectWebSocket(state.currentConversation.id);
+            }
+        }
+    }
+
+    // ============================================================
+    // UTILITY FUNCTIONS
+    // ============================================================
     function getInitials(name) {
         if (!name) return 'U';
-        return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        return name.split(' ')
+            .map(n => n[0])
+            .join('')
+            .toUpperCase()
+            .substring(0, 2);
     }
 
     function formatTime(dateString) {
@@ -1317,7 +1456,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function formatMessageTime(dateString) {
         if (!dateString) return '';
         const date = new Date(dateString);
-        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        return date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
     }
 
     function formatDate(dateString) {
@@ -1330,57 +1473,106 @@ document.addEventListener('DOMContentLoaded', () => {
         if (date.toDateString() === today.toDateString()) return 'Today';
         if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
 
-        return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        return date.toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        });
     }
 
-    async function loadchats() {
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function scrollToBottom(smooth = true) {
+        const container = document.getElementById('messagesContainer');
+        if (!container) return;
+
+        requestAnimationFrame(() => {
+            if (smooth) {
+                container.scrollTo({
+                    top: container.scrollHeight,
+                    behavior: 'smooth'
+                });
+            } else {
+                container.scrollTop = container.scrollHeight;
+            }
+        });
+    }
+
+    // ============================================================
+    // CHAT LIST MANAGEMENT
+    // ============================================================
+    async function loadChats() {
         const token = localStorage.getItem('authToken');
         const listContainer = document.getElementById('chatsList');
 
-        listContainer.innerHTML = '<div class="loading-state"><div class="spinner"></div><div class="loading-text">Loading chats...</div></div>';
+        if (!listContainer) return;
+
+        listContainer.innerHTML = `
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <div class="loading-text">Loading chats...</div>
+            </div>
+        `;
 
         try {
-            const response = await fetch(`${API_BASE}/chats/`, {
+            const response = await fetch(`${CONFIG.API_BASE}/chats/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (!response.ok) throw new Error('Failed to load');
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
 
-            chats = await response.json();
-            displaychats(chats);
+            state.chats = await response.json();
+            displayChats(state.chats);
         } catch (error) {
-            console.error('Load error:', error);
-            listContainer.innerHTML = '<div class="empty-state"><div class="empty-icon">🔭</div><div class="empty-title">No chats</div><div class="empty-text">Start chatting to see chats here</div></div>';
+            console.error('[Chats] Load error:', error);
+            showError(listContainer, 'Failed to load chats. Please refresh the page.');
         }
     }
 
-    function displaychats(convos) {
+    function displayChats(conversations) {
         const listContainer = document.getElementById('chatsList');
+        if (!listContainer) return;
 
-        if (!convos || convos.length === 0) {
-            listContainer.innerHTML = '<div class="empty-state"><div class="empty-icon">🔭</div><div class="empty-title">No chats</div><div class="empty-text">Start chatting to see chats here</div></div>';
+        if (!conversations || conversations.length === 0) {
+            listContainer.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🔭</div>
+                    <div class="empty-title">No chats</div>
+                    <div class="empty-text">Start chatting to see conversations here</div>
+                </div>
+            `;
             return;
         }
 
-        listContainer.innerHTML = convos.map(convo => {
-            const otherUser = convo.other_user;
-            const isActive = currentConversation?.id === convo.id;
+        listContainer.innerHTML = conversations.map(convo => {
+            const otherUser = convo.other_user || {};
+            const isActive = state.currentConversation?.id === convo.id;
+            const unreadCount = convo.unread_count || 0;
 
             return `
-                <div class="conversation-item ${isActive ? 'active' : ''}" onclick="selectConversation(${convo.id})">
+                <div class="conversation-item ${isActive ? 'active' : ''}"
+                     onclick="window.selectConversation(${convo.id})"
+                     role="listitem"
+                     aria-label="Chat with ${otherUser.name || otherUser.username}">
                     <div class="conv-avatar">
                         ${getInitials(otherUser.name || otherUser.username)}
                         ${convo.is_online ? '<div class="online-badge"></div>' : ''}
                     </div>
                     <div class="conv-content">
                         <div class="conv-header">
-                            <div class="conv-name">${otherUser.name || otherUser.username}</div>
-                            <div class="conv-time ${convo.unread_count > 0 ? 'unread' : ''}">${formatTime(convo.updated_at)}</div>
+                            <div class="conv-name">${escapeHtml(otherUser.name || otherUser.username)}</div>
+                            <div class="conv-time ${unreadCount > 0 ? 'unread' : ''}">${formatTime(convo.updated_at)}</div>
                         </div>
                         <div class="conv-footer">
                             ${convo.last_message_sent_by_me ? '<span class="conv-status">✓✓</span>' : ''}
-                            <div class="conv-preview">${convo.last_message || 'No messages yet'}</div>
-                            ${convo.unread_count > 0 ? `<span class="conv-badge">${convo.unread_count}</span>` : ''}
+                            <div class="conv-preview">${escapeHtml(convo.last_message || 'No messages yet')}</div>
+                            ${unreadCount > 0 ? `<span class="conv-badge">${unreadCount}</span>` : ''}
                         </div>
                     </div>
                 </div>
@@ -1388,56 +1580,110 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
     }
 
+    function handleSearch(e) {
+        const searchTerm = e.target.value.toLowerCase().trim();
+
+        if (!searchTerm) {
+            displayChats(state.chats);
+            return;
+        }
+
+        const filtered = state.chats.filter(convo => {
+            const otherUser = convo.other_user || {};
+            const userName = (otherUser.name || otherUser.username || '').toLowerCase();
+            const lastMessage = (convo.last_message || '').toLowerCase();
+            return userName.includes(searchTerm) || lastMessage.includes(searchTerm);
+        });
+
+        displayChats(filtered);
+    }
+
+    function filterChats(filter) {
+        let filtered = state.chats;
+
+        if (filter === 'Unread') {
+            filtered = state.chats.filter(c => (c.unread_count || 0) > 0);
+        }
+
+        displayChats(filtered);
+    }
+
+    // ============================================================
+    // CONVERSATION SELECTION
+    // ============================================================
     window.selectConversation = async function(convoId) {
-        const convo = chats.find(c => c.id === convoId);
-        if (!convo) return;
+        const convo = state.chats.find(c => c.id === convoId);
+        if (!convo) {
+            console.error('[Conversation] Not found:', convoId);
+            return;
+        }
 
-        currentConversation = convo;
+        state.currentConversation = convo;
 
+        // Update UI active state
         document.querySelectorAll('.conversation-item').forEach(item => {
             item.classList.remove('active');
         });
-        document.querySelector(`[onclick="selectConversation(${convoId})"]`)?.classList.add('active');
+        const selectedItem = document.querySelector(`[onclick="window.selectConversation(${convoId})"]`);
+        if (selectedItem) {
+            selectedItem.classList.add('active');
+        }
 
+        // Load messages
         await loadMessages(convoId);
 
-        // ============================================================
-        // WEBSOCKET: Connect to WebSocket instead of starting polling
-        // Closes any existing WebSocket before opening a new one
-        // ============================================================
+        // Connect WebSocket
         connectWebSocket(convoId);
 
+        // Hide sidebar on mobile
         if (window.innerWidth <= 768) {
-            document.getElementById('chatsSidebar').classList.remove('active');
+            document.getElementById('chatsSidebar')?.classList.remove('active');
         }
     };
 
+    // ============================================================
+    // MESSAGE LOADING
+    // ============================================================
     async function loadMessages(convoId) {
         const token = localStorage.getItem('authToken');
         const chatContent = document.getElementById('chatContent');
 
-        chatContent.innerHTML = '<div class="loading-state"><div class="spinner"></div><div class="loading-text">Loading messages...</div></div>';
+        if (!chatContent) return;
+
+        chatContent.innerHTML = `
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <div class="loading-text">Loading messages...</div>
+            </div>
+        `;
 
         try {
-            const response = await fetch(`${API_BASE}/chats/${convoId}/messages/`, {
+            const response = await fetch(`${CONFIG.API_BASE}/chats/${convoId}/messages/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (!response.ok) throw new Error('Failed to load');
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
 
             const data = await response.json();
             displayChat(data);
         } catch (error) {
-            console.error('Message error:', error);
-            chatContent.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><div class="empty-title">Failed to load messages</div><div class="empty-text">Please try again</div></div>';
+            console.error('[Messages] Load error:', error);
+            showError(chatContent, 'Failed to load messages. Please try again.');
         }
     }
 
     function displayChat(data) {
         const chatContent = document.getElementById('chatContent');
-        const otherUser = currentConversation.other_user;
+        if (!chatContent || !state.currentConversation) return;
+
+        const otherUser = state.currentConversation.other_user || {};
         const messages = data.messages || [];
         const itemContext = data.item_context;
+
+        // Clear rendered message cache for new conversation
+        clearRenderedMessages();
 
         let messagesHtml = '';
         let lastDate = null;
@@ -1446,54 +1692,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const msgDate = formatDate(msg.created_at);
 
             if (msgDate !== lastDate) {
-                messagesHtml += `<div class="date-divider"><span class="date-label">${msgDate}</span></div>`;
+                messagesHtml += `
+                    <div class="date-divider">
+                        <span class="date-label">${msgDate}</span>
+                    </div>
+                `;
                 lastDate = msgDate;
             }
 
-            const isSent = msg.sender_id === currentUser.id;
-
-            messagesHtml += `
-                <div class="message ${isSent ? 'sent' : 'received'}">
-                    <div class="message-bubble">
-                        <div class="message-text">${escapeHtml(msg.content)}</div>
-                        <div class="message-meta">
-                            <span class="message-time">${formatMessageTime(msg.created_at)}</span>
-                            ${isSent ? `<span class="message-status ${msg.is_read ? 'read' : ''}">✓✓</span>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
+            messagesHtml += createMessageHtml(msg);
         });
 
         chatContent.innerHTML = `
             <div class="chat-header">
                 <div class="chat-header-left">
-                    <button class="back-btn" onclick="toggleSidebar()">←</button>
+                    <button class="back-btn" onclick="window.toggleSidebar()" aria-label="Back to chat list">←</button>
                     <div class="chat-avatar">${getInitials(otherUser.name || otherUser.username)}</div>
                     <div class="chat-user-info">
-                        <div class="chat-user-name">${otherUser.name || otherUser.username}</div>
-                        <div class="chat-user-status ${currentConversation.is_online ? 'online' : ''}">
-                            ${currentConversation.is_online ? '<span class="status-indicator"></span>online' : 'offline'}
+                        <div class="chat-user-name">${escapeHtml(otherUser.name || otherUser.username)}</div>
+                        <div class="chat-user-status ${state.currentConversation.is_online ? 'online' : ''}">
+                            ${state.currentConversation.is_online ? '<span class="status-indicator"></span>online' : 'offline'}
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <div class="messages-container" id="messagesContainer">
-                ${itemContext ? `
-                    <div class="item-context-card">
-                        <img src="${itemContext.image || PLACEHOLDER}" class="item-thumb" alt="${itemContext.title}" onerror="this.src='${PLACEHOLDER}'">
-                        <div class="item-info">
-                            <div class="item-title">${itemContext.title}</div>
-                            <div class="item-price">₹${Number(itemContext.price).toLocaleString('en-IN')}</div>
-                            <a href="/item-detail?id=${itemContext.id}" class="view-item-link">View item →</a>
-                        </div>
-                    </div>
-                ` : ''}
-
-                ${messagesHtml || '<div class="empty-state"><div class="empty-icon">💬</div><div class="empty-title">No messages yet</div><div class="empty-text">Start the conversation</div></div>'}
-
+                ${itemContext ? createItemContextHtml(itemContext) : ''}
+                ${messagesHtml || createEmptyMessagesHtml()}
                 <div id="typingIndicator" class="typing-indicator" style="display: none;">
                     <div class="typing-bubble">
                         <div class="typing-dot"></div>
@@ -1505,20 +1731,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <div class="message-input-container">
                 <div class="input-wrapper">
-                    <button class="input-action-btn" title="Emoji">😊</button>
-                    <button class="input-action-btn" title="Attach">📎</button>
+                    <button class="input-action-btn" title="Emoji" aria-label="Add emoji">😊</button>
+                    <button class="input-action-btn" title="Attach file" aria-label="Attach file">📎</button>
                     <div class="input-field-wrapper">
-                        <textarea class="message-input" id="messageInput" placeholder="Type a message..." rows="1"></textarea>
+                        <textarea class="message-input"
+                                  id="messageInput"
+                                  placeholder="Type a message..."
+                                  rows="1"
+                                  aria-label="Message input"></textarea>
                     </div>
-                    <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>➤</button>
+                    <button class="send-btn"
+                            id="sendBtn"
+                            onclick="window.sendMessage()"
+                            disabled
+                            aria-label="Send message">➤</button>
                 </div>
             </div>
         `;
 
         setupMessageInput();
-        scrollToBottom();
+        scrollToBottom(false);
     }
 
+    function createMessageHtml(msg) {
+        if (!msg || !state.currentUser) return '';
+
+        const isSent = msg.sender_id === state.currentUser.id;
+        const messageText = msg.content || msg.message || '';
+        const msgId = msg.id || '';
+
+        // Track message ID
+        if (msgId) {
+            state.renderedMessageIds.add(msgId);
+        }
+
+        return `
+            <div class="message ${isSent ? 'sent' : 'received'}" data-message-id="${msgId}">
+                <div class="message-bubble">
+                    <div class="message-text">${escapeHtml(messageText)}</div>
+                    <div class="message-meta">
+                        <span class="message-time">${formatMessageTime(msg.created_at)}</span>
+                        ${isSent ? `<span class="message-status ${msg.is_read ? 'read' : ''}">✓✓</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function createItemContextHtml(item) {
+        return `
+            <div class="item-context-card">
+                <img src="${item.image || CONFIG.PLACEHOLDER_IMAGE}"
+                     class="item-thumb"
+                     alt="${escapeHtml(item.title)}"
+                     onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
+                <div class="item-info">
+                    <div class="item-title">${escapeHtml(item.title)}</div>
+                    <div class="item-price">₹${Number(item.price).toLocaleString('en-IN')}</div>
+                    <a href="/item-detail?id=${item.id}" class="view-item-link">View item →</a>
+                </div>
+            </div>
+        `;
+    }
+
+    function createEmptyMessagesHtml() {
+        return `
+            <div class="empty-state">
+                <div class="empty-icon">💬</div>
+                <div class="empty-title">No messages yet</div>
+                <div class="empty-text">Start the conversation</div>
+            </div>
+        `;
+    }
+
+    // ============================================================
+    // MESSAGE INPUT HANDLING
+    // ============================================================
     function setupMessageInput() {
         const input = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
@@ -1526,297 +1814,358 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!input || !sendBtn) return;
 
         input.addEventListener('input', function() {
+            // Auto-resize textarea
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-            sendBtn.disabled = !this.value.trim();
+
+            // Enable/disable send button
+            const hasContent = this.value.trim().length > 0;
+            const isConnected = state.chatSocket && state.chatSocket.readyState === WebSocket.OPEN;
+            sendBtn.disabled = !hasContent || !isConnected;
         });
 
         input.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                if (this.value.trim()) sendMessage();
+                if (this.value.trim() && !sendBtn.disabled) {
+                    window.sendMessage();
+                }
             }
         });
+
+        // Set initial button state
+        const isConnected = state.chatSocket && state.chatSocket.readyState === WebSocket.OPEN;
+        sendBtn.disabled = !isConnected;
     }
 
     // ============================================================
-    // WEBSOCKET: Send messages via WebSocket instead of REST API
-    // Format: { "message": "text here" }
-    // IMPORTANT: Message is NOT appended immediately - we wait for
-    // the server to echo it back via WebSocket to prevent duplicates
-    // and keep server as the source of truth.
+    // SEND MESSAGE
     // ============================================================
     window.sendMessage = function() {
         const input = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
 
-        if (!input || !currentConversation) return;
+        if (!input || !state.currentConversation) return;
 
         const content = input.value.trim();
         if (!content) return;
 
-        // Prevent sending if WebSocket is not connected
-        if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
-            console.warn('WebSocket is not connected. Cannot send message.');
-            sendBtn.disabled = true;
+        // Check WebSocket connection
+        if (!state.chatSocket || state.chatSocket.readyState !== WebSocket.OPEN) {
+            console.warn('[Send] WebSocket not connected');
+            showConnectionError();
             return;
         }
 
         try {
-            // Send message via WebSocket as JSON
-            chatSocket.send(JSON.stringify({ message: content }));
-            console.log('[WS] Message sent:', content);
-
-            // Clear input after sending
-            input.value = '';
-            input.style.height = 'auto';
+            // Add sending state
+            sendBtn.classList.add('sending');
             sendBtn.disabled = true;
 
-            // DO NOT append message here - wait for server echo via onmessage
-            // This prevents duplicate messages and ensures server is source of truth
+            // Send via WebSocket
+            state.chatSocket.send(JSON.stringify({ message: content }));
+            console.log('[Send] Message sent:', content.substring(0, 50));
+
+            // Clear input
+            input.value = '';
+            input.style.height = 'auto';
+
+            // Remove sending state after delay
+            setTimeout(() => {
+                sendBtn.classList.remove('sending');
+                const isConnected = state.chatSocket && state.chatSocket.readyState === WebSocket.OPEN;
+                sendBtn.disabled = !isConnected;
+            }, 500);
 
         } catch (error) {
-            console.error('[WS] Send error:', error);
+            console.error('[Send] Error:', error);
+            sendBtn.classList.remove('sending');
+            sendBtn.disabled = false;
+            showConnectionError();
         }
 
         input.focus();
     };
 
     // ============================================================
-    // appendMessage: Renders a message to the chat UI
-    // Supports both REST format (content) and WebSocket format (message)
-    // Includes duplicate prevention via message ID tracking
+    // APPEND MESSAGE TO UI
     // ============================================================
-    const renderedMessageIds = new Set(); // Track rendered message IDs to prevent duplicates
-
     function appendMessage(msg) {
+        if (!msg) return;
+
         const container = document.getElementById('messagesContainer');
         if (!container) return;
 
-        // Prevent duplicate messages using message ID
+        // Prevent duplicates
         const msgId = msg.id;
-        if (msgId && renderedMessageIds.has(msgId)) {
-            console.log('[Chat] Skipping duplicate message:', msgId);
-            return;
-        }
         if (msgId) {
-            renderedMessageIds.add(msgId);
+            if (state.renderedMessageIds.has(msgId)) {
+                console.log('[Message] Skipping duplicate:', msgId);
+                return;
+            }
+            state.renderedMessageIds.add(msgId);
+
+            // Limit cache size
+            if (state.renderedMessageIds.size > CONFIG.MESSAGE_ID_CACHE_LIMIT) {
+                const idsArray = Array.from(state.renderedMessageIds);
+                state.renderedMessageIds.clear();
+                idsArray.slice(-500).forEach(id => state.renderedMessageIds.add(id));
+            }
         }
 
-        // Remove empty state if present
+        // Remove empty state
         const emptyState = container.querySelector('.empty-state');
-        if (emptyState) emptyState.remove();
+        if (emptyState) {
+            emptyState.remove();
+        }
 
-        // Determine if message was sent by current user
-        const isSent = msg.sender_id === currentUser.id;
+        const messageHtml = createMessageHtml(msg);
 
-        // Support both 'content' (REST) and 'message' (WebSocket) field names
-        const messageText = msg.content || msg.message || '';
-
-        const messageHtml = `
-            <div class="message ${isSent ? 'sent' : 'received'}" data-message-id="${msgId || ''}">
-                <div class="message-bubble">
-                    <div class="message-text">${escapeHtml(messageText)}</div>
-                    <div class="message-meta">
-                        <span class="message-time">${formatMessageTime(msg.created_at)}</span>
-                        ${isSent ? `<span class="message-status ${msg.is_read ? 'read' : ''}">✓</span>` : ''}
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Insert before typing indicator if present
+        // Insert before typing indicator
         const typingIndicator = document.getElementById('typingIndicator');
         if (typingIndicator) {
             typingIndicator.insertAdjacentHTML('beforebegin', messageHtml);
         } else {
             container.insertAdjacentHTML('beforeend', messageHtml);
         }
+
+        scrollToBottom();
     }
 
-    // Clear rendered message IDs when switching chats
     function clearRenderedMessages() {
-        renderedMessageIds.clear();
-    }
-
-    function scrollToBottom() {
-        const container = document.getElementById('messagesContainer');
-        if (container) {
-            setTimeout(() => {
-                container.scrollTop = container.scrollHeight;
-            }, 100);
-        }
+        state.renderedMessageIds.clear();
     }
 
     // ============================================================
-    // WEBSOCKET CONNECTION MANAGEMENT
-    // Replaced polling (setInterval, checkNewMessages) with WebSocket
+    // WEBSOCKET CONNECTION
     // ============================================================
-
-    /**
-     * Connects to WebSocket for real-time chat messages
-     * @param {number} chatId - The conversation ID to connect to
-     *
-     * WebSocket URL format: ws://<host>/ws/chat/<conversation_id>/
-     * Uses wss:// automatically when page is served over HTTPS
-     */
     function connectWebSocket(chatId) {
-        // Close existing WebSocket before opening new one (switching chats)
-        if (chatSocket) {
-            console.log('[WS] Closing previous connection');
-            chatSocket.close();
-            chatSocket = null;
+        // Close existing connection
+        disconnectWebSocket();
+
+        // Get auth token
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            console.error('[WS] No auth token found');
+            return;
         }
 
-        // Clear tracked message IDs for new conversation
-        clearRenderedMessages();
-
-        // Determine WebSocket protocol based on page protocol
+        // Determine protocol
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${wsProtocol}//${window.location.host}/ws/chats/${chatId}/`;
+        const wsUrl = `${wsProtocol}//${window.location.host}/ws/chats/${chatId}/?token=${encodeURIComponent(token)}`;
 
-        console.log('[WS] Connecting to:', wsUrl);
+        console.log('[WS] Connecting to chat:', chatId);
+        updateConnectionStatus('reconnecting', 'Connecting...');
 
-        chatSocket = new WebSocket(wsUrl);
-
-        // ============================================================
-        // onopen: Connection successfully established
-        // ============================================================
-        chatSocket.onopen = function(e) {
-            console.log('[WS] Connected to chat:', chatId);
-        };
-
-        // ============================================================
-        // onmessage: Receive real-time messages from server
-        //
-        // Expected server payload:
-        // {
-        //   "id": 123,
-        //   "message": "Hello",
-        //   "sender_id": 5,
-        //   "created_at": "2026-01-09T12:30:00Z",
-        //   "is_read": false
-        // }
-        // ============================================================
-        chatSocket.onmessage = function(e) {
-            console.log('[WS] Received:', e.data);
-
-            try {
-                const data = JSON.parse(e.data);
-
-                // Handle chat message (sent or received)
-                if (data.message !== undefined || data.type === 'chat_message') {
-                    // Build message object for appendMessage()
-                    // Server sends 'message' field, appendMessage supports both
-                    const msg = {
-                        id: data.id,
-                        message: data.message,      // WebSocket format
-                        content: data.message,      // REST format (for compatibility)
-                        sender_id: data.sender_id,
-                        created_at: data.created_at || new Date().toISOString(),
-                        is_read: data.is_read || false
-                    };
-
-                    // Append to UI and scroll
-                    appendMessage(msg);
-                    scrollToBottom();
-
-                    console.log('[WS] Message rendered:', msg.id);
-                }
-                // Handle typing indicator event
-                else if (data.type === 'typing') {
-                    const typingIndicator = document.getElementById('typingIndicator');
-                    if (typingIndicator) {
-                        typingIndicator.style.display = data.is_typing ? 'flex' : 'none';
-                    }
-                }
-                // Handle read receipt / status updates
-                else if (data.type === 'read_receipt') {
-                    // Update message status icons if needed
-                    const msgEl = document.querySelector(`[data-message-id="${data.message_id}"] .message-status`);
-                    if (msgEl) {
-                        msgEl.classList.add('read');
-                    }
-                }
-                // Handle server-side errors
-                else if (data.type === 'error') {
-                    console.error('[WS] Server error:', data.error || data.message);
-                }
-
-            } catch (error) {
-                console.error('[WS] Parse error:', error, e.data);
-            }
-        };
-
-        // ============================================================
-        // onclose: WebSocket connection closed
-        // ============================================================
-        chatSocket.onclose = function(e) {
-            // Normal closure codes: 1000 (normal), 1001 (going away)
-            if (e.code === 1000 || e.code === 1001) {
-                console.log('[WS] Connection closed normally');
-            } else {
-                console.warn('[WS] Connection closed unexpectedly. Code:', e.code, 'Reason:', e.reason);
-            }
-            chatSocket = null;
-        };
-
-        // ============================================================
-        // onerror: WebSocket connection error
-        // ============================================================
-        chatSocket.onerror = function(e) {
-            console.error('[WS] Connection error:', e);
-        };
+        try {
+            state.chatSocket = new WebSocket(wsUrl);
+            state.chatSocket.onopen = handleWebSocketOpen;
+            state.chatSocket.onmessage = handleWebSocketMessage;
+            state.chatSocket.onclose = handleWebSocketClose;
+            state.chatSocket.onerror = handleWebSocketError;
+        } catch (error) {
+            console.error('[WS] Connection error:', error);
+            updateConnectionStatus('disconnected', 'Connection failed');
+            scheduleReconnect(chatId);
+        }
     }
 
-    /**
-     * Closes the current WebSocket connection
-     * Called when leaving page or manually disconnecting
-     */
+    function handleWebSocketOpen(event) {
+        console.log('[WS] Connected successfully');
+        state.reconnectAttempts = 0;
+        state.isReconnecting = false;
+        updateConnectionStatus('connected', 'Connected');
+
+        // Update send button state
+        const sendBtn = document.getElementById('sendBtn');
+        const input = document.getElementById('messageInput');
+        if (sendBtn && input) {
+            sendBtn.disabled = !input.value.trim();
+        }
+
+        // Hide status after delay
+        setTimeout(() => {
+            const statusEl = document.getElementById('connectionStatus');
+            if (statusEl) {
+                statusEl.style.display = 'none';
+            }
+        }, 2000);
+    }
+
+    function handleWebSocketMessage(event) {
+        try {
+            const data = JSON.parse(event.data);
+            console.log('[WS] Received:', data.type || 'message');
+
+            // Handle chat message
+            if (data.message !== undefined || data.type === 'chat_message') {
+                const msg = {
+                    id: data.id,
+                    message: data.message,
+                    content: data.message,
+                    sender_id: data.sender_id,
+                    created_at: data.created_at || new Date().toISOString(),
+                    is_read: data.is_read || false
+                };
+                appendMessage(msg);
+            }
+            // Handle typing indicator
+            else if (data.type === 'typing') {
+                const typingIndicator = document.getElementById('typingIndicator');
+                if (typingIndicator) {
+                    typingIndicator.style.display = data.is_typing ? 'flex' : 'none';
+                }
+            }
+            // Handle read receipt
+            else if (data.type === 'read_receipt') {
+                const msgEl = document.querySelector(`[data-message-id="${data.message_id}"] .message-status`);
+                if (msgEl) {
+                    msgEl.classList.add('read');
+                }
+            }
+            // Handle error
+            else if (data.type === 'error') {
+                console.error('[WS] Server error:', data.error || data.message);
+                showError(null, data.error || 'An error occurred');
+            }
+
+        } catch (error) {
+            console.error('[WS] Parse error:', error, event.data);
+        }
+    }
+
+    function handleWebSocketClose(event) {
+        const isNormalClosure = event.code === 1000 || event.code === 1001;
+
+        if (isNormalClosure) {
+            console.log('[WS] Connection closed normally');
+            updateConnectionStatus('disconnected', 'Disconnected');
+        } else {
+            console.warn('[WS] Connection closed unexpectedly. Code:', event.code, 'Reason:', event.reason);
+            updateConnectionStatus('disconnected', 'Connection lost');
+
+            // Attempt reconnect if conversation is still active
+            if (state.currentConversation && !state.isReconnecting) {
+                scheduleReconnect(state.currentConversation.id);
+            }
+        }
+
+        state.chatSocket = null;
+
+        // Disable send button
+        const sendBtn = document.getElementById('sendBtn');
+        if (sendBtn) {
+            sendBtn.disabled = true;
+        }
+    }
+
+    function handleWebSocketError(error) {
+        console.error('[WS] Error:', error);
+        updateConnectionStatus('disconnected', 'Connection error');
+    }
+
     function disconnectWebSocket() {
-        if (chatSocket) {
+        if (state.reconnectTimer) {
+            clearTimeout(state.reconnectTimer);
+            state.reconnectTimer = null;
+        }
+
+        if (state.chatSocket) {
             console.log('[WS] Disconnecting');
-            chatSocket.close(1000, 'User disconnected');
-            chatSocket = null;
+            state.chatSocket.close(1000, 'User disconnected');
+            state.chatSocket = null;
         }
     }
 
-    function handleSearch(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const filtered = chats.filter(convo => {
-            const userName = (convo.other_user.name || convo.other_user.username).toLowerCase();
-            const lastMessage = (convo.last_message || '').toLowerCase();
-            return userName.includes(searchTerm) || lastMessage.includes(searchTerm);
-        });
-        displaychats(filtered);
-    }
-
-    function filterchats(filter) {
-        let filtered = chats;
-
-        if (filter === 'Unread') {
-            filtered = chats.filter(c => c.unread_count > 0);
+    function scheduleReconnect(chatId) {
+        if (state.reconnectAttempts >= CONFIG.MAX_RECONNECT_ATTEMPTS) {
+            console.error('[WS] Max reconnect attempts reached');
+            updateConnectionStatus('disconnected', 'Unable to connect');
+            return;
         }
 
-        displaychats(filtered);
+        if (state.isReconnecting) return;
+
+        state.isReconnecting = true;
+        state.reconnectAttempts++;
+
+        const delay = CONFIG.WS_RECONNECT_DELAY * state.reconnectAttempts;
+        console.log(`[WS] Reconnecting in ${delay}ms (attempt ${state.reconnectAttempts})`);
+
+        updateConnectionStatus('reconnecting', `Reconnecting... (${state.reconnectAttempts}/${CONFIG.MAX_RECONNECT_ATTEMPTS})`);
+
+        state.reconnectTimer = setTimeout(() => {
+            if (state.currentConversation?.id === chatId) {
+                connectWebSocket(chatId);
+            }
+        }, delay);
     }
 
+    // ============================================================
+    // CONNECTION STATUS UI
+    // ============================================================
+    function updateConnectionStatus(status, text) {
+        const statusEl = document.getElementById('connectionStatus');
+        const textEl = document.getElementById('connectionText');
+
+        if (!statusEl || !textEl) return;
+
+        statusEl.className = `connection-status ${status}`;
+        textEl.textContent = text;
+        statusEl.style.display = 'flex';
+    }
+
+    function showConnectionError() {
+        updateConnectionStatus('disconnected', 'Connection lost. Trying to reconnect...');
+
+        if (state.currentConversation) {
+            scheduleReconnect(state.currentConversation.id);
+        }
+    }
+
+    // ============================================================
+    // ERROR HANDLING
+    // ============================================================
+    function showError(container, message) {
+        const errorHtml = `
+            <div class="error-message">
+                <span class="error-icon">⚠️</span>
+                <span>${escapeHtml(message)}</span>
+            </div>
+        `;
+
+        if (container) {
+            container.innerHTML = errorHtml;
+        } else {
+            // Show as toast/notification
+            console.error('[Error]', message);
+        }
+    }
+
+    // ============================================================
+    // UI HELPERS
+    // ============================================================
     window.toggleSidebar = function() {
-        document.getElementById('chatsSidebar').classList.toggle('active');
+        document.getElementById('chatsSidebar')?.classList.toggle('active');
     };
 
     function handleResize() {
         if (window.innerWidth > 768) {
-            document.getElementById('chatsSidebar').classList.remove('active');
+            document.getElementById('chatsSidebar')?.classList.remove('active');
         }
     }
 
+    // ============================================================
+    // URL PARAMETERS
+    // ============================================================
     function checkUrlParams() {
         const params = new URLSearchParams(window.location.search);
         const userId = params.get('user');
         const itemId = params.get('item');
 
-        if (userId) createConversation(userId, itemId);
+        if (userId) {
+            createConversation(userId, itemId);
+        }
     }
 
     async function createConversation(userId, itemId = null) {
@@ -1826,7 +2175,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const body = { user_id: userId };
             if (itemId) body.item_id = itemId;
 
-            const response = await fetch(`${API_BASE}/chats/create/`, {
+            const response = await fetch(`${CONFIG.API_BASE}/chats/create/`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -1835,28 +2184,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(body)
             });
 
-
             if (response.ok) {
                 const convo = await response.json();
-                await loadchats();
-                selectConversation(convo.id);
+                await loadChats();
+                window.selectConversation(convo.id);
+            } else {
+                throw new Error(`Failed to create conversation: ${response.statusText}`);
             }
         } catch (error) {
-            console.error('Create conversation error:', error);
+            console.error('[Conversation] Create error:', error);
+            showError(null, 'Failed to create conversation');
         }
     }
 
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
     // ============================================================
-    // WEBSOCKET: Clean up WebSocket on page unload
+    // CLEANUP
     // ============================================================
-    window.addEventListener('beforeunload', () => {
+    function cleanup() {
+        console.log('[Cleanup] Closing connections');
         disconnectWebSocket();
-    });
+    }
 });
 {% endblock %}
