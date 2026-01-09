@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "rest_framework_simplejwt",
+    "channels",
 
     # Local apps
     "api",
@@ -87,6 +88,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "Clixs.wsgi.application"
+ASGI_APPLICATION = "backend.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 
 # --------------------------------------------------
