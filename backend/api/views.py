@@ -2,31 +2,19 @@ from rest_framework import viewsets, generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
-
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from .models import (
-    Item,
-    ItemImage,
-    ContactForm,
-    ReportPost,
-    Feedback,
-    Chat,
-    Message,
+    Item, ItemImage, ContactForm, ReportPost,
+    Feedback, Chat, Message
 )
-
 from .serializers import (
-    UserSerializer,
-    UserRegisterSerializer,
-    ItemSerializer,
-    ItemImageSerializer,
-    ContactFormSerializer,
-    ReportPostSerializer,
-    FeedbackSerializer,
-    ChatSerializer,
-    MessageSerializer,
+    UserSerializer, UserRegisterSerializer,
+    ItemSerializer, ItemImageSerializer,
+    ContactFormSerializer, ReportPostSerializer,
+    FeedbackSerializer, ChatSerializer, MessageSerializer
 )
 
 User = get_user_model()
@@ -66,7 +54,7 @@ class DeleteAccountView(generics.DestroyAPIView):
         request.user.delete()
         return Response(
             {"detail": "Account deleted successfully"},
-            status=status.HTTP_204_NO_CONTENT,
+            status=status.HTTP_204_NO_CONTENT
         )
 
 
@@ -78,7 +66,7 @@ class ItemViewSet(viewsets.ModelViewSet):
     serializer_class = ItemSerializer
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly,
+        IsOwnerOrReadOnly
     ]
     parser_classes = [MultiPartParser, FormParser]
 
@@ -95,10 +83,9 @@ class ItemViewSet(viewsets.ModelViewSet):
             ItemImage.objects.create(item=item, image=image)
 
         item.refresh_from_db()
-        output_serializer = self.get_serializer(item)
         return Response(
-            output_serializer.data,
-            status=status.HTTP_201_CREATED,
+            self.get_serializer(item).data,
+            status=status.HTTP_201_CREATED
         )
 
 
@@ -111,14 +98,10 @@ class ItemImageViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
-        return ItemImage.objects.filter(
-            item__owner=self.request.user
-        )
+        return ItemImage.objects.filter(item__owner=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(
-            item_id=self.request.data.get("item")
-        )
+        serializer.save(item_id=self.request.data.get("item"))
 
 
 # =========================
@@ -164,7 +147,7 @@ class FeedbackListView(generics.ListAPIView):
 
 
 # =========================
-# Chat Views (NEW)
+# Chat Views (FIXED)
 # =========================
 class ChatCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -179,18 +162,18 @@ class ChatCreateView(APIView):
         if buyer == seller:
             return Response(
                 {"detail": "You cannot chat with yourself."},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST
             )
 
-        chat, created = Chat.objects.get_or_create(
+        chat, _ = Chat.objects.get_or_create(
             item=item,
             buyer=buyer,
-            seller=seller,
+            seller=seller
         )
 
         return Response(
             ChatSerializer(chat).data,
-            status=status.HTTP_200_OK,
+            status=status.HTTP_200_OK
         )
 
 
@@ -200,11 +183,7 @@ class ChatListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Chat.objects.filter(
-            buyer=user
-        ) | Chat.objects.filter(
-            seller=user
-        )
+        return Chat.objects.filter(buyer=user) | Chat.objects.filter(seller=user)
 
 
 class ChatMessagesView(generics.ListAPIView):
@@ -227,7 +206,7 @@ class SendMessageView(generics.CreateAPIView):
     def perform_create(self, serializer):
         chat = get_object_or_404(
             Chat,
-            id=self.request.data.get("chat"),
+            id=self.request.data.get("chat")
         )
 
         if self.request.user not in [chat.buyer, chat.seller]:
@@ -235,7 +214,7 @@ class SendMessageView(generics.CreateAPIView):
 
         message = serializer.save(
             chat=chat,
-            sender=self.request.user,
+            sender=self.request.user
         )
 
         chat.last_message_at = timezone.now()
