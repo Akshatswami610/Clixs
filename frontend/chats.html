@@ -103,11 +103,6 @@ body {
     background-clip: text;
 }
 
-.header-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
 .header-btn {
     width: 40px;
     height: 40px;
@@ -424,8 +419,7 @@ body {
     z-index: 0;
 }
 
-.chat-header-left,
-.chat-header-right {
+.chat-header-left {
     position: relative;
     z-index: 1;
 }
@@ -1207,10 +1201,7 @@ body {
                 <div class="header-content">
                     <div class="header-top">
                         <h1 class="header-title">Messages</h1>
-                        <div class="header-actions">
-                            <button class="header-btn" title="New chat">💬</button>
-                            <button class="header-btn" title="Menu">⋮</button>
-                        </div>
+
                     </div>
                     <div class="search-container">
                         <div class="search-wrapper">
@@ -1486,11 +1477,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 </div>
-                <div class="chat-header-right">
-                    <button class="chat-action-btn" title="Search">🔍</button>
-                    <button class="chat-action-btn" title="Call">📞</button>
-                    <button class="chat-action-btn" title="Menu">⋮</button>
-                </div>
+
             </div>
 
             <div class="messages-container" id="messagesContainer">
@@ -1686,7 +1673,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Determine WebSocket protocol based on page protocol
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${wsProtocol}//${window.location.host}/ws/chat/${chatId}/`;
+        const wsUrl = `${wsProtocol}//${window.location.host}/ws/chats/${chatId}/`;
 
         console.log('[WS] Connecting to:', wsUrl);
 
@@ -1839,7 +1826,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const body = { user_id: userId };
             if (itemId) body.item_id = itemId;
 
-            const response = await fetch(`${API_BASE}/chats/`, {
+            const response = await fetch(`${API_BASE}/chats/create/`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -1847,6 +1834,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify(body)
             });
+
 
             if (response.ok) {
                 const convo = await response.json();
