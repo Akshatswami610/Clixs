@@ -1,12 +1,17 @@
 import json
+from urllib.parse import parse_qs
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.utils import timezone
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import Chat, Message
 
 User = get_user_model()
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -29,11 +34,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close(code=4003)
             return
 
-        if not self.user or self.user == AnonymousUser():
+        if not self.user or isinstance(self.user, AnonymousUser):
             await self.close(code=4003)
             return
 
-        # ✅ Check chat permission
+        # ✅ Permission check
         is_allowed = await self.is_user_in_chat()
         if not is_allowed:
             await self.close(code=4004)
