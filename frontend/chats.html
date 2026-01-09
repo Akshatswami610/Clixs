@@ -31,8 +31,8 @@ body {
     gap: 2rem;
 }
 
-/* Left Sidebar - Conversations */
-.conversations-sidebar {
+/* Left Sidebar - chats */
+.chats-sidebar {
     width: 420px;
     background: linear-gradient(180deg, rgba(30, 30, 45, 0.95), rgba(26, 26, 42, 0.95));
     border-radius: 25px;
@@ -210,26 +210,26 @@ body {
     color: #00d4ff;
 }
 
-.conversations-list {
+.chats-list {
     flex: 1;
     overflow-y: auto;
     background: linear-gradient(180deg, rgba(26, 26, 42, 0.6), rgba(20, 20, 35, 0.6));
 }
 
-.conversations-list::-webkit-scrollbar {
+.chats-list::-webkit-scrollbar {
     width: 6px;
 }
 
-.conversations-list::-webkit-scrollbar-track {
+.chats-list::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.conversations-list::-webkit-scrollbar-thumb {
+.chats-list::-webkit-scrollbar-thumb {
     background: rgba(52, 152, 219, 0.4);
     border-radius: 3px;
 }
 
-.conversations-list::-webkit-scrollbar-thumb:hover {
+.chats-list::-webkit-scrollbar-thumb:hover {
     background: rgba(52, 152, 219, 0.6);
 }
 
@@ -992,7 +992,7 @@ body {
         padding: 1.5rem;
     }
 
-    .conversations-sidebar {
+    .chats-sidebar {
         width: 360px;
     }
 
@@ -1007,7 +1007,7 @@ body {
         gap: 1rem;
     }
 
-    .conversations-sidebar {
+    .chats-sidebar {
         width: 320px;
     }
 
@@ -1040,7 +1040,7 @@ body {
         gap: 0;
     }
 
-    .conversations-sidebar {
+    .chats-sidebar {
         position: fixed;
         top: 60px;
         left: 0;
@@ -1053,7 +1053,7 @@ body {
         border-right: 2px solid rgba(52, 152, 219, 0.2);
     }
 
-    .conversations-sidebar.active {
+    .chats-sidebar.active {
         transform: translateX(0);
     }
 
@@ -1202,7 +1202,7 @@ body {
 <div class="chat-wrapper">
     <div class="chat-container">
         <!-- Left Sidebar -->
-        <div class="conversations-sidebar" id="conversationsSidebar">
+        <div class="chats-sidebar" id="chatsSidebar">
             <div class="sidebar-header">
                 <div class="header-content">
                     <div class="header-top">
@@ -1215,7 +1215,7 @@ body {
                     <div class="search-container">
                         <div class="search-wrapper">
                             <span class="search-icon">🔍</span>
-                            <input type="text" class="search-input" id="searchInput" placeholder="Search conversations...">
+                            <input type="text" class="search-input" id="searchInput" placeholder="Search chats...">
                         </div>
                     </div>
                 </div>
@@ -1227,8 +1227,8 @@ body {
 
             </div>
 
-            <div class="conversations-list" id="conversationsList">
-                <!-- Conversations will be loaded here -->
+            <div class="chats-list" id="chatsList">
+                <!-- chats will be loaded here -->
             </div>
         </div>
 
@@ -1258,7 +1258,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentUser = null;
     let currentConversation = null;
-    let conversations = [];
+    let chats = [];
 
     // ============================================================
     // WEBSOCKET: Replaced polling with WebSocket connection
@@ -1266,7 +1266,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let chatSocket = null; // WebSocket instance for current conversation
 
     if (checkAuth()) {
-        loadConversations();
+        loadchats();
         setupEventListeners();
         checkUrlParams();
     }
@@ -1297,7 +1297,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tab.addEventListener('click', function() {
                 document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
-                filterConversations(this.textContent.trim());
+                filterchats(this.textContent.trim());
             });
         });
 
@@ -1342,32 +1342,32 @@ document.addEventListener('DOMContentLoaded', () => {
         return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     }
 
-    async function loadConversations() {
+    async function loadchats() {
         const token = localStorage.getItem('authToken');
-        const listContainer = document.getElementById('conversationsList');
+        const listContainer = document.getElementById('chatsList');
 
-        listContainer.innerHTML = '<div class="loading-state"><div class="spinner"></div><div class="loading-text">Loading conversations...</div></div>';
+        listContainer.innerHTML = '<div class="loading-state"><div class="spinner"></div><div class="loading-text">Loading chats...</div></div>';
 
         try {
-            const response = await fetch(`${API_BASE}/conversations/`, {
+            const response = await fetch(`${API_BASE}/chats/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (!response.ok) throw new Error('Failed to load');
 
-            conversations = await response.json();
-            displayConversations(conversations);
+            chats = await response.json();
+            displaychats(chats);
         } catch (error) {
             console.error('Load error:', error);
-            listContainer.innerHTML = '<div class="empty-state"><div class="empty-icon">🔭</div><div class="empty-title">No conversations</div><div class="empty-text">Start chatting to see conversations here</div></div>';
+            listContainer.innerHTML = '<div class="empty-state"><div class="empty-icon">🔭</div><div class="empty-title">No chats</div><div class="empty-text">Start chatting to see chats here</div></div>';
         }
     }
 
-    function displayConversations(convos) {
-        const listContainer = document.getElementById('conversationsList');
+    function displaychats(convos) {
+        const listContainer = document.getElementById('chatsList');
 
         if (!convos || convos.length === 0) {
-            listContainer.innerHTML = '<div class="empty-state"><div class="empty-icon">🔭</div><div class="empty-title">No conversations</div><div class="empty-text">Start chatting to see conversations here</div></div>';
+            listContainer.innerHTML = '<div class="empty-state"><div class="empty-icon">🔭</div><div class="empty-title">No chats</div><div class="empty-text">Start chatting to see chats here</div></div>';
             return;
         }
 
@@ -1398,7 +1398,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.selectConversation = async function(convoId) {
-        const convo = conversations.find(c => c.id === convoId);
+        const convo = chats.find(c => c.id === convoId);
         if (!convo) return;
 
         currentConversation = convo;
@@ -1417,7 +1417,7 @@ document.addEventListener('DOMContentLoaded', () => {
         connectWebSocket(convoId);
 
         if (window.innerWidth <= 768) {
-            document.getElementById('conversationsSidebar').classList.remove('active');
+            document.getElementById('chatsSidebar').classList.remove('active');
         }
     };
 
@@ -1428,7 +1428,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chatContent.innerHTML = '<div class="loading-state"><div class="spinner"></div><div class="loading-text">Loading messages...</div></div>';
 
         try {
-            const response = await fetch(`${API_BASE}/conversations/${convoId}/messages/`, {
+            const response = await fetch(`${API_BASE}/chats/${convoId}/messages/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -1647,7 +1647,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Clear rendered message IDs when switching conversations
+    // Clear rendered message IDs when switching chats
     function clearRenderedMessages() {
         renderedMessageIds.clear();
     }
@@ -1674,7 +1674,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * Uses wss:// automatically when page is served over HTTPS
      */
     function connectWebSocket(chatId) {
-        // Close existing WebSocket before opening new one (switching conversations)
+        // Close existing WebSocket before opening new one (switching chats)
         if (chatSocket) {
             console.log('[WS] Closing previous connection');
             chatSocket.close();
@@ -1796,31 +1796,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleSearch(e) {
         const searchTerm = e.target.value.toLowerCase();
-        const filtered = conversations.filter(convo => {
+        const filtered = chats.filter(convo => {
             const userName = (convo.other_user.name || convo.other_user.username).toLowerCase();
             const lastMessage = (convo.last_message || '').toLowerCase();
             return userName.includes(searchTerm) || lastMessage.includes(searchTerm);
         });
-        displayConversations(filtered);
+        displaychats(filtered);
     }
 
-    function filterConversations(filter) {
-        let filtered = conversations;
+    function filterchats(filter) {
+        let filtered = chats;
 
         if (filter === 'Unread') {
-            filtered = conversations.filter(c => c.unread_count > 0);
+            filtered = chats.filter(c => c.unread_count > 0);
         }
 
-        displayConversations(filtered);
+        displaychats(filtered);
     }
 
     window.toggleSidebar = function() {
-        document.getElementById('conversationsSidebar').classList.toggle('active');
+        document.getElementById('chatsSidebar').classList.toggle('active');
     };
 
     function handleResize() {
         if (window.innerWidth > 768) {
-            document.getElementById('conversationsSidebar').classList.remove('active');
+            document.getElementById('chatsSidebar').classList.remove('active');
         }
     }
 
@@ -1839,7 +1839,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const body = { user_id: userId };
             if (itemId) body.item_id = itemId;
 
-            const response = await fetch(`${API_BASE}/conversations/`, {
+            const response = await fetch(`${API_BASE}/chats/`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -1850,7 +1850,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 const convo = await response.json();
-                await loadConversations();
+                await loadchats();
                 selectConversation(convo.id);
             }
         } catch (error) {
