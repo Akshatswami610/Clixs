@@ -265,8 +265,7 @@ class Message(models.Model):
 class ReportPost(models.Model):
     item = models.ForeignKey(
         Item,
-        on_delete=models.CASCADE,
-        related_name="reports"
+        on_delete=models.CASCADE
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -276,4 +275,19 @@ class ReportPost(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"Report on {self.item.title}"
+        return f"Report by {self.user} on {self.item}"
+
+
+# =========================
+# Feedback
+# =========================
+class Feedback(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    feedback = models.TextField()
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Feedback by {self.user}"
