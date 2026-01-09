@@ -30,6 +30,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             jwt_auth = JWTAuthentication()
             validated_token = jwt_auth.get_validated_token(token)
             self.user = jwt_auth.get_user(validated_token)
+            self.scope["user"] = self.user
         except Exception:
             await self.close(code=4003)
             return
