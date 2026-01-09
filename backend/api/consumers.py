@@ -23,7 +23,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        # Check if user is allowed in this chat
+        # Check if user belongs to this chat
         is_allowed = await self.is_user_in_chat()
         if not is_allowed:
             await self.close()
@@ -45,9 +45,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         """
-        Receive message from WebSocket
         Expected payload:
-        { "message": "Hello" }
+        {
+            "message": "Hello"
+        }
         """
         try:
             data = json.loads(text_data)
@@ -58,33 +59,33 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             message = await self.save_message(message_text)
 
-            # Broadcast message to room
+            # Broadcast to group
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     "type": "chat_message",
                     "id": message.id,
                     "message": message.text,
-                    "sender_id": message.sender_id,
+                    "sender_id": message.sender.id,
                     "created_at": message.created_at.isoformat(),
                     "is_read": False,
                 },
             )
 
         except Exception as e:
-            await self.send(text_data=json.dumps({
-                "type": "error",
-                "error": str(e)
-            }))
+            await self.send(
+                text_data=json.dumps({
+                    "type": "error",
+                    "error": str(e),
+                })
+            )
 
     async def chat_message(self, event):
-        """
-        Receive message from room group
-        """
+        """Receive message from room group"""
         await self.send(text_data=json.dumps(event))
 
     # =========================
-    # DB helpers
+    # DB HELPERS
     # =========================
 
     @database_sync_to_async
