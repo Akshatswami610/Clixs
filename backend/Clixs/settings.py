@@ -88,7 +88,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "Clixs.wsgi.application"
-ASGI_APPLICATION = "backend.asgi.application"
+ASGI_APPLICATION = "Clixs.asgi.application"
 
 CHANNEL_LAYERS = {
     "default": {
