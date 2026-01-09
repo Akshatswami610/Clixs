@@ -1554,7 +1554,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ============================================================
     // WEBSOCKET: Send messages via WebSocket instead of REST API
-    // Messages are sent as JSON: { "message": "text here" }
+    // Format: { "message": "text here" }
+    // IMPORTANT: Message is NOT appended immediately - we wait for
+    // the server to echo it back via WebSocket to prevent duplicates
+    // and keep server as the source of truth.
     // ============================================================
     window.sendMessage = function() {
         const input = document.getElementById('messageInput');
@@ -1565,64 +1568,88 @@ document.addEventListener('DOMContentLoaded', () => {
         const content = input.value.trim();
         if (!content) return;
 
-        // Check if WebSocket is open
+        // Prevent sending if WebSocket is not connected
         if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
-            console.error('WebSocket is not connected');
-            alert('Connection lost. Please refresh the page.');
+            console.warn('WebSocket is not connected. Cannot send message.');
+            sendBtn.disabled = true;
             return;
         }
 
-        input.disabled = true;
-        sendBtn.disabled = true;
-
         try {
-            // Send message via WebSocket
+            // Send message via WebSocket as JSON
             chatSocket.send(JSON.stringify({ message: content }));
-            console.log('Message sent via WebSocket:', content);
+            console.log('[WS] Message sent:', content);
 
+            // Clear input after sending
             input.value = '';
             input.style.height = 'auto';
+            sendBtn.disabled = true;
 
-            // Note: The message will be appended when received back from WebSocket
-            // This ensures consistency and handles the case where server might modify the message
+            // DO NOT append message here - wait for server echo via onmessage
+            // This prevents duplicate messages and ensures server is source of truth
 
         } catch (error) {
-            console.error('WebSocket send error:', error);
-            alert('Failed to send message');
-        } finally {
-            input.disabled = false;
-            sendBtn.disabled = false;
-            input.focus();
+            console.error('[WS] Send error:', error);
         }
+
+        input.focus();
     };
+
+    // ============================================================
+    // appendMessage: Renders a message to the chat UI
+    // Supports both REST format (content) and WebSocket format (message)
+    // Includes duplicate prevention via message ID tracking
+    // ============================================================
+    const renderedMessageIds = new Set(); // Track rendered message IDs to prevent duplicates
 
     function appendMessage(msg) {
         const container = document.getElementById('messagesContainer');
         if (!container) return;
 
+        // Prevent duplicate messages using message ID
+        const msgId = msg.id;
+        if (msgId && renderedMessageIds.has(msgId)) {
+            console.log('[Chat] Skipping duplicate message:', msgId);
+            return;
+        }
+        if (msgId) {
+            renderedMessageIds.add(msgId);
+        }
+
+        // Remove empty state if present
         const emptyState = container.querySelector('.empty-state');
         if (emptyState) emptyState.remove();
 
+        // Determine if message was sent by current user
         const isSent = msg.sender_id === currentUser.id;
 
+        // Support both 'content' (REST) and 'message' (WebSocket) field names
+        const messageText = msg.content || msg.message || '';
+
         const messageHtml = `
-            <div class="message ${isSent ? 'sent' : 'received'}">
+            <div class="message ${isSent ? 'sent' : 'received'}" data-message-id="${msgId || ''}">
                 <div class="message-bubble">
-                    <div class="message-text">${escapeHtml(msg.content)}</div>
+                    <div class="message-text">${escapeHtml(messageText)}</div>
                     <div class="message-meta">
                         <span class="message-time">${formatMessageTime(msg.created_at)}</span>
-                        ${isSent ? '<span class="message-status">✓</span>' : ''}
+                        ${isSent ? `<span class="message-status ${msg.is_read ? 'read' : ''}">✓</span>` : ''}
                     </div>
                 </div>
             </div>
         `;
 
+        // Insert before typing indicator if present
         const typingIndicator = document.getElementById('typingIndicator');
         if (typingIndicator) {
             typingIndicator.insertAdjacentHTML('beforebegin', messageHtml);
         } else {
             container.insertAdjacentHTML('beforeend', messageHtml);
         }
+    }
+
+    // Clear rendered message IDs when switching conversations
+    function clearRenderedMessages() {
+        renderedMessageIds.clear();
     }
 
     function scrollToBottom() {
@@ -1635,107 +1662,134 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ============================================================
-    // WEBSOCKET: Removed polling functions (startMessagePolling, checkNewMessages)
-    // Replaced with WebSocket connection management
+    // WEBSOCKET CONNECTION MANAGEMENT
+    // Replaced polling (setInterval, checkNewMessages) with WebSocket
     // ============================================================
 
     /**
-     * Connects to WebSocket for real-time chat
-     * @param {number} chatId - The conversation/chat ID
+     * Connects to WebSocket for real-time chat messages
+     * @param {number} chatId - The conversation ID to connect to
+     *
+     * WebSocket URL format: ws://<host>/ws/chat/<conversation_id>/
+     * Uses wss:// automatically when page is served over HTTPS
      */
     function connectWebSocket(chatId) {
-        // Close existing WebSocket connection if any
+        // Close existing WebSocket before opening new one (switching conversations)
         if (chatSocket) {
-            console.log('Closing existing WebSocket connection');
+            console.log('[WS] Closing previous connection');
             chatSocket.close();
             chatSocket = null;
         }
 
-        // Determine WebSocket protocol (ws or wss based on current page protocol)
+        // Clear tracked message IDs for new conversation
+        clearRenderedMessages();
+
+        // Determine WebSocket protocol based on page protocol
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${wsProtocol}//${window.location.host}/ws/chat/${chatId}/`;
 
-        console.log('Connecting to WebSocket:', wsUrl);
+        console.log('[WS] Connecting to:', wsUrl);
 
         chatSocket = new WebSocket(wsUrl);
 
         // ============================================================
-        // WEBSOCKET: onopen - Connection established
+        // onopen: Connection successfully established
         // ============================================================
         chatSocket.onopen = function(e) {
-            console.log('WebSocket connection established for chat:', chatId);
+            console.log('[WS] Connected to chat:', chatId);
         };
 
         // ============================================================
-        // WEBSOCKET: onmessage - Receive messages in real-time
-        // Parses JSON, determines message ownership, appends to UI
+        // onmessage: Receive real-time messages from server
+        //
+        // Expected server payload:
+        // {
+        //   "id": 123,
+        //   "message": "Hello",
+        //   "sender_id": 5,
+        //   "created_at": "2026-01-09T12:30:00Z",
+        //   "is_read": false
+        // }
         // ============================================================
         chatSocket.onmessage = function(e) {
-            console.log('WebSocket message received:', e.data);
+            console.log('[WS] Received:', e.data);
 
             try {
                 const data = JSON.parse(e.data);
 
-                // Handle different message types from server
-                if (data.type === 'chat_message' || data.message !== undefined) {
-                    // Construct message object compatible with appendMessage()
+                // Handle chat message (sent or received)
+                if (data.message !== undefined || data.type === 'chat_message') {
+                    // Build message object for appendMessage()
+                    // Server sends 'message' field, appendMessage supports both
                     const msg = {
-                        id: data.id || Date.now(),
-                        content: data.message || data.content,
+                        id: data.id,
+                        message: data.message,      // WebSocket format
+                        content: data.message,      // REST format (for compatibility)
                         sender_id: data.sender_id,
                         created_at: data.created_at || new Date().toISOString(),
                         is_read: data.is_read || false
                     };
 
-                    // Append message to UI using existing function
+                    // Append to UI and scroll
                     appendMessage(msg);
                     scrollToBottom();
 
-                    console.log('Message appended:', msg.content);
-                } else if (data.type === 'typing') {
-                    // Handle typing indicator if server sends it
+                    console.log('[WS] Message rendered:', msg.id);
+                }
+                // Handle typing indicator event
+                else if (data.type === 'typing') {
                     const typingIndicator = document.getElementById('typingIndicator');
                     if (typingIndicator) {
                         typingIndicator.style.display = data.is_typing ? 'flex' : 'none';
                     }
-                } else if (data.type === 'error') {
-                    console.error('Server error:', data.error);
-                    alert(data.error || 'An error occurred');
                 }
+                // Handle read receipt / status updates
+                else if (data.type === 'read_receipt') {
+                    // Update message status icons if needed
+                    const msgEl = document.querySelector(`[data-message-id="${data.message_id}"] .message-status`);
+                    if (msgEl) {
+                        msgEl.classList.add('read');
+                    }
+                }
+                // Handle server-side errors
+                else if (data.type === 'error') {
+                    console.error('[WS] Server error:', data.error || data.message);
+                }
+
             } catch (error) {
-                console.error('Error parsing WebSocket message:', error, e.data);
+                console.error('[WS] Parse error:', error, e.data);
             }
         };
 
         // ============================================================
-        // WEBSOCKET: onclose - Connection closed
+        // onclose: WebSocket connection closed
         // ============================================================
         chatSocket.onclose = function(e) {
-            console.log('WebSocket connection closed:', e.code, e.reason);
-
-            // Only show error for unexpected closures
-            if (e.code !== 1000 && e.code !== 1001) {
-                console.warn('WebSocket closed unexpectedly. Code:', e.code);
+            // Normal closure codes: 1000 (normal), 1001 (going away)
+            if (e.code === 1000 || e.code === 1001) {
+                console.log('[WS] Connection closed normally');
+            } else {
+                console.warn('[WS] Connection closed unexpectedly. Code:', e.code, 'Reason:', e.reason);
             }
-
             chatSocket = null;
         };
 
         // ============================================================
-        // WEBSOCKET: onerror - Connection error
+        // onerror: WebSocket connection error
         // ============================================================
         chatSocket.onerror = function(e) {
-            console.error('WebSocket error:', e);
+            console.error('[WS] Connection error:', e);
         };
     }
 
     /**
      * Closes the current WebSocket connection
+     * Called when leaving page or manually disconnecting
      */
     function disconnectWebSocket() {
         if (chatSocket) {
-            console.log('Disconnecting WebSocket');
-            chatSocket.close();
+            console.log('[WS] Disconnecting');
+            chatSocket.close(1000, 'User disconnected');
             chatSocket = null;
         }
     }
