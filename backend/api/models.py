@@ -257,3 +257,23 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message from {self.sender.phone_number}"
+
+
+# =========================
+# Report Post
+# =========================
+class ReportPost(models.Model):
+    item = models.ForeignKey(
+        Item,
+        on_delete=models.CASCADE,
+        related_name="reports"
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    reason = models.TextField()
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Report on {self.item.title}"
