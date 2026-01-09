@@ -1259,7 +1259,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentUser = null;
     let currentConversation = null;
     let conversations = [];
-    let messagePollingInterval = null;
+
+    // ============================================================
+    // WEBSOCKET: Replaced polling with WebSocket connection
+    // ============================================================
+    let chatSocket = null; // WebSocket instance for current conversation
 
     if (checkAuth()) {
         loadConversations();
@@ -1405,7 +1409,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector(`[onclick="selectConversation(${convoId})"]`)?.classList.add('active');
 
         await loadMessages(convoId);
-        startMessagePolling();
+
+        // ============================================================
+        // WEBSOCKET: Connect to WebSocket instead of starting polling
+        // Closes any existing WebSocket before opening a new one
+        // ============================================================
+        connectWebSocket(convoId);
 
         if (window.innerWidth <= 768) {
             document.getElementById('conversationsSidebar').classList.remove('active');
@@ -1543,7 +1552,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    window.sendMessage = async function() {
+    // ============================================================
+    // WEBSOCKET: Send messages via WebSocket instead of REST API
+    // Messages are sent as JSON: { "message": "text here" }
+    // ============================================================
+    window.sendMessage = function() {
         const input = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
 
@@ -1552,33 +1565,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const content = input.value.trim();
         if (!content) return;
 
-        const token = localStorage.getItem('authToken');
+        // Check if WebSocket is open
+        if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
+            console.error('WebSocket is not connected');
+            alert('Connection lost. Please refresh the page.');
+            return;
+        }
 
         input.disabled = true;
         sendBtn.disabled = true;
 
         try {
-            const response = await fetch(`${API_BASE}/conversations/${currentConversation.id}/messages/`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ content })
-            });
-
-            if (!response.ok) throw new Error('Send failed');
-
-            const newMessage = await response.json();
+            // Send message via WebSocket
+            chatSocket.send(JSON.stringify({ message: content }));
+            console.log('Message sent via WebSocket:', content);
 
             input.value = '';
             input.style.height = 'auto';
 
-            appendMessage(newMessage);
-            scrollToBottom();
+            // Note: The message will be appended when received back from WebSocket
+            // This ensures consistency and handles the case where server might modify the message
 
         } catch (error) {
-            console.error('Send error:', error);
+            console.error('WebSocket send error:', error);
             alert('Failed to send message');
         } finally {
             input.disabled = false;
@@ -1625,33 +1634,109 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function startMessagePolling() {
-        if (messagePollingInterval) clearInterval(messagePollingInterval);
+    // ============================================================
+    // WEBSOCKET: Removed polling functions (startMessagePolling, checkNewMessages)
+    // Replaced with WebSocket connection management
+    // ============================================================
 
-        messagePollingInterval = setInterval(async () => {
-            if (currentConversation) await checkNewMessages();
-        }, 3000);
+    /**
+     * Connects to WebSocket for real-time chat
+     * @param {number} chatId - The conversation/chat ID
+     */
+    function connectWebSocket(chatId) {
+        // Close existing WebSocket connection if any
+        if (chatSocket) {
+            console.log('Closing existing WebSocket connection');
+            chatSocket.close();
+            chatSocket = null;
+        }
+
+        // Determine WebSocket protocol (ws or wss based on current page protocol)
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${wsProtocol}//${window.location.host}/ws/chat/${chatId}/`;
+
+        console.log('Connecting to WebSocket:', wsUrl);
+
+        chatSocket = new WebSocket(wsUrl);
+
+        // ============================================================
+        // WEBSOCKET: onopen - Connection established
+        // ============================================================
+        chatSocket.onopen = function(e) {
+            console.log('WebSocket connection established for chat:', chatId);
+        };
+
+        // ============================================================
+        // WEBSOCKET: onmessage - Receive messages in real-time
+        // Parses JSON, determines message ownership, appends to UI
+        // ============================================================
+        chatSocket.onmessage = function(e) {
+            console.log('WebSocket message received:', e.data);
+
+            try {
+                const data = JSON.parse(e.data);
+
+                // Handle different message types from server
+                if (data.type === 'chat_message' || data.message !== undefined) {
+                    // Construct message object compatible with appendMessage()
+                    const msg = {
+                        id: data.id || Date.now(),
+                        content: data.message || data.content,
+                        sender_id: data.sender_id,
+                        created_at: data.created_at || new Date().toISOString(),
+                        is_read: data.is_read || false
+                    };
+
+                    // Append message to UI using existing function
+                    appendMessage(msg);
+                    scrollToBottom();
+
+                    console.log('Message appended:', msg.content);
+                } else if (data.type === 'typing') {
+                    // Handle typing indicator if server sends it
+                    const typingIndicator = document.getElementById('typingIndicator');
+                    if (typingIndicator) {
+                        typingIndicator.style.display = data.is_typing ? 'flex' : 'none';
+                    }
+                } else if (data.type === 'error') {
+                    console.error('Server error:', data.error);
+                    alert(data.error || 'An error occurred');
+                }
+            } catch (error) {
+                console.error('Error parsing WebSocket message:', error, e.data);
+            }
+        };
+
+        // ============================================================
+        // WEBSOCKET: onclose - Connection closed
+        // ============================================================
+        chatSocket.onclose = function(e) {
+            console.log('WebSocket connection closed:', e.code, e.reason);
+
+            // Only show error for unexpected closures
+            if (e.code !== 1000 && e.code !== 1001) {
+                console.warn('WebSocket closed unexpectedly. Code:', e.code);
+            }
+
+            chatSocket = null;
+        };
+
+        // ============================================================
+        // WEBSOCKET: onerror - Connection error
+        // ============================================================
+        chatSocket.onerror = function(e) {
+            console.error('WebSocket error:', e);
+        };
     }
 
-    async function checkNewMessages() {
-        if (!currentConversation) return;
-
-        const token = localStorage.getItem('authToken');
-
-        try {
-            const response = await fetch(`${API_BASE}/conversations/${currentConversation.id}/messages/?since=${Date.now() - 5000}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                if (data.messages?.length > 0) {
-                    data.messages.forEach(msg => appendMessage(msg));
-                    scrollToBottom();
-                }
-            }
-        } catch (error) {
-            console.error('Poll error:', error);
+    /**
+     * Closes the current WebSocket connection
+     */
+    function disconnectWebSocket() {
+        if (chatSocket) {
+            console.log('Disconnecting WebSocket');
+            chatSocket.close();
+            chatSocket = null;
         }
     }
 
@@ -1725,8 +1810,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return div.innerHTML;
     }
 
+    // ============================================================
+    // WEBSOCKET: Clean up WebSocket on page unload
+    // ============================================================
     window.addEventListener('beforeunload', () => {
-        if (messagePollingInterval) clearInterval(messagePollingInterval);
+        disconnectWebSocket();
     });
 });
 {% endblock %}
