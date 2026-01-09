@@ -157,7 +157,7 @@ class FeedbackAdmin(admin.ModelAdmin):
 
 
 # =========================
-# Chat Admin (NEW)
+# Chat Admin (UPDATED)
 # =========================
 @admin.register(Chat)
 class ChatAdmin(admin.ModelAdmin):
@@ -172,14 +172,19 @@ class ChatAdmin(admin.ModelAdmin):
     search_fields = (
         "item__title",
         "buyer__phone_number",
-        "seller__phone_number",
+        "item__owner__phone_number",
     )
-    autocomplete_fields = ("item", "buyer", "seller")
+    autocomplete_fields = ("item", "buyer")
     readonly_fields = ("created_at", "last_message_at")
+
+    def seller(self, obj):
+        return obj.item.owner
+
+    seller.short_description = "Seller"
 
 
 # =========================
-# Message Admin (NEW)
+# Message Admin (UPDATED)
 # =========================
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
@@ -189,9 +194,9 @@ class MessageAdmin(admin.ModelAdmin):
         "sender",
         "short_text",
         "created_at",
-        "is_read",
+        "read_status",
     )
-    list_filter = ("is_read",)
+    list_filter = ("created_at",)
     search_fields = (
         "text",
         "sender__phone_number",
@@ -204,3 +209,8 @@ class MessageAdmin(admin.ModelAdmin):
         return obj.text[:40]
 
     short_text.short_description = "Message"
+
+    def read_status(self, obj):
+        return "Read" if obj.read_at else "Unread"
+
+    read_status.short_description = "Status"
