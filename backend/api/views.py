@@ -148,8 +148,9 @@ class FeedbackListView(generics.ListAPIView):
 
 
 # =========================
-# Chat Views (FIXED)
+# CHAT VIEWS (PRODUCT-BASED)
 # =========================
+
 class ChatCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -157,23 +158,19 @@ class ChatCreateView(APIView):
         item_id = request.data.get("item_id")
         item = get_object_or_404(Item, id=item_id)
 
-        buyer = request.user
-        seller = item.owner
-
-        if buyer == seller:
+        if item.owner == request.user:
             return Response(
-                {"detail": "You cannot chat with yourself."},
+                {"detail": "Cannot chat with your own item"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         chat, _ = Chat.objects.get_or_create(
             item=item,
-            buyer=buyer
+            buyer=request.user
         )
 
         return Response(
-            ChatSerializer(chat).data,
-            status=status.HTTP_200_OK
+            ChatSerializer(chat, context={"request": request}).data
         )
 
 
@@ -183,7 +180,9 @@ class ChatListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Chat.objects.filter(Q(buyer=user) | Q(item__owner=user)).distinct()
+        return Chat.objects.filter(
+            Q(buyer=user) | Q(item__owner=user)
+        ).select_related("item")
 
 
 class ChatMessagesView(generics.ListAPIView):
@@ -204,20 +203,9 @@ class SendMessageView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        chat = get_object_or_404(
-            Chat,
-            id=self.request.data.get("chat")
-        )
+        chat = get_object_or_404(Chat, id=self.request.data.get("chat"))
 
         if self.request.user not in [chat.buyer, chat.seller]:
             raise permissions.PermissionDenied()
 
-        message = serializer.save(
-            chat=chat,
-            sender=self.request.user
-        )
-
-        chat.last_message_at = timezone.now()
-        chat.save()
-
-        return message
+        serializer.save(chat=chat)
