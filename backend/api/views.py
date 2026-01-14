@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.db.models import Q
 
 from .models import (
     Item, ItemImage, ContactForm, ReportPost,
@@ -167,8 +168,7 @@ class ChatCreateView(APIView):
 
         chat, _ = Chat.objects.get_or_create(
             item=item,
-            buyer=buyer,
-            seller=seller
+            buyer=buyer
         )
 
         return Response(
@@ -183,7 +183,7 @@ class ChatListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Chat.objects.filter(buyer=user) | Chat.objects.filter(seller=user)
+        return Chat.objects.filter(Q(buyer=user) | Q(item__owner=user)).distinct()
 
 
 class ChatMessagesView(generics.ListAPIView):
