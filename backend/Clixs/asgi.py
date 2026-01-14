@@ -12,7 +12,8 @@ import api.routing  # import AFTER django.setup()
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-    "websocket": URLRouter(
-        api.routing.websocket_urlpatterns
-    ),
+    "websocket": JwtAuthMiddleware(
+        URLRouter(api.routing.websocket_urlpatterns)
+    )
+
 })
