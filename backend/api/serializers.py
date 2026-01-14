@@ -109,11 +109,12 @@ class FeedbackSerializer(serializers.ModelSerializer):
         read_only_fields = ("created_at",)
 
 # ======================================================
-# CHAT SERIALIZERS
+# CHAT SERIALIZER (FIXED)
 # ======================================================
 
 class ChatSerializer(serializers.ModelSerializer):
     other_user = serializers.SerializerMethodField()
+    seller = serializers.SerializerMethodField()
     last_message = serializers.SerializerMethodField()
 
     class Meta:
@@ -137,11 +138,20 @@ class ChatSerializer(serializers.ModelSerializer):
 
     def get_other_user(self, obj):
         request = self.context.get("request")
-        if request.user == obj.buyer:
-            user = obj.seller
+
+        if request and request.user == obj.buyer:
+            user = obj.item.owner
         else:
             user = obj.buyer
 
+        return {
+            "id": user.id,
+            "phone_number": user.phone_number,
+            "name": f"{user.first_name} {user.last_name}".strip()
+        }
+
+    def get_seller(self, obj):
+        user = obj.item.owner
         return {
             "id": user.id,
             "phone_number": user.phone_number,
@@ -153,12 +163,13 @@ class ChatSerializer(serializers.ModelSerializer):
         return last_msg.text if last_msg else None
 
 # ======================================================
-# MESSAGE SERIALIZER
+# MESSAGE SERIALIZER (FIXED)
 # ======================================================
 
 class MessageSerializer(serializers.ModelSerializer):
     content = serializers.CharField(source="text", read_only=True)
     sender_id = serializers.IntegerField(source="sender.id", read_only=True)
+    is_read = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
@@ -176,7 +187,11 @@ class MessageSerializer(serializers.ModelSerializer):
             "sender_id",
             "created_at",
             "content",
+            "is_read",
         )
+
+    def get_is_read(self, obj):
+        return bool(obj.read_at)
 
     def create(self, validated_data):
         request = self.context.get("request")
