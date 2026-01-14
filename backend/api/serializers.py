@@ -108,13 +108,15 @@ class FeedbackSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ("created_at",)
 
-# ======================================================
-# CHAT SERIALIZER (FIXED)
-# ======================================================
+# =========================
+# CHAT SERIALIZER (ANONYMOUS, PRODUCT-ONLY)
+# =========================
 
 class ChatSerializer(serializers.ModelSerializer):
-    other_user = serializers.SerializerMethodField()
-    seller = serializers.SerializerMethodField()
+    item_title = serializers.CharField(
+        source="item_title_snapshot",
+        read_only=True
+    )
     last_message = serializers.SerializerMethodField()
 
     class Meta:
@@ -122,78 +124,40 @@ class ChatSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "item",
-            "buyer",
-            "seller",
-            "other_user",
+            "item_title",
+            "created_at",
+            "last_message_at",
             "last_message",
-            "created_at",
-            "last_message_at",
         )
-        read_only_fields = (
-            "buyer",
-            "seller",
-            "created_at",
-            "last_message_at",
-        )
-
-    def get_other_user(self, obj):
-        request = self.context.get("request")
-
-        if request and request.user == obj.buyer:
-            user = obj.item.owner
-        else:
-            user = obj.buyer
-
-        return {
-            "id": user.id,
-            "phone_number": user.phone_number,
-            "name": f"{user.first_name} {user.last_name}".strip()
-        }
-
-    def get_seller(self, obj):
-        user = obj.item.owner
-        return {
-            "id": user.id,
-            "phone_number": user.phone_number,
-            "name": f"{user.first_name} {user.last_name}".strip()
-        }
 
     def get_last_message(self, obj):
-        last_msg = obj.messages.last()
-        return last_msg.text if last_msg else None
+        msg = obj.messages.last()
+        return msg.text if msg else None
 
-# ======================================================
-# MESSAGE SERIALIZER (FIXED)
-# ======================================================
+
+# =========================
+# MESSAGE SERIALIZER (NO NAMES)
+# =========================
 
 class MessageSerializer(serializers.ModelSerializer):
-    content = serializers.CharField(source="text", read_only=True)
-    sender_id = serializers.IntegerField(source="sender.id", read_only=True)
-    is_read = serializers.SerializerMethodField()
+    is_me = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
         fields = (
             "id",
             "chat",
-            "sender_id",
-            "content",
             "text",
-            "is_read",
+            "is_me",
             "created_at",
         )
-        read_only_fields = (
-            "id",
-            "sender_id",
-            "created_at",
-            "content",
-            "is_read",
-        )
+        read_only_fields = ("id", "created_at", "is_me")
 
-    def get_is_read(self, obj):
-        return bool(obj.read_at)
+    def get_is_me(self, obj):
+        request = self.context.get("request")
+        return request and obj.sender == request.user
 
     def create(self, validated_data):
-        request = self.context.get("request")
+        request = self.context["request"]
         validated_data["sender"] = request.user
         return super().create(validated_data)
