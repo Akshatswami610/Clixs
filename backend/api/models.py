@@ -15,7 +15,7 @@ from django.core.exceptions import ValidationError
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
         if not phone_number:
-            raise ValueError("The phone number must be set")
+            raise ValueError("Phone number is required")
 
         user = self.model(phone_number=phone_number, **extra_fields)
         user.set_password(password)
@@ -55,7 +55,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 # =========================
-# Item Model
+# Item (Product)
 # =========================
 class Item(models.Model):
     ITEM_TYPES = (
@@ -84,7 +84,7 @@ class Item(models.Model):
     rent_prices = models.JSONField(
         null=True,
         blank=True,
-        help_text="Example: {'daily': 50, 'weekly': 300}"
+        help_text="Example: {'daily': 100, 'weekly': 500}"
     )
 
     category = models.CharField(max_length=50, blank=True)
@@ -104,15 +104,11 @@ class Item(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def clean(self):
-        if self.item_type == "SELL":
-            if not self.sell_price:
-                raise ValidationError("Sell price is required.")
-            if self.rent_prices:
-                raise ValidationError("Rent prices not allowed for SELL items.")
+        if self.item_type == "SELL" and not self.sell_price:
+            raise ValidationError("Sell price required for SELL items")
 
-        if self.item_type == "RENT":
-            if not isinstance(self.rent_prices, dict):
-                raise ValidationError("Rent prices must be a dictionary.")
+        if self.item_type == "RENT" and not isinstance(self.rent_prices, dict):
+            raise ValidationError("Rent prices required for RENT items")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -123,7 +119,7 @@ class Item(models.Model):
 
 
 # =========================
-# Item Image
+# Item Images
 # =========================
 class ItemImage(models.Model):
     item = models.ForeignKey(
@@ -136,39 +132,7 @@ class ItemImage(models.Model):
 
 
 # =========================
-# Contact Form
-# =========================
-class ContactForm(models.Model):
-    STATUS = (
-        ("PENDING", "Pending"),
-        ("RESOLVED", "Resolved"),
-    )
-
-    name = models.CharField(max_length=50)
-    email = models.EmailField(blank=True, null=True)
-    phone = models.CharField(max_length=15, blank=True, null=True)
-
-    subject = models.CharField(max_length=50)
-    message = models.TextField()
-
-    status = models.CharField(
-        max_length=10,
-        choices=STATUS,
-        default="PENDING"
-    )
-
-    created_at = models.DateTimeField(default=timezone.now)
-
-    def clean(self):
-        if not self.email and not self.phone:
-            raise ValidationError("Provide email or phone.")
-
-    class Meta:
-        ordering = ["-created_at"]
-
-
-# =========================
-# Chat (Hardened)
+# Chat (Product-based, Anonymous UI)
 # =========================
 class Chat(models.Model):
     item = models.ForeignKey(
@@ -176,6 +140,9 @@ class Chat(models.Model):
         on_delete=models.CASCADE,
         related_name="chats"
     )
+
+    # Snapshot for fast UI + historical safety
+    item_title_snapshot = models.CharField(max_length=100, editable=False)
 
     buyer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -200,21 +167,24 @@ class Chat(models.Model):
 
     def clean(self):
         if self.buyer == self.item.owner:
-            raise ValidationError("You cannot chat with yourself.")
+            raise ValidationError("Cannot chat with yourself")
 
         if self.item.status != "ACTIVE":
-            raise ValidationError("Cannot start chat on inactive item.")
+            raise ValidationError("Chat not allowed on inactive items")
 
     def save(self, *args, **kwargs):
+        if not self.item_title_snapshot:
+            self.item_title_snapshot = self.item.title
+
         self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Chat for {self.item.title}"
+        return f"Chat: {self.item_title_snapshot}"
 
 
 # =========================
-# Message (Hardened)
+# Message (No Names Exposed)
 # =========================
 class Message(models.Model):
     chat = models.ForeignKey(
@@ -241,53 +211,37 @@ class Message(models.Model):
 
     def clean(self):
         if self.sender not in [self.chat.buyer, self.chat.seller]:
-            raise ValidationError("Sender must be part of the chat.")
+            raise ValidationError("Sender not part of this chat")
 
         if self.chat.item.status != "ACTIVE":
-            raise ValidationError("Messaging is closed for this item.")
+            raise ValidationError("Messaging closed for this item")
 
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
 
-        # Atomic update to avoid race conditions
         Chat.objects.filter(id=self.chat_id).update(
             last_message_at=self.created_at
         )
 
     def __str__(self):
-        return f"Message from {self.sender.phone_number}"
+        return f"Message in {self.chat.id}"
 
 
 # =========================
-# Report Post
+# Report Item
 # =========================
 class ReportPost(models.Model):
-    item = models.ForeignKey(
-        Item,
-        on_delete=models.CASCADE
-    )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
-    )
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     reason = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return f"Report by {self.user} on {self.item}"
 
 
 # =========================
 # Feedback
 # =========================
 class Feedback(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
-    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     feedback = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return f"Feedback by {self.user}"
