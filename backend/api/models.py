@@ -15,7 +15,7 @@ from django.core.exceptions import ValidationError
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
         if not phone_number:
-            raise ValueError("Phone number is required")
+            raise ValueError("The phone number must be set")
 
         user = self.model(phone_number=phone_number, **extra_fields)
         user.set_password(password)
@@ -55,7 +55,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 # =========================
-# Item (Product)
+# Item Model
 # =========================
 class Item(models.Model):
     ITEM_TYPES = (
@@ -84,7 +84,7 @@ class Item(models.Model):
     rent_prices = models.JSONField(
         null=True,
         blank=True,
-        help_text="Example: {'daily': 100, 'weekly': 500}"
+        help_text="Example: {'daily': 50, 'weekly': 300}"
     )
 
     category = models.CharField(max_length=50, blank=True)
@@ -104,11 +104,15 @@ class Item(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def clean(self):
-        if self.item_type == "SELL" and not self.sell_price:
-            raise ValidationError("Sell price required for SELL items")
+        if self.item_type == "SELL":
+            if not self.sell_price:
+                raise ValidationError("Sell price is required.")
+            if self.rent_prices:
+                raise ValidationError("Rent prices not allowed for SELL items.")
 
-        if self.item_type == "RENT" and not isinstance(self.rent_prices, dict):
-            raise ValidationError("Rent prices required for RENT items")
+        if self.item_type == "RENT":
+            if not isinstance(self.rent_prices, dict):
+                raise ValidationError("Rent prices must be a dictionary.")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -119,7 +123,7 @@ class Item(models.Model):
 
 
 # =========================
-# Item Images
+# Item Image
 # =========================
 class ItemImage(models.Model):
     item = models.ForeignKey(
@@ -129,6 +133,38 @@ class ItemImage(models.Model):
     )
     image = models.ImageField(upload_to="clixs/items/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+# =========================
+# Contact Form
+# =========================
+class ContactForm(models.Model):
+    STATUS = (
+        ("PENDING", "Pending"),
+        ("RESOLVED", "Resolved"),
+    )
+
+    name = models.CharField(max_length=50)
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+
+    subject = models.CharField(max_length=50)
+    message = models.TextField()
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS,
+        default="PENDING"
+    )
+
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def clean(self):
+        if not self.email and not self.phone:
+            raise ValidationError("Provide email or phone.")
+
+    class Meta:
+        ordering = ["-created_at"]
 
 
 # =========================
@@ -182,7 +218,6 @@ class Chat(models.Model):
     def __str__(self):
         return f"Chat: {self.item_title_snapshot}"
 
-
 # =========================
 # Message (No Names Exposed)
 # =========================
@@ -229,19 +264,34 @@ class Message(models.Model):
 
 
 # =========================
-# Report Item
+# Report Post
 # =========================
 class ReportPost(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    item = models.ForeignKey(
+        Item,
+        on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
     reason = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Report by {self.user} on {self.item}"
 
 
 # =========================
 # Feedback
 # =========================
 class Feedback(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
     feedback = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Feedback by {self.user}"
