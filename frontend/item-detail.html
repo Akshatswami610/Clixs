@@ -636,6 +636,224 @@
     border-color: rgba(231, 76, 60, 0.6);
 }
 
+.report-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.report-modal-content {
+    background: rgba(30, 30, 45, 0.98);
+    border: 2px solid rgba(231, 76, 60, 0.5);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: scaleIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.report-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(231, 76, 60, 0.2);
+}
+
+.report-modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.report-modal-close {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #b0b0b0;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.report-modal-close:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.report-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.form-textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 1rem;
+    background: rgba(52, 152, 219, 0.05);
+    border: 2px solid rgba(52, 152, 219, 0.2);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: all 0.3s ease;
+}
+
+.form-textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    background: rgba(52, 152, 219, 0.1);
+}
+
+.form-textarea::placeholder {
+    color: #7f8c8d;
+}
+
+.report-reasons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.reason-option {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem;
+    background: rgba(52, 152, 219, 0.05);
+    border: 2px solid rgba(52, 152, 219, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.reason-option:hover {
+    background: rgba(52, 152, 219, 0.1);
+    border-color: rgba(52, 152, 219, 0.4);
+}
+
+.reason-option input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.reason-option label {
+    flex: 1;
+    color: #e0e0e0;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.submit-report-btn {
+    flex: 1;
+    padding: 1rem;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-report-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(231, 76, 60, 0.6);
+}
+
+.submit-report-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.cancel-report-btn {
+    flex: 1;
+    padding: 1rem;
+    background: rgba(52, 152, 219, 0.1);
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 12px;
+    color: #3498db;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cancel-report-btn:hover {
+    background: rgba(52, 152, 219, 0.2);
+    border-color: #3498db;
+}
+
+.report-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 45px;
+    height: 45px;
+    background: rgba(231, 76, 60, 0.1);
+    border: 2px solid rgba(231, 76, 60, 0.3);
+    border-radius: 50%;
+    color: #e74c3c;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.report-btn:hover {
+    background: rgba(231, 76, 60, 0.2);
+    border-color: #e74c3c;
+    transform: scale(1.1);
+}
+
 @media (max-width: 768px) {
     .toast {
         min-width: auto;
@@ -713,11 +931,15 @@
 </div>
 {% endblock %}
 
+
 {% block extra_scripts %}
+// Place this code inside {% block extra_scripts %} in your HTML file
+
 document.addEventListener("DOMContentLoaded", () => {
     const API_BASE = "/api/v1";
     const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%231a1a2e'/%3E%3Cg transform='translate(200, 150)'%3E%3Ccircle cx='0' cy='-20' r='40' fill='%233498db' opacity='0.3'/%3E%3Crect x='-30' y='10' width='60' height='40' rx='5' fill='%233498db' opacity='0.3'/%3E%3Cpolygon points='0,-10 -25,25 25,25' fill='%233498db' opacity='0.5'/%3E%3C/g%3E%3Ctext x='200' y='250' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%23666'%3ENo Image%3C/text%3E%3C/svg%3E";
 
+    // Toast notification function
     function showToast(title, message, type = 'info') {
         // Remove any existing toasts and overlays
         const existingToasts = document.querySelectorAll('.toast');
@@ -760,6 +982,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3000);
     }
 
+    // Close toast function
     window.closeToast = function() {
         const toast = document.querySelector('.toast');
         const overlay = document.querySelector('.toast-overlay');
@@ -781,6 +1004,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 300);
     };
 
+    // Notification function
     function showNotification(title, message, type = 'info') {
         // Remove any existing notifications
         const existingNotifications = document.querySelectorAll('.notification');
@@ -812,6 +1036,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3000);
     }
 
+    // Close notification function
     window.closeNotification = function(btn) {
         const notification = btn ? btn.closest('.notification') : document.querySelector('.notification');
 
@@ -825,11 +1050,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // Format INR currency
     function formatINR(amount) {
         if (!amount || isNaN(amount)) return "";
         return "₹" + Number(amount).toLocaleString("en-IN");
     }
 
+    // Get image URL
     function getImageUrl(imagePath) {
         if (!imagePath) return PLACEHOLDER;
         if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
@@ -841,6 +1068,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return `/media/${imagePath}`;
     }
 
+    // Format date
     function formatDate(dateString) {
         if (!dateString) return "";
         const date = new Date(dateString);
@@ -851,16 +1079,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Get user initials
     function getInitials(name) {
         if (!name) return "U";
         return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
     }
 
+    // Get item ID from URL
     function getItemIdFromURL() {
         const params = new URLSearchParams(window.location.search);
         return params.get('id');
     }
 
+    // Fetch item detail
     async function fetchItemDetail() {
         const container = document.getElementById("itemDetailContainer");
         const itemId = getItemIdFromURL();
@@ -925,6 +1156,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Display item detail
     function displayItemDetail(item) {
         const container = document.getElementById("itemDetailContainer");
 
@@ -997,6 +1229,9 @@ document.addEventListener("DOMContentLoaded", () => {
         container.innerHTML = `
             <div class="detail-content">
                 <div class="image-section">
+                    <button class="report-btn" onclick="openReportModal(${item.id})" title="Report this post">
+                        🚩
+                    </button>
                     <img src="${images[0]}"
                          class="main-image"
                          id="mainImage"
@@ -1069,7 +1304,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Global functions for button actions
+    // Chat with seller function
     window.chatWithSeller = function(itemId, sellerId) {
         const token = localStorage.getItem('authToken');
         if (!token) {
@@ -1091,6 +1326,7 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = `/chats?user=${sellerId}&item=${itemId}`;
     };
 
+    // Make offer function
     window.makeOffer = function(itemId) {
         const token = localStorage.getItem('authToken');
         if (!token) {
@@ -1102,6 +1338,148 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         showNotification('Coming Soon', 'Make offer functionality will be available soon!', 'info');
     };
+
+    // Open report modal function
+    window.openReportModal = function(itemId) {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            showToast('Login Required', 'Please login to report this post', 'warning');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 1500);
+            return;
+        }
+
+        const modal = document.createElement('div');
+        modal.className = 'report-modal';
+        modal.id = 'reportModal';
+        modal.innerHTML = `
+            <div class="report-modal-content">
+                <div class="report-modal-header">
+                    <h2 class="report-modal-title">
+                        <span>🚩</span>
+                        <span>Report Post</span>
+                    </h2>
+                    <button class="report-modal-close" onclick="closeReportModal()">×</button>
+                </div>
+                <form class="report-form" id="reportForm">
+                    <div class="form-group">
+                        <label class="form-label">Why are you reporting this post?</label>
+                        <div class="report-reasons">
+                            <div class="reason-option">
+                                <input type="radio" id="reason1" name="reportReason" value="Spam or misleading" required>
+                                <label for="reason1">Spam or misleading</label>
+                            </div>
+                            <div class="reason-option">
+                                <input type="radio" id="reason2" name="reportReason" value="Inappropriate content">
+                                <label for="reason2">Inappropriate content</label>
+                            </div>
+                            <div class="reason-option">
+                                <input type="radio" id="reason3" name="reportReason" value="Fraudulent or scam">
+                                <label for="reason3">Fraudulent or scam</label>
+                            </div>
+                            <div class="reason-option">
+                                <input type="radio" id="reason4" name="reportReason" value="Duplicate listing">
+                                <label for="reason4">Duplicate listing</label>
+                            </div>
+                            <div class="reason-option">
+                                <input type="radio" id="reason5" name="reportReason" value="Other">
+                                <label for="reason5">Other</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="additionalInfo">Additional Information (Optional)</label>
+                        <textarea
+                            class="form-textarea"
+                            id="additionalInfo"
+                            placeholder="Please provide any additional details about why you're reporting this post..."
+                            rows="4"
+                        ></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-report-btn" onclick="closeReportModal()">Cancel</button>
+                        <button type="submit" class="submit-report-btn" id="submitReportBtn">Submit Report</button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Handle form submission
+        document.getElementById('reportForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await submitReport(itemId);
+        });
+
+        // Close modal on background click
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeReportModal();
+            }
+        });
+    };
+
+    // Close report modal function
+    window.closeReportModal = function() {
+        const modal = document.getElementById('reportModal');
+        if (modal) {
+            modal.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => {
+                modal.remove();
+            }, 300);
+        }
+    };
+
+    // Submit report function
+    async function submitReport(itemId) {
+        const submitBtn = document.getElementById('submitReportBtn');
+        const selectedReason = document.querySelector('input[name="reportReason"]:checked');
+        const additionalInfo = document.getElementById('additionalInfo').value.trim();
+
+        if (!selectedReason) {
+            showNotification('Error', 'Please select a reason for reporting', 'error');
+            return;
+        }
+
+        // Build the reason text
+        let reason = selectedReason.value;
+        if (additionalInfo) {
+            reason += `: ${additionalInfo}`;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await fetch(`${API_BASE}/reports/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    item: itemId,
+                    reason: reason
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || errorData.error || 'Failed to submit report');
+            }
+
+            closeReportModal();
+            showToast('Report Submitted', 'Thank you for helping us maintain a safe community. We will review your report shortly.', 'success');
+        } catch (error) {
+            console.error('Error submitting report:', error);
+            showNotification('Error', error.message || 'Failed to submit report. Please try again.', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Report';
+        }
+    }
 
     // Fetch item details on page load
     fetchItemDetail();
