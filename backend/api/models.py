@@ -136,14 +136,41 @@ class ItemImage(models.Model):
 
 
 # =========================
-# Chat
+# Contact Form
 # =========================
-class Chat(models.Model):
-    STATUS_CHOICES = (
-        ("OPEN", "Open"),
-        ("CLOSED", "Closed"),
+class ContactForm(models.Model):
+    STATUS = (
+        ("PENDING", "Pending"),
+        ("RESOLVED", "Resolved"),
     )
 
+    name = models.CharField(max_length=50)
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+
+    subject = models.CharField(max_length=50)
+    message = models.TextField()
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS,
+        default="PENDING"
+    )
+
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def clean(self):
+        if not self.email and not self.phone:
+            raise ValidationError("Provide email or phone.")
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+# =========================
+# Chat (Hardened)
+# =========================
+class Chat(models.Model):
     item = models.ForeignKey(
         Item,
         on_delete=models.CASCADE,
@@ -154,12 +181,6 @@ class Chat(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="buyer_chats"
-    )
-
-    status = models.CharField(
-        max_length=10,
-        choices=STATUS_CHOICES,
-        default="OPEN"
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -181,8 +202,7 @@ class Chat(models.Model):
         if self.buyer == self.item.owner:
             raise ValidationError("You cannot chat with yourself.")
 
-        # Only block chat creation, not existing chats
-        if not self.pk and self.item.status != "ACTIVE":
+        if self.item.status != "ACTIVE":
             raise ValidationError("Cannot start chat on inactive item.")
 
     def save(self, *args, **kwargs):
@@ -194,14 +214,9 @@ class Chat(models.Model):
 
 
 # =========================
-# Message
+# Message (Hardened)
 # =========================
 class Message(models.Model):
-    MESSAGE_TYPES = (
-        ("TEXT", "Text"),
-        ("SYSTEM", "System"),
-    )
-
     chat = models.ForeignKey(
         Chat,
         on_delete=models.CASCADE,
@@ -211,12 +226,6 @@ class Message(models.Model):
     sender = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
-    )
-
-    message_type = models.CharField(
-        max_length=10,
-        choices=MESSAGE_TYPES,
-        default="TEXT"
     )
 
     text = models.TextField(max_length=2000)
@@ -231,20 +240,17 @@ class Message(models.Model):
         ]
 
     def clean(self):
-        if self.sender not in (self.chat.buyer, self.chat.seller):
+        if self.sender not in [self.chat.buyer, self.chat.seller]:
             raise ValidationError("Sender must be part of the chat.")
 
-        if self.chat.status != "OPEN":
-            raise ValidationError("Chat is closed.")
-
-        if self.message_type == "TEXT" and not self.text.strip():
-            raise ValidationError("Message cannot be empty.")
+        if self.chat.item.status != "ACTIVE":
+            raise ValidationError("Messaging is closed for this item.")
 
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
 
-        # Update chat activity safely
+        # Atomic update to avoid race conditions
         Chat.objects.filter(id=self.chat_id).update(
             last_message_at=self.created_at
         )
