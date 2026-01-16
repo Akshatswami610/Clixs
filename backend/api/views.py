@@ -9,13 +9,13 @@ from django.db.models import Q
 
 from .models import (
     Item, ItemImage, ContactForm, ReportPost,
-    Feedback, Chat, Message
+     Chat, Message
 )
 from .serializers import (
     UserSerializer, UserRegisterSerializer,
     ItemSerializer, ItemImageSerializer,
     ContactFormSerializer, ReportPostSerializer,
-    FeedbackSerializer, ChatSerializer, MessageSerializer
+     ChatSerializer, MessageSerializer
 )
 
 User = get_user_model()
@@ -130,20 +130,6 @@ class ReportPostCreateView(generics.CreateAPIView):
 class ReportPostListView(generics.ListAPIView):
     queryset = ReportPost.objects.select_related("item", "user")
     serializer_class = ReportPostSerializer
-    permission_classes = [permissions.IsAdminUser]
-
-
-# =========================
-# Feedback Views
-# =========================
-class FeedbackCreateView(generics.CreateAPIView):
-    serializer_class = FeedbackSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class FeedbackListView(generics.ListAPIView):
-    queryset = Feedback.objects.select_related("user")
-    serializer_class = FeedbackSerializer
     permission_classes = [permissions.IsAdminUser]
 
 
