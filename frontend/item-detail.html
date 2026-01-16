@@ -3,6 +3,7 @@
 {% block title %}Item Details - Clixs{% endblock %}
 
 {% block extra_styles %}
+<style>
 .detail-container {
     max-width: 1400px;
     margin: 0 auto;
@@ -35,12 +36,21 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 3rem;
-    animation: fadeIn 0.8s ease;
+    animation: fadeInUp 0.8s ease;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; }
 }
 
 .image-section {
@@ -289,6 +299,10 @@
     box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
 }
 
+.chat-btn--narrow {
+    max-width: 300px;
+}
+
 .secondary-btn {
     width: 100%;
     padding: 1.2rem;
@@ -354,12 +368,8 @@
 }
 
 @keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .error-container {
@@ -433,12 +443,8 @@
 }
 
 @keyframes iconBounce {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.2);
-    }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
 }
 
 .toast-content {
@@ -516,23 +522,8 @@
     backdrop-filter: blur(4px);
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
 .toast-overlay.closing {
     animation: fadeOut 0.3s ease forwards;
-}
-
-@keyframes fadeOut {
-    to {
-        opacity: 0;
-    }
 }
 
 .notification {
@@ -918,6 +909,7 @@
         font-size: 1.8rem;
     }
 }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -931,13 +923,19 @@
 </div>
 {% endblock %}
 
-
 {% block extra_scripts %}
-// Place this code inside {% block extra_scripts %} in your HTML file
 
 document.addEventListener("DOMContentLoaded", () => {
     const API_BASE = "/api/v1";
     const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%231a1a2e'/%3E%3Cg transform='translate(200, 150)'%3E%3Ccircle cx='0' cy='-20' r='40' fill='%233498db' opacity='0.3'/%3E%3Crect x='-30' y='10' width='60' height='40' rx='5' fill='%233498db' opacity='0.3'/%3E%3Cpolygon points='0,-10 -25,25 25,25' fill='%233498db' opacity='0.5'/%3E%3C/g%3E%3Ctext x='200' y='250' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%23666'%3ENo Image%3C/text%3E%3C/svg%3E";
+
+    // ===== XSS Protection: Escape HTML entities =====
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+    }
 
     // Toast notification function
     function showToast(title, message, type = 'info') {
@@ -968,8 +966,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <button class="toast-close" onclick="closeToast()">×</button>
             <div class="toast-icon">${icons[type]}</div>
             <div class="toast-content">
-                <div class="toast-title">${title}</div>
-                <div class="toast-message">${message}</div>
+                <div class="toast-title">${escapeHtml(title)}</div>
+                <div class="toast-message">${escapeHtml(message)}</div>
             </div>
         `;
 
@@ -1022,8 +1020,8 @@ document.addEventListener("DOMContentLoaded", () => {
         notification.innerHTML = `
             <div class="notification-icon">${icons[type]}</div>
             <div class="notification-content">
-                <div class="notification-title">${title}</div>
-                <div class="notification-message">${message}</div>
+                <div class="notification-title">${escapeHtml(title)}</div>
+                <div class="notification-message">${escapeHtml(message)}</div>
             </div>
             <button class="notification-close" onclick="closeNotification(this)">×</button>
         `;
@@ -1100,7 +1098,7 @@ document.addEventListener("DOMContentLoaded", () => {
             container.innerHTML = `
                 <div class="error-container">
                     <div class="error-message">Item not found</div>
-                    <a href="/home" class="chat-btn" style="max-width: 300px;">Go Back to Home</a>
+                    <a href="/home" class="chat-btn chat-btn--narrow">Go Back to Home</a>
                 </div>
             `;
             return;
@@ -1135,7 +1133,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     container.innerHTML = `
                         <div class="error-container">
                             <div class="error-message">Please login to view item details</div>
-                            <a href="/login" class="chat-btn" style="max-width: 300px;">Login</a>
+                            <a href="/login" class="chat-btn chat-btn--narrow">Login</a>
                         </div>
                     `;
                     return;
@@ -1149,8 +1147,8 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error(error);
             container.innerHTML = `
                 <div class="error-container">
-                    <div class="error-message">${error.message}</div>
-                    <a href="/home" class="chat-btn" style="max-width: 300px;">Go Back to Home</a>
+                    <div class="error-message">${escapeHtml(error.message)}</div>
+                    <a href="/home" class="chat-btn chat-btn--narrow">Go Back to Home</a>
                 </div>
             `;
         }
@@ -1160,7 +1158,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function displayItemDetail(item) {
         const container = document.getElementById("itemDetailContainer");
 
-        const images = item.images && item.images.length > 0
+        // Fixed: Better null/array check
+        const images = Array.isArray(item.images) && item.images.length > 0
             ? item.images.map(img => getImageUrl(img.image))
             : [PLACEHOLDER];
 
@@ -1174,7 +1173,7 @@ document.addEventListener("DOMContentLoaded", () => {
             priceHtml = `
                 <div class="price-section">
                     <div class="price-label">Selling Price</div>
-                    <div class="main-price">${formatINR(item.sell_price)}</div>
+                    <div class="main-price">${escapeHtml(formatINR(item.sell_price))}</div>
                 </div>
             `;
         } else {
@@ -1189,24 +1188,24 @@ document.addEventListener("DOMContentLoaded", () => {
             priceHtml = `
                 <div class="price-section">
                     <div class="price-label">Rental Prices</div>
-                    ${mainPrice ? `<div class="main-price">${formatINR(mainPrice)}<span style="font-size: 1.2rem; color: #b0b0b0;">${mainPeriod}</span></div>` : ''}
+                    ${mainPrice ? `<div class="main-price">${escapeHtml(formatINR(mainPrice))}<span style="font-size: 1.2rem; color: #b0b0b0;">${mainPeriod}</span></div>` : ''}
                     <div class="rent-prices-grid">
                         ${hourly ? `
                             <div class="rent-price-item">
                                 <div class="rent-price-period">Hourly</div>
-                                <div class="rent-price-amount">${formatINR(hourly)}</div>
+                                <div class="rent-price-amount">${escapeHtml(formatINR(hourly))}</div>
                             </div>
                         ` : ''}
                         ${daily ? `
                             <div class="rent-price-item">
                                 <div class="rent-price-period">Daily</div>
-                                <div class="rent-price-amount">${formatINR(daily)}</div>
+                                <div class="rent-price-amount">${escapeHtml(formatINR(daily))}</div>
                             </div>
                         ` : ''}
                         ${weekly ? `
                             <div class="rent-price-item">
                                 <div class="rent-price-period">Weekly</div>
-                                <div class="rent-price-amount">${formatINR(weekly)}</div>
+                                <div class="rent-price-amount">${escapeHtml(formatINR(weekly))}</div>
                             </div>
                         ` : ''}
                     </div>
@@ -1217,7 +1216,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const thumbnailsHtml = images.length > 1 ? `
             <div class="image-thumbnails">
                 ${images.map((img, index) => `
-                    <img src="${img}"
+                    <img src="${escapeHtml(img)}"
                          class="thumbnail ${index === 0 ? 'active' : ''}"
                          alt="Thumbnail ${index + 1}"
                          data-index="${index}"
@@ -1226,29 +1225,38 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         ` : '';
 
+        // Fixed: Better empty string handling for owner name/username
+        const ownerName = (item.owner?.name && item.owner.name.trim()) ||
+                          (item.owner?.username && item.owner.username.trim()) ||
+                          'User';
+        const ownerDisplayName = (item.owner?.name && item.owner.name.trim()) ||
+                                  (item.owner?.username && item.owner.username.trim()) ||
+                                  'Anonymous';
+        const ownerEmail = (item.owner?.email && item.owner.email.trim()) || 'Email not available';
+
         container.innerHTML = `
             <div class="detail-content">
                 <div class="image-section">
-                    <button class="report-btn" onclick="openReportModal(${item.id})" title="Report this post">
+                    <button class="report-btn" onclick="openReportModal(${parseInt(item.id, 10)})" title="Report this post">
                         🚩
                     </button>
-                    <img src="${images[0]}"
+                    <img src="${escapeHtml(images[0])}"
                          class="main-image"
                          id="mainImage"
-                         alt="${item.title}"
+                         alt="${escapeHtml(item.title)}"
                          onerror="this.src='${PLACEHOLDER}'">
                     ${thumbnailsHtml}
                 </div>
 
                 <div class="info-section">
                     <div class="item-header">
-                        <h1 class="item-title">${item.title}</h1>
+                        <h1 class="item-title">${escapeHtml(item.title)}</h1>
                         <div class="item-meta">
-                            <span class="badge ${typeClass}">${item.item_type}</span>
-                            <span class="badge ${statusClass}">${item.status}</span>
-                            <span class="category-badge">${item.category}</span>
+                            <span class="badge ${typeClass}">${escapeHtml(item.item_type)}</span>
+                            <span class="badge ${statusClass}">${escapeHtml(item.status)}</span>
+                            <span class="category-badge">${escapeHtml(item.category)}</span>
                         </div>
-                        ${item.created_at ? `<div class="posted-date">Posted on ${formatDate(item.created_at)}</div>` : ''}
+                        ${item.created_at ? `<div class="posted-date">Posted on ${escapeHtml(formatDate(item.created_at))}</div>` : ''}
                     </div>
 
                     ${priceHtml}
@@ -1258,7 +1266,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <span>📝</span>
                             <span>Description</span>
                         </h2>
-                        <p class="description-text">${item.description || 'No description available.'}</p>
+                        <p class="description-text">${escapeHtml(item.description) || 'No description available.'}</p>
                     </div>
 
                     <div class="seller-section">
@@ -1267,19 +1275,19 @@ document.addEventListener("DOMContentLoaded", () => {
                             <span>Seller Information</span>
                         </h2>
                         <div class="seller-info">
-                            <div class="seller-avatar">${getInitials(item.owner?.name || item.owner?.username || 'User')}</div>
+                            <div class="seller-avatar">${escapeHtml(getInitials(ownerName))}</div>
                             <div class="seller-details">
-                                <div class="seller-name">${item.owner?.name || item.owner?.username || 'Anonymous'}</div>
-                                <div class="seller-email">${item.owner?.email || 'Email not available'}</div>
+                                <div class="seller-name">${escapeHtml(ownerDisplayName)}</div>
+                                <div class="seller-email">${escapeHtml(ownerEmail)}</div>
                             </div>
                         </div>
                         <div class="action-buttons">
-                            <button class="chat-btn" onclick="chatWithSeller(${item.id}, ${item.owner?.id})">
+                            <button class="chat-btn" onclick="chatWithSeller(${parseInt(item.id, 10)}, ${parseInt(item.owner?.id, 10) || 0})">
                                 <span>💬</span>
                                 <span>Chat with Seller</span>
                             </button>
                             ${item.status === 'ACTIVE' ? `
-                                <button class="secondary-btn" onclick="makeOffer(${item.id})">
+                                <button class="secondary-btn" onclick="makeOffer(${parseInt(item.id, 10)})">
                                     ${item.item_type === 'SELL' ? 'Make an Offer' : 'Request to Rent'}
                                 </button>
                             ` : ''}
@@ -1293,7 +1301,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (images.length > 1) {
             document.querySelectorAll('.thumbnail').forEach(thumb => {
                 thumb.addEventListener('click', function() {
-                    const index = parseInt(this.dataset.index);
+                    const index = parseInt(this.dataset.index, 10);
                     const mainImage = document.getElementById('mainImage');
                     mainImage.src = images[index];
 
@@ -1323,7 +1331,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }));
 
         // Redirect to chat page directly
-        window.location.href = `/chats?user=${sellerId}&item=${itemId}`;
+        window.location.href = `/chats?user=${encodeURIComponent(sellerId)}&item=${encodeURIComponent(itemId)}`;
     };
 
     // Make offer function
@@ -1395,6 +1403,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             id="additionalInfo"
                             placeholder="Please provide any additional details about why you're reporting this post..."
                             rows="4"
+                            maxlength="1000"
                         ></textarea>
                     </div>
                     <div class="form-actions">
@@ -1443,10 +1452,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Build the reason text
+        // Build the reason text (limit length for safety)
         let reason = selectedReason.value;
         if (additionalInfo) {
-            reason += `: ${additionalInfo}`;
+            reason += `: ${additionalInfo.substring(0, 1000)}`;
         }
 
         submitBtn.disabled = true;
@@ -1461,7 +1470,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    item: itemId,
+                    item: parseInt(itemId, 10),
                     reason: reason
                 })
             });
@@ -1484,4 +1493,5 @@ document.addEventListener("DOMContentLoaded", () => {
     // Fetch item details on page load
     fetchItemDetail();
 });
+
 {% endblock %}
