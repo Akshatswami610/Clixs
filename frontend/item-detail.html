@@ -924,7 +924,6 @@
 {% endblock %}
 
 {% block extra_scripts %}
-
 document.addEventListener("DOMContentLoaded", () => {
     const API_BASE = "/api/v1";
     const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%231a1a2e'/%3E%3Cg transform='translate(200, 150)'%3E%3Ccircle cx='0' cy='-20' r='40' fill='%233498db' opacity='0.3'/%3E%3Crect x='-30' y='10' width='60' height='40' rx='5' fill='%233498db' opacity='0.3'/%3E%3Cpolygon points='0,-10 -25,25 25,25' fill='%233498db' opacity='0.5'/%3E%3C/g%3E%3Ctext x='200' y='250' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%23666'%3ENo Image%3C/text%3E%3C/svg%3E";
@@ -1238,7 +1237,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="detail-content">
                 <div class="image-section">
                     <button class="report-btn" onclick="openReportModal(${parseInt(item.id, 10)})" title="Report this post">
-                        🚩
+                        ⚠️
                     </button>
                     <img src="${escapeHtml(images[0])}"
                          class="main-image"
@@ -1365,7 +1364,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="report-modal-content">
                 <div class="report-modal-header">
                     <h2 class="report-modal-title">
-                        <span>🚩</span>
+                        <span>⚠️</span>
                         <span>Report Post</span>
                     </h2>
                     <button class="report-modal-close" onclick="closeReportModal()">×</button>
@@ -1481,7 +1480,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             closeReportModal();
-            showToast('Report Submitted', 'Thank you for helping us maintain a safe community. We will review your report shortly.', 'success');
+            showNotification('Report Submitted', 'Thank you! We will review your report shortly.', 'success');
         } catch (error) {
             console.error('Error submitting report:', error);
             showNotification('Error', error.message || 'Failed to submit report. Please try again.', 'error');
@@ -1493,5 +1492,4 @@ document.addEventListener("DOMContentLoaded", () => {
     // Fetch item details on page load
     fetchItemDetail();
 });
-
 {% endblock %}
