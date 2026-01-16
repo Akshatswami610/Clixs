@@ -20,8 +20,6 @@ from .views import (
     ContactFormListView,
     ReportPostCreateView,
     ReportPostListView,
-    FeedbackCreateView,
-    FeedbackListView,
 
     # Chat
     ChatCreateView,
