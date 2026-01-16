@@ -69,12 +69,6 @@ urlpatterns = [
     path("reports/list/", ReportPostListView.as_view(), name="report-list"),
 
     # =========================
-    # FEEDBACK
-    # =========================
-    path("feedback/", FeedbackCreateView.as_view(), name="feedback-create"),
-    path("feedback/list/", FeedbackListView.as_view(), name="feedback-list"),
-
-    # =========================
     # CHAT
     # =========================
     path("chats/", ChatListView.as_view(), name="chat-list"),
