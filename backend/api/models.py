@@ -280,18 +280,3 @@ class ReportPost(models.Model):
 
     def __str__(self):
         return f"Report by {self.user} on {self.item}"
-
-
-# =========================
-# Feedback
-# =========================
-class Feedback(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
-    )
-    feedback = models.TextField()
-    created_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return f"Feedback by {self.user}"
