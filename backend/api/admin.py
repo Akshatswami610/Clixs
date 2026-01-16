@@ -8,7 +8,6 @@ from .models import (
     ItemImage,
     ContactForm,
     ReportPost,
-    Feedback,
     Chat,
     Message,
 )
@@ -143,16 +142,6 @@ class ContactFormAdmin(admin.ModelAdmin):
 class ReportPostAdmin(admin.ModelAdmin):
     list_display = ("item", "user", "created_at")
     autocomplete_fields = ("item", "user")
-    readonly_fields = ("created_at",)
-
-
-# =========================
-# Feedback Admin
-# =========================
-@admin.register(Feedback)
-class FeedbackAdmin(admin.ModelAdmin):
-    list_display = ("user", "created_at")
-    autocomplete_fields = ("user",)
     readonly_fields = ("created_at",)
 
 
