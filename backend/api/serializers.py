@@ -76,7 +76,7 @@ class ItemSerializer(serializers.ModelSerializer):
         read_only_fields = ("owner", "created_at")
 
 # ======================================================
-# CONTACT / REPORT / FEEDBACK
+# CONTACT / REPORT
 # ======================================================
 
 class ContactFormSerializer(serializers.ModelSerializer):
@@ -101,28 +101,19 @@ class ReportPostSerializer(serializers.ModelSerializer):
 # CHAT SERIALIZER (ANONYMOUS, PRODUCT-ONLY)
 # =========================
 
-class ChatSerializer(serializers.ModelSerializer):
-    item_title = serializers.CharField(
-        source="item_title_snapshot",
-        read_only=True
-    )
-    last_message = serializers.SerializerMethodField()
+# =========================
+# CHAT SERIALIZER (FINAL, STORED LABEL)
+# =========================
 
+class ChatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chat
         fields = (
             "id",
-            "item",
-            "item_title",
+            "chat_label",
             "created_at",
             "last_message_at",
-            "last_message",
         )
-
-    def get_last_message(self, obj):
-        msg = obj.messages.last()
-        return msg.text if msg else None
-
 
 # =========================
 # MESSAGE SERIALIZER (NO NAMES)
