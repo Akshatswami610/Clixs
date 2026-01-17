@@ -85,6 +85,14 @@
     animation: fadeIn 1s ease 0.6s backwards;
 }
 
+.hero-userid {
+    font-size: 0.95rem;
+    color: #00d4ff;
+    margin-top: 0.5rem;
+    font-weight: 500;
+    animation: fadeIn 1s ease 0.8s backwards;
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -797,6 +805,7 @@
                 <div class="hero-avatar" id="heroAvatar">👤</div>
                 <h1 class="hero-title" id="heroName">Loading...</h1>
                 <p class="hero-subtitle" id="heroSubtitle">Profile information</p>
+                <p class="hero-userid" id="heroUserId">User ID: Loading...</p>
             </div>
         </div>
 
@@ -1041,6 +1050,7 @@ async function loadProfile() {
     const profileInfo = document.getElementById('profileInfo');
     const heroName = document.getElementById('heroName');
     const heroAvatar = document.getElementById('heroAvatar');
+    const heroUserId = document.getElementById('heroUserId');
 
     try {
         const response = await fetch(`${API_BASE}/auth/profile/`, {
@@ -1072,11 +1082,27 @@ async function loadProfile() {
         const firstName = user.first_name || 'User';
         const lastName = user.last_name || '';
         const fullName = `${firstName} ${lastName}`.trim();
+        const userId = user.id || user.user_id || 'N/A';
+
         heroName.textContent = fullName;
         heroAvatar.textContent = firstName.charAt(0).toUpperCase();
+        heroUserId.textContent = `User ID: #${userId}`;
+
+        // Get member since date
+        let memberSince = new Date().getFullYear();
+        if (user.date_joined) {
+            memberSince = new Date(user.date_joined).getFullYear();
+        } else if (user.created_at) {
+            memberSince = new Date(user.created_at).getFullYear();
+        }
 
         // Update profile info cards
         profileInfo.innerHTML = `
+            <div class="info-card">
+                <div class="info-icon">🆔</div>
+                <div class="info-label">User ID</div>
+                <div class="info-value">#${escapeHtml(userId)}</div>
+            </div>
             <div class="info-card">
                 <div class="info-icon">👤</div>
                 <div class="info-label">Full Name</div>
@@ -1095,7 +1121,7 @@ async function loadProfile() {
             <div class="info-card">
                 <div class="info-icon">📅</div>
                 <div class="info-label">Member Since</div>
-                <div class="info-value">${new Date().getFullYear()}</div>
+                <div class="info-value">${memberSince}</div>
             </div>
         `;
     } catch (error) {
@@ -1104,6 +1130,9 @@ async function loadProfile() {
         showToast('Failed to load profile', 'error');
     }
 }
+
+// Rest of the JavaScript remains the same as the original file...
+// Load user items, edit functions, delete functions, etc.
 
 // Load user items
 async function loadUserItems() {
