@@ -177,8 +177,12 @@ class Chat(models.Model):
         related_name="chats"
     )
 
-    # Snapshot for fast UI + historical safety
-    item_title_snapshot = models.CharField(max_length=100, editable=False)
+    # 🔒 Permanent readable identifier
+    chat_label = models.CharField(
+        max_length=200,
+        editable=False,
+        db_index=True
+    )
 
     buyer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -192,10 +196,6 @@ class Chat(models.Model):
     class Meta:
         unique_together = ("item", "buyer")
         ordering = ["-last_message_at"]
-        indexes = [
-            models.Index(fields=["buyer"]),
-            models.Index(fields=["item"]),
-        ]
 
     @property
     def seller(self):
@@ -204,19 +204,22 @@ class Chat(models.Model):
     def clean(self):
         if self.buyer == self.item.owner:
             raise ValidationError("Cannot chat with yourself")
-
         if self.item.status != "ACTIVE":
             raise ValidationError("Chat not allowed on inactive items")
 
     def save(self, *args, **kwargs):
-        if not self.item_title_snapshot:
-            self.item_title_snapshot = self.item.title
+        # 🔥 Create snapshot ONLY ONCE
+        if not self.chat_label:
+            self.chat_label = (
+                f"{self.item.title}: "
+                f"user_{self.buyer.id} - user_{self.item.owner.id}"
+            )
 
         self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Chat: {self.item_title_snapshot}"
+        return self.chat_label
 
 # =========================
 # Message (No Names Exposed)
