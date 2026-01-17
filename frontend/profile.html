@@ -1088,14 +1088,6 @@ async function loadProfile() {
         heroAvatar.textContent = firstName.charAt(0).toUpperCase();
         heroUserId.textContent = `User ID: #${userId}`;
 
-        // Get member since date
-        let memberSince = new Date().getFullYear();
-        if (user.date_joined) {
-            memberSince = new Date(user.date_joined).getFullYear();
-        } else if (user.created_at) {
-            memberSince = new Date(user.created_at).getFullYear();
-        }
-
         // Update profile info cards
         profileInfo.innerHTML = `
             <div class="info-card">
@@ -1117,11 +1109,6 @@ async function loadProfile() {
                 <div class="info-icon">🆔</div>
                 <div class="info-label">Registration Number</div>
                 <div class="info-value">${escapeHtml(user.registration_number || 'Not Provided')}</div>
-            </div>
-            <div class="info-card">
-                <div class="info-icon">📅</div>
-                <div class="info-label">Member Since</div>
-                <div class="info-value">${memberSince}</div>
             </div>
         `;
     } catch (error) {
