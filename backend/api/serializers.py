@@ -112,6 +112,7 @@ class ChatSerializer(serializers.ModelSerializer):
             "id",
             "chat_label",
             "created_at",
+            "item",
             "last_message_at",
         )
 
