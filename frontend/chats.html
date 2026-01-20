@@ -1339,7 +1339,7 @@ body {
 
 {% block extra_scripts %}
 // ============================================================
-// CHAT APPLICATION - WEBSOCKET VERSION
+// CHAT APPLICATION - WEBSOCKET VERSION (PRODUCT-BASED)
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1430,13 +1430,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================================
     // UTILITY FUNCTIONS
     // ============================================================
-    function getInitials(name) {
-        if (!name) return 'U';
-        return name.split(' ')
+    function getInitials(text) {
+        if (!text) return '📦';
+
+        // Extract product name from chat_label (format: "Product: user_X - user_Y")
+        const parts = text.split(':');
+        if (parts.length > 1) {
+            const productName = parts[0].trim();
+            return productName.split(' ')
+                .map(n => n[0])
+                .join('')
+                .toUpperCase()
+                .substring(0, 2);
+        }
+
+        return text.split(' ')
             .map(n => n[0])
             .join('')
             .toUpperCase()
-            .substring(0, 2);
+            .substring(0, 2) || '📦';
     }
 
     function formatTime(dateString) {
@@ -1502,6 +1514,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function extractProductName(chatLabel) {
+        if (!chatLabel) return 'Product Chat';
+
+        // Format: "Product Name: user_X - user_Y"
+        const parts = chatLabel.split(':');
+        if (parts.length > 1) {
+            return parts[0].trim();
+        }
+
+        return chatLabel;
+    }
+
     // ============================================================
     // CHAT LIST MANAGEMENT
     // ============================================================
@@ -1551,28 +1575,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         listContainer.innerHTML = conversations.map(convo => {
-            const otherUser = convo.other_user || {};
             const isActive = state.currentConversation?.id === convo.id;
-            const unreadCount = convo.unread_count || 0;
+            const chatTitle = extractProductName(convo.chat_label);
+            const timestamp = convo.last_message_at || convo.created_at;
 
             return `
                 <div class="conversation-item ${isActive ? 'active' : ''}"
                      onclick="window.selectConversation(${convo.id})"
                      role="listitem"
-                     aria-label="Chat with ${otherUser.name || otherUser.username}">
+                     aria-label="Chat about ${chatTitle}">
                     <div class="conv-avatar">
-                        ${getInitials(otherUser.name || otherUser.username)}
-                        ${convo.is_online ? '<div class="online-badge"></div>' : ''}
+                        ${getInitials(convo.chat_label)}
                     </div>
                     <div class="conv-content">
                         <div class="conv-header">
-                            <div class="conv-name">${escapeHtml(otherUser.name || otherUser.username)}</div>
-                            <div class="conv-time ${unreadCount > 0 ? 'unread' : ''}">${formatTime(convo.updated_at)}</div>
+                            <div class="conv-name">${escapeHtml(chatTitle)}</div>
+                            <div class="conv-time">${formatTime(timestamp)}</div>
                         </div>
                         <div class="conv-footer">
-                            ${convo.last_message_sent_by_me ? '<span class="conv-status">✓✓</span>' : ''}
-                            <div class="conv-preview">${escapeHtml(convo.last_message || 'No messages yet')}</div>
-                            ${unreadCount > 0 ? `<span class="conv-badge">${unreadCount}</span>` : ''}
+                            <div class="conv-preview">${convo.last_message_at ? 'Tap to view messages' : 'No messages yet'}</div>
                         </div>
                     </div>
                 </div>
@@ -1589,23 +1610,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const filtered = state.chats.filter(convo => {
-            const otherUser = convo.other_user || {};
-            const userName = (otherUser.name || otherUser.username || '').toLowerCase();
-            const lastMessage = (convo.last_message || '').toLowerCase();
-            return userName.includes(searchTerm) || lastMessage.includes(searchTerm);
+            const chatLabel = (convo.chat_label || '').toLowerCase();
+            return chatLabel.includes(searchTerm);
         });
 
         displayChats(filtered);
     }
 
     function filterChats(filter) {
-        let filtered = state.chats;
-
-        if (filter === 'Unread') {
-            filtered = state.chats.filter(c => (c.unread_count || 0) > 0);
-        }
-
-        displayChats(filtered);
+        // Note: Backend doesn't provide unread_count, so "Unread" filter shows all chats
+        displayChats(state.chats);
     }
 
     // ============================================================
@@ -1678,9 +1692,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const chatContent = document.getElementById('chatContent');
         if (!chatContent || !state.currentConversation) return;
 
-        const otherUser = state.currentConversation.other_user || {};
         const messages = data.messages || [];
         const itemContext = data.item_context;
+        const chatTitle = extractProductName(state.currentConversation.chat_label);
 
         // Clear rendered message cache for new conversation
         clearRenderedMessages();
@@ -1707,12 +1721,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="chat-header">
                 <div class="chat-header-left">
                     <button class="back-btn" onclick="window.toggleSidebar()" aria-label="Back to chat list">←</button>
-                    <div class="chat-avatar">${getInitials(otherUser.name || otherUser.username)}</div>
+                    <div class="chat-avatar">${getInitials(state.currentConversation.chat_label)}</div>
                     <div class="chat-user-info">
-                        <div class="chat-user-name">${escapeHtml(otherUser.name || otherUser.username)}</div>
-                        <div class="chat-user-status ${state.currentConversation.is_online ? 'online' : ''}">
-                            ${state.currentConversation.is_online ? '<span class="status-indicator"></span>online' : 'offline'}
-                        </div>
+                        <div class="chat-user-name">Chat about: ${escapeHtml(chatTitle)}</div>
+                        <div class="chat-user-status">Product-based conversation</div>
                     </div>
                 </div>
             </div>
@@ -1754,10 +1766,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createMessageHtml(msg) {
-        if (!msg || !state.currentUser) return '';
+        if (!msg) return '';
 
-        const isSent = msg.sender_id === state.currentUser.id;
-        const messageText = msg.content || msg.message || '';
+        const isSent = msg.is_me === true;
+        const messageText = msg.text || '';
         const msgId = msg.id || '';
 
         // Track message ID
@@ -1771,7 +1783,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="message-text">${escapeHtml(messageText)}</div>
                     <div class="message-meta">
                         <span class="message-time">${formatMessageTime(msg.created_at)}</span>
-                        ${isSent ? `<span class="message-status ${msg.is_read ? 'read' : ''}">✓✓</span>` : ''}
                     </div>
                 </div>
             </div>
@@ -1997,15 +2008,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = JSON.parse(event.data);
             console.log('[WS] Received:', data.type || 'message');
 
-            // Handle chat message
-            if (data.message !== undefined || data.type === 'chat_message') {
+            // Handle chat message - use 'text' field instead of 'message'
+            if (data.text !== undefined || data.type === 'chat_message') {
                 const msg = {
                     id: data.id,
-                    message: data.message,
-                    content: data.message,
-                    sender_id: data.sender_id,
+                    text: data.text || data.message,
+                    is_me: data.is_me !== undefined ? data.is_me : (data.sender_id === state.currentUser.id),
                     created_at: data.created_at || new Date().toISOString(),
-                    is_read: data.is_read || false
+                    chat: data.chat
                 };
                 appendMessage(msg);
             }
@@ -2014,13 +2024,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const typingIndicator = document.getElementById('typingIndicator');
                 if (typingIndicator) {
                     typingIndicator.style.display = data.is_typing ? 'flex' : 'none';
-                }
-            }
-            // Handle read receipt
-            else if (data.type === 'read_receipt') {
-                const msgEl = document.querySelector(`[data-message-id="${data.message_id}"] .message-status`);
-                if (msgEl) {
-                    msgEl.classList.add('read');
                 }
             }
             // Handle error
