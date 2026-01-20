@@ -1731,7 +1731,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <div class="messages-container" id="messagesContainer">
                 ${itemContext ? createItemContextHtml(itemContext) : ''}
-                ${messagesHtml || createEmptyMessagesHtml()}
+                ${messagesHtml.trim() ? messagesHtml : createEmptyMessagesHtml()}
                 <div id="typingIndicator" class="typing-indicator" style="display: none;">
                     <div class="typing-bubble">
                         <div class="typing-dot"></div>
@@ -1772,10 +1772,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const messageText = msg.text || '';
         const msgId = msg.id || '';
 
-        // Track message ID
-        if (msgId) {
-            state.renderedMessageIds.add(msgId);
-        }
+        if (!messageText.trim()) return ''; // 🔥 prevent empty bubbles
+
 
         return `
             <div class="message ${isSent ? 'sent' : 'received'}" data-message-id="${msgId}">
@@ -1788,6 +1786,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
     }
+
 
     function createItemContextHtml(item) {
         return `
@@ -2006,27 +2005,30 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleWebSocketMessage(event) {
         try {
             const data = JSON.parse(event.data);
-            console.log('[WS] Received:', data.type || 'message');
+            console.log('[WS] Received:', data);
 
-            // Handle chat message - use 'text' field instead of 'message'
-            if (data.text !== undefined || data.type === 'chat_message') {
+            // Normalize into REST-style message object
+            if (data.type === 'chat_message' || data.text !== undefined || data.message !== undefined) {
                 const msg = {
-                    id: data.id,
-                    text: data.text || data.message,
-                    is_me: data.is_me !== undefined ? data.is_me : (data.sender_id === state.currentUser.id),
-                    created_at: data.created_at || new Date().toISOString(),
-                    chat: data.chat
+                    id: data.id || `ws-${Date.now()}-${crypto.randomUUID()}`,
+                    chat: data.chat || data.chat_id || state.currentConversation?.id,
+                    text: data.text || data.message || '',
+                    is_me: data.is_me !== undefined
+                        ? data.is_me
+                        : (data.sender_id === state.currentUser.id),
+                    created_at: data.created_at || new Date().toISOString()
                 };
+
                 appendMessage(msg);
             }
-            // Handle typing indicator
+
             else if (data.type === 'typing') {
                 const typingIndicator = document.getElementById('typingIndicator');
                 if (typingIndicator) {
                     typingIndicator.style.display = data.is_typing ? 'flex' : 'none';
                 }
             }
-            // Handle error
+
             else if (data.type === 'error') {
                 console.error('[WS] Server error:', data.error || data.message);
                 showError(null, data.error || 'An error occurred');
@@ -2036,6 +2038,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('[WS] Parse error:', error, event.data);
         }
     }
+
 
     function handleWebSocketClose(event) {
         const isNormalClosure = event.code === 1000 || event.code === 1001;
@@ -2163,20 +2166,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================================
     function checkUrlParams() {
         const params = new URLSearchParams(window.location.search);
-        const userId = params.get('user');
         const itemId = params.get('item');
 
-        if (userId) {
-            createConversation(userId, itemId);
+        if (itemId) {
+            createConversation(itemId);
         }
     }
 
-    async function createConversation(userId, itemId = null) {
+    async function createConversation(itemId) {
         const token = localStorage.getItem('authToken');
 
         try {
-            const body = { user_id: userId };
-            if (itemId) body.item_id = itemId;
+            const body = { item_id: itemId };
 
             const response = await fetch(`${CONFIG.API_BASE}/chats/create/`, {
                 method: 'POST',
