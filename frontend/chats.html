@@ -1551,19 +1551,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
-            state.chats = await response.json();
+            const raw = await response.json();
+            console.log('[Chats API raw response]:', raw);
+
+            // 🔥 Handle both paginated and non-paginated responses
+            state.chats = Array.isArray(raw) ? raw : (raw.results || []);
+
             displayChats(state.chats);
+
         } catch (error) {
             console.error('[Chats] Load error:', error);
             showError(listContainer, 'Failed to load chats. Please refresh the page.');
         }
     }
 
+
     function displayChats(conversations) {
         const listContainer = document.getElementById('chatsList');
         if (!listContainer) return;
 
-        if (!conversations || conversations.length === 0) {
+        if (!Array.isArray(conversations) || conversations.length === 0) {
             listContainer.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">🔭</div>
@@ -1581,7 +1588,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             return `
                 <div class="conversation-item ${isActive ? 'active' : ''}"
-                     onclick="window.selectConversation(${convo.id})"
+                     data-convo-id="${convo.id}"
                      role="listitem"
                      aria-label="Chat about ${chatTitle}">
                     <div class="conv-avatar">
@@ -1599,6 +1606,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
         }).join('');
+        // Attach click handlers after rendering
+        document.querySelectorAll('.conversation-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const id = item.getAttribute('data-convo-id');
+                window.selectConversation(Number(id));
+            });
+        });
     }
 
     function handleSearch(e) {
@@ -1638,7 +1652,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.conversation-item').forEach(item => {
             item.classList.remove('active');
         });
-        const selectedItem = document.querySelector(`[onclick="window.selectConversation(${convoId})"]`);
+        const selectedItem = document.querySelector(`.conversation-item[data-convo-id="${convoId}"]`);
         if (selectedItem) {
             selectedItem.classList.add('active');
         }
@@ -1924,7 +1938,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Remove empty state
-        const emptyState = container.querySelector('.empty-state');
+        const emptyState = container.querySelector(':scope > .empty-state');
         if (emptyState) {
             emptyState.remove();
         }
