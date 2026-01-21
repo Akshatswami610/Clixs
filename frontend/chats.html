@@ -1097,7 +1097,7 @@ body {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
     .chat-wrapper {
         height: calc(100vh - 60px);
     }
@@ -1696,7 +1696,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const chatContent = document.getElementById('chatContent');
         if (!chatContent || !state.currentConversation) return;
 
-        const messages = data.messages || [];
+        const messages = Array.isArray(data) ? data : (data.messages || []);
         const itemContext = data.item_context;
         const chatTitle = extractProductName(state.currentConversation.chat_label);
 
