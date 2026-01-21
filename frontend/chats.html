@@ -1330,6 +1330,7 @@ body {
 // ============================================================
 // CHAT APPLICATION - WEBSOCKET VERSION (PRODUCT-BASED)
 // ============================================================
+let urlParamsHandled = false;
 
 document.addEventListener('DOMContentLoaded', () => {
     // Configuration
@@ -2168,6 +2169,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // URL PARAMETERS
     // ============================================================
     function checkUrlParams() {
+        if (urlParamsHandled) return;   // 🔥 prevent repeat
+        urlParamsHandled = true;
+
         const params = new URLSearchParams(window.location.search);
         const itemId = params.get('item');
 
@@ -2175,6 +2179,7 @@ document.addEventListener('DOMContentLoaded', () => {
             createConversation(itemId);
         }
     }
+
 
     async function createConversation(itemId) {
         const token = localStorage.getItem('authToken');
