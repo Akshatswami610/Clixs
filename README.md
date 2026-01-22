@@ -176,8 +176,7 @@ Redis is used as the channel layer.
 ---
 
 ## 👨‍💻 Author
-Developed by Akshat
-Project: Clixs Marketplace with Real-Time Chat
+Developed and Designed by [Akshat Swami](https://akshatswamipy.vercel.app)
 
 ---
 
