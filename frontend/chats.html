@@ -75,21 +75,6 @@ body {
     background-clip: text;
 }
 
-.header-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    background: rgba(52, 152, 219, 0.15);
-    border: 2px solid rgba(52, 152, 219, 0.3);
-    color: #00d4ff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    transition: all 0.3s ease;
-}
-
 .search-container {
     position: relative;
 }
@@ -128,47 +113,6 @@ body {
 
 .search-input::placeholder {
     color: #8b9199;
-}
-
-.filter-tabs {
-    display: flex;
-    gap: 0.75rem;
-    padding: 1rem 1.5rem;
-    background: rgba(20, 20, 35, 0.5);
-    border-bottom: 2px solid rgba(52, 152, 219, 0.15);
-    overflow-x: auto;
-    flex-shrink: 0;
-}
-
-.filter-tabs::-webkit-scrollbar {
-    height: 0;
-}
-
-.filter-tab {
-    padding: 0.6rem 1.25rem;
-    background: transparent;
-    border: 2px solid rgba(52, 152, 219, 0.25);
-    border-radius: 20px;
-    color: #b0b0b0;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-
-.filter-tab.active {
-    background: linear-gradient(135deg, #3498db, #9b59b6);
-    color: #ffffff;
-    border-color: transparent;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
-}
-
-.filter-tab:hover:not(.active) {
-    background: rgba(52, 152, 219, 0.15);
-    border-color: #3498db;
-    color: #00d4ff;
 }
 
 .chats-list {
@@ -585,27 +529,6 @@ body {
     gap: 0.6rem;
 }
 
-.input-action-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: rgba(52, 152, 219, 0.15);
-    border: 2px solid rgba(52, 152, 219, 0.3);
-    color: #00d4ff;
-    font-size: 18px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.3s ease;
-}
-
-.input-action-btn:hover {
-    background: rgba(52, 152, 219, 0.25);
-    transform: translateY(-2px);
-}
-
 .input-field-wrapper {
     flex: 1;
     background: rgba(20, 20, 30, 0.8);
@@ -989,16 +912,6 @@ body {
         font-size: 1.5rem;
     }
 
-    .filter-tabs {
-        padding: 0.75rem 1rem;
-        gap: 0.5rem;
-    }
-
-    .filter-tab {
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
-    }
-
     .conversation-item {
         padding: 0.85rem 1rem;
     }
@@ -1050,7 +963,7 @@ body {
         padding: 0.85rem 1rem;
     }
 
-    .input-action-btn, .send-btn {
+    .send-btn {
         width: 36px;
         height: 36px;
         font-size: 16px;
@@ -1092,10 +1005,6 @@ body {
 
     .input-wrapper {
         gap: 0.4rem;
-    }
-
-    .input-action-btn {
-        display: none;
     }
 
     .empty-icon {
@@ -1144,7 +1053,7 @@ body {
                     </div>
                     <div class="search-container">
                         <div class="search-wrapper">
-                            <span class="search-icon">🔍</span>
+                            <span class="search-icon">⌕</span>
                             <input type="text" class="search-input" id="searchInput" placeholder="Search chats..." aria-label="Search chats">
                         </div>
                     </div>
@@ -1159,11 +1068,11 @@ body {
         <div class="chat-area" id="chatArea">
             <div id="chatContent">
                 <div class="empty-state">
-                    <div class="empty-icon">💬</div>
+                    <div class="empty-icon">◎</div>
                     <h2 class="empty-title">Clixs Messenger</h2>
                     <p class="empty-text">Select a conversation from the left to start messaging.<br>Connect with buyers and sellers instantly and securely.</p>
                     <div class="empty-footer">
-                        <span class="encryption-icon">🔒</span>
+                        <span class="encryption-icon">🔐</span>
                         <span>Your messages are private and secure</span>
                     </div>
                 </div>
@@ -1229,7 +1138,6 @@ document.addEventListener('DOMContentLoaded', () => {
             state.currentUser = JSON.parse(userStr);
             return true;
         } catch (e) {
-            console.error('[Auth] Parse error:', e);
             window.location.href = '/login';
             return false;
         }
@@ -1244,14 +1152,6 @@ document.addEventListener('DOMContentLoaded', () => {
             searchInput.addEventListener('input', handleSearch);
         }
 
-        document.querySelectorAll('.filter-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                filterChats(this.textContent.trim());
-            });
-        });
-
         window.addEventListener('resize', handleResize);
         window.addEventListener('beforeunload', cleanup);
         document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -1260,7 +1160,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleVisibilityChange() {
         if (!document.hidden && state.currentConversation) {
             if (!state.chatSocket || state.chatSocket.readyState !== WebSocket.OPEN) {
-                console.log('[Visibility] Tab visible, reconnecting WebSocket');
                 connectWebSocket(state.currentConversation.id);
             }
         }
@@ -1270,7 +1169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // UTILITY FUNCTIONS
     // ============================================================
     function getInitials(text) {
-        if (!text) return '📦';
+        if (!text) return '?';
 
         const parts = text.split(':');
         if (parts.length > 1) {
@@ -1286,7 +1185,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .map(n => n[0])
             .join('')
             .toUpperCase()
-            .substring(0, 2) || '📦';
+            .substring(0, 2) || '?';
     }
 
     function formatTime(dateString) {
@@ -1389,14 +1288,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const raw = await response.json();
-            console.log('[Chats API raw response]:', raw);
 
             state.chats = Array.isArray(raw) ? raw : (raw.results || []);
 
             displayChats(state.chats);
 
         } catch (error) {
-            console.error('[Chats] Load error:', error);
             showError(listContainer, 'Failed to load chats. Please refresh the page.');
         }
     }
@@ -1408,7 +1305,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!Array.isArray(conversations) || conversations.length === 0) {
             listContainer.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon">🔭</div>
+                    <div class="empty-icon">○</div>
                     <div class="empty-title">No chats</div>
                     <div class="empty-text">Start chatting to see conversations here</div>
                 </div>
@@ -1466,17 +1363,12 @@ document.addEventListener('DOMContentLoaded', () => {
         displayChats(filtered);
     }
 
-    function filterChats(filter) {
-        displayChats(state.chats);
-    }
-
     // ============================================================
     // CONVERSATION SELECTION
     // ============================================================
     window.selectConversation = async function(convoId) {
         const convo = state.chats.find(c => c.id === convoId);
         if (!convo) {
-            console.error('[Conversation] Not found:', convoId);
             return;
         }
 
@@ -1526,7 +1418,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             displayChat(data);
         } catch (error) {
-            console.error('[Messages] Load error:', error);
             showError(chatContent, 'Failed to load messages. Please try again.');
         }
     }
@@ -1585,8 +1476,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <div class="message-input-container">
                 <div class="input-wrapper">
-                    <button class="input-action-btn" title="Emoji" aria-label="Add emoji">😊</button>
-                    <button class="input-action-btn" title="Attach file" aria-label="Attach file">📎</button>
                     <div class="input-field-wrapper">
                         <textarea class="message-input"
                                   id="messageInput"
@@ -1698,7 +1587,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!content) return;
 
         if (!state.chatSocket || state.chatSocket.readyState !== WebSocket.OPEN) {
-            console.warn('[Send] WebSocket not connected');
             showConnectionError();
             return;
         }
@@ -1708,7 +1596,6 @@ document.addEventListener('DOMContentLoaded', () => {
             sendBtn.disabled = true;
 
             state.chatSocket.send(JSON.stringify({ message: content }));
-            console.log('[Send] Message sent:', content.substring(0, 50));
 
             input.value = '';
             input.style.height = 'auto';
@@ -1720,7 +1607,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 500);
 
         } catch (error) {
-            console.error('[Send] Error:', error);
             sendBtn.classList.remove('sending');
             sendBtn.disabled = false;
             showConnectionError();
@@ -1741,7 +1627,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const msgId = msg.id;
         if (msgId) {
             if (state.renderedMessageIds.has(msgId)) {
-                console.log('[Message] Skipping duplicate:', msgId);
                 return;
             }
             state.renderedMessageIds.add(msgId);
@@ -1782,14 +1667,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const token = localStorage.getItem('authToken');
         if (!token) {
-            console.error('[WS] No auth token found');
             return;
         }
 
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${wsProtocol}//${window.location.host}/ws/chats/${chatId}/?token=${encodeURIComponent(token)}`;
 
-        console.log('[WS] Connecting to chat:', chatId);
         updateConnectionStatus('reconnecting', 'Connecting...');
 
         try {
@@ -1799,14 +1682,12 @@ document.addEventListener('DOMContentLoaded', () => {
             state.chatSocket.onclose = handleWebSocketClose;
             state.chatSocket.onerror = handleWebSocketError;
         } catch (error) {
-            console.error('[WS] Connection error:', error);
             updateConnectionStatus('disconnected', 'Connection failed');
             scheduleReconnect(chatId);
         }
     }
 
     function handleWebSocketOpen(event) {
-        console.log('[WS] Connected successfully');
         state.reconnectAttempts = 0;
         state.isReconnecting = false;
         updateConnectionStatus('connected', 'Connected');
@@ -1828,7 +1709,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleWebSocketMessage(event) {
         try {
             const data = JSON.parse(event.data);
-            console.log('[WS] Received:', data);
 
             if (data.type === 'chat_message' || data.text !== undefined || data.message !== undefined) {
                 const msg = {
@@ -1852,12 +1732,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             else if (data.type === 'error') {
-                console.error('[WS] Server error:', data.error || data.message);
                 showError(null, data.error || 'An error occurred');
             }
 
         } catch (error) {
-            console.error('[WS] Parse error:', error, event.data);
         }
     }
 
@@ -1865,10 +1743,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const isNormalClosure = event.code === 1000 || event.code === 1001;
 
         if (isNormalClosure) {
-            console.log('[WS] Connection closed normally');
             updateConnectionStatus('disconnected', 'Disconnected');
         } else {
-            console.warn('[WS] Connection closed unexpectedly. Code:', event.code);
             updateConnectionStatus('disconnected', 'Connection lost');
 
             if (state.currentConversation && !state.isReconnecting) {
@@ -1885,7 +1761,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleWebSocketError(error) {
-        console.error('[WS] Error:', error);
         updateConnectionStatus('disconnected', 'Connection error');
     }
 
@@ -1896,7 +1771,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (state.chatSocket) {
-            console.log('[WS] Disconnecting');
             state.chatSocket.close(1000, 'User disconnected');
             state.chatSocket = null;
         }
@@ -1904,7 +1778,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function scheduleReconnect(chatId) {
         if (state.reconnectAttempts >= CONFIG.MAX_RECONNECT_ATTEMPTS) {
-            console.error('[WS] Max reconnect attempts reached');
             updateConnectionStatus('disconnected', 'Unable to connect');
             return;
         }
@@ -1915,7 +1788,6 @@ document.addEventListener('DOMContentLoaded', () => {
         state.reconnectAttempts++;
 
         const delay = CONFIG.WS_RECONNECT_DELAY * state.reconnectAttempts;
-        console.log(`[WS] Reconnecting in ${delay}ms (attempt ${state.reconnectAttempts})`);
 
         updateConnectionStatus('reconnecting', `Reconnecting... (${state.reconnectAttempts}/${CONFIG.MAX_RECONNECT_ATTEMPTS})`);
 
@@ -1961,8 +1833,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (container) {
             container.innerHTML = errorHtml;
-        } else {
-            console.error('[Error]', message);
         }
     }
 
@@ -2017,7 +1887,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`Failed to create conversation: ${response.statusText}`);
             }
         } catch (error) {
-            console.error('[Conversation] Create error:', error);
             showError(null, 'Failed to create conversation');
         }
     }
@@ -2026,7 +1895,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // CLEANUP
     // ============================================================
     function cleanup() {
-        console.log('[Cleanup] Closing connections');
         disconnectWebSocket();
     }
 });
