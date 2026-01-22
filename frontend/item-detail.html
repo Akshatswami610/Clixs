@@ -320,57 +320,6 @@
     border-color: #3498db;
 }
 
-.loading-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 60vh;
-    gap: 2rem;
-}
-
-.loading-spinner {
-    position: relative;
-    width: 80px;
-    height: 80px;
-}
-
-.spinner-ring {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border: 4px solid transparent;
-    border-top-color: #3498db;
-    border-right-color: #00d4ff;
-    border-radius: 50%;
-    animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-}
-
-.spinner-ring:nth-child(2) {
-    width: 60px;
-    height: 60px;
-    top: 10px;
-    left: 10px;
-    border-top-color: #9b59b6;
-    border-right-color: #e74c3c;
-    animation: spin 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite reverse;
-}
-
-.spinner-ring:nth-child(3) {
-    width: 40px;
-    height: 40px;
-    top: 20px;
-    left: 20px;
-    border-top-color: #00d4ff;
-    border-right-color: #27ae60;
-    animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
 .error-container {
     display: flex;
     flex-direction: column;
@@ -943,10 +892,10 @@ document.addEventListener("DOMContentLoaded", () => {
         existingOverlays.forEach(overlay => overlay.remove());
 
         const icons = {
-            info: 'ℹ️',
-            success: '✅',
-            warning: '⚠️',
-            error: '❌'
+            info: 'i',
+            success: '✓',
+            warning: '!',
+            error: '×'
         };
 
         // Create overlay
@@ -1141,7 +1090,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const item = await response.json();
             displayItemDetail(item);
         } catch (error) {
-            console.error(error);
             container.innerHTML = `
                 <div class="error-container">
                     <div class="error-message">${escapeHtml(error.message)}</div>
@@ -1284,9 +1232,6 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <span>Chat with Seller</span>
                             </button>
                             ${item.status === 'ACTIVE' ? `
-                                <button class="secondary-btn" onclick="makeOffer(${parseInt(item.id, 10)})">
-                                    ${item.item_type === 'SELL' ? 'Make an Offer' : 'Request to Rent'}
-                                </button>
                             ` : ''}
                         </div>
                     </div>
@@ -1329,19 +1274,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Redirect to chat page directly
         window.location.href = `/chats?user=${encodeURIComponent(sellerId)}&item=${encodeURIComponent(itemId)}`;
-    };
-
-    // Make offer function
-    window.makeOffer = function(itemId) {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-            showToast('Login Required', 'Please login to make an offer', 'warning');
-            setTimeout(() => {
-                window.location.href = '/login';
-            }, 1500);
-            return;
-        }
-        showNotification('Coming Soon', 'Make offer functionality will be available soon!', 'info');
     };
 
     // Open report modal function
@@ -1480,7 +1412,6 @@ document.addEventListener("DOMContentLoaded", () => {
             closeReportModal();
             showNotification('Report Submitted', 'Thank you! We will review your report shortly.', 'success');
         } catch (error) {
-            console.error('Error submitting report:', error);
             showNotification('Error', error.message || 'Failed to submit report. Please try again.', 'error');
             submitBtn.disabled = false;
             submitBtn.textContent = 'Submit Report';
