@@ -927,15 +927,11 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             throw new Error('Login successful but could not load profile. Please refresh the page.');
         }
 
-        showMessage('Login successful! Redirecting...', 'success');
-
         if (typeof checkAuth === 'function') {
             checkAuth();
         }
 
-        setTimeout(() => {
-            window.location.href = '{% url "home" %}';
-        }, 1000);
+        window.location.href = '{% url "home" %}';
 
     } catch (error) {
         showMessage(error.message);
