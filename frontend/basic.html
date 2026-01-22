@@ -37,11 +37,6 @@
             align-items: center;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
             z-index: 1000;
-            transition: all 0.3s ease;
-        }
-
-        .navbar:hover {
-            box-shadow: 0 6px 30px rgba(52, 152, 219, 0.3);
         }
 
         .nav-logo {
@@ -52,12 +47,7 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             cursor: pointer;
-            transition: transform 0.3s ease;
             user-select: none;
-        }
-
-        .nav-logo:hover {
-            transform: scale(1.05);
         }
 
         .nav-links {
@@ -391,14 +381,6 @@
             color: white;
         }
 
-        .toast::before {
-            content: '✓';
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
         /* Responsive Design */
         @media (max-width: 968px) {
             .nav-links {
@@ -596,16 +578,12 @@
             }
         }
 
-        // Logout function - Direct logout without confirmation
+        // Logout function
         function logout() {
-            // Clear localStorage
             localStorage.removeItem('authToken');
             localStorage.removeItem('user');
-
-            // Show success notification
             showToast('Logged out successfully', 'success');
 
-            // Redirect to home page after 1 second
             setTimeout(() => {
                 location.href = '{% url "home" %}';
             }, 1000);
