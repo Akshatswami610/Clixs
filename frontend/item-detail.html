@@ -1286,7 +1286,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Check if user is trying to chat with themselves
         const currentUserId = getCurrentUserId();
-        if (currentUserId && currentUserId === sellerId) {
+        // Convert both to numbers for comparison to handle type mismatches
+        if (currentUserId && sellerId && parseInt(currentUserId) === parseInt(sellerId)) {
             showNotification('Cannot Chat with Yourself', 'You cannot start a chat with yourself. This is your own listing.', 'warning');
             return;
         }
