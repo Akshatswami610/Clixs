@@ -1254,6 +1254,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Helper function to decode JWT and get user ID
+    function getCurrentUserId() {
+        const token = localStorage.getItem('authToken');
+        if (!token) return null;
+
+        try {
+            // JWT tokens have 3 parts separated by dots
+            const parts = token.split('.');
+            if (parts.length !== 3) return null;
+
+            // Decode the payload (second part)
+            const payload = JSON.parse(atob(parts[1]));
+            return payload.user_id || payload.sub || payload.id || null;
+        } catch (error) {
+            console.error('Error decoding token:', error);
+            return null;
+        }
+    }
+
     // Chat with seller function
     window.chatWithSeller = function(itemId, sellerId) {
         const token = localStorage.getItem('authToken');
@@ -1262,6 +1281,13 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => {
                 window.location.href = '/login';
             }, 1500);
+            return;
+        }
+
+        // Check if user is trying to chat with themselves
+        const currentUserId = getCurrentUserId();
+        if (currentUserId && currentUserId === sellerId) {
+            showNotification('Cannot Chat with Yourself', 'You cannot start a chat with yourself. This is your own listing.', 'warning');
             return;
         }
 
