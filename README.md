@@ -89,7 +89,7 @@ Clixs/
 ## ⚙️ Setup Instructions
 
 ### 1. Clone the repository
-    git clone <your-repo-url>
+    git clone github.com/Akshatswami610/Clixs
     cd Clixs
 
 ### 2. Create a virtual environment
