@@ -10,9 +10,9 @@ The backend is built with **Django, Django REST Framework, and Django Channels**
 ## 🚀 Features
 
 ### Core Features
-- Custom user authentication (phone number based)
+- Custom user authentication (phone number-based)
 - User registration, login, profile management
-- Create, list, update, delete items (Sell / Rent)
+- Create, list, update, and delete items (Sell / Rent)
 - Upload multiple images per item
 - Contact form, feedback, and report system
 - Admin dashboard for moderation
