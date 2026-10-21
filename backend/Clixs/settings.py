@@ -1,9 +1,10 @@
+
 from pathlib import Path
 from datetime import timedelta
 from decouple import config
 
 # --------------------------------------------------
-# BASE DIR
+# BASE DIRECTORY
 # --------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -11,16 +12,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --------------------------------------------------
 # SECURITY
 # --------------------------------------------------
-SECRET_KEY = config("SECRET_KEY", default="dev-secret-key")
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+SECRET_KEY = config("SECRET_KEY")
+DEBUG = config("DEBUG", default=False, cast=bool)
 
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS",
+    default="localhost,127.0.0.1",
+    cast=lambda value: [
+        host.strip() for host in value.split(",") if host.strip()
+    ],
+)
 
 # --------------------------------------------------
 # APPLICATIONS
 # --------------------------------------------------
 INSTALLED_APPS = [
-    # Django default
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -28,14 +34,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # Third-party
     "rest_framework",
     "rest_framework.authtoken",
     "corsheaders",
     "rest_framework_simplejwt",
     "channels",
 
-    # Local apps
     "api",
     "Clixs",
 ]
@@ -45,8 +49,9 @@ INSTALLED_APPS = [
 # MIDDLEWARE
 # --------------------------------------------------
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -57,31 +62,49 @@ MIDDLEWARE = [
 
 
 # --------------------------------------------------
-# CORS
+# CORS & CSRF
 # --------------------------------------------------
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-]
+CORS_ALLOWED_ORIGINS = config(
+    "CORS_ALLOWED_ORIGINS",
+    default="http://localhost:5173",
+    cast=lambda value: [
+        origin.strip()
+        for origin in value.split(",")
+        if origin.strip()
+    ],
+)
 
 CORS_ALLOW_CREDENTIALS = True
 
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="",
+    cast=lambda value: [
+        origin.strip()
+        for origin in value.split(",")
+        if origin.strip()
+    ],
+)
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 
 # --------------------------------------------------
-# URL & TEMPLATES
+# URLS & TEMPLATES
 # --------------------------------------------------
 ROOT_URLCONF = "Clixs.urls"
-#APPEND_SLASH = False
+
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR.parent / 'frontend'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR.parent / "frontend"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
@@ -90,39 +113,80 @@ TEMPLATES = [
 WSGI_APPLICATION = "Clixs.wsgi.application"
 ASGI_APPLICATION = "Clixs.asgi.application"
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
-        },
-    },
-}
-
 
 # --------------------------------------------------
-# DATABASE
+# POSTGRESQL DATABASE
 # --------------------------------------------------
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("NAME", default="clixs"),
-        "USER": config("USER", default="postgres"),
-        "PASSWORD": config("PASSWORD", default=""),
-        "HOST": config("HOST", default="localhost"),
+        "NAME": config("NAME", default="clixs_db"),
+        "USER": config("USER", default="clixs_db_user"),
+        "PASSWORD": config("PASSWORD"),
+        "HOST": config("HOST"),
         "PORT": config("PORT", default="5432"),
+        "CONN_MAX_AGE": 60,
     }
 }
 
 
 # --------------------------------------------------
-# AUTH
+# DJANGO CHANNELS / REDIS
 # --------------------------------------------------
+REDIS_URL = config("REDIS_URL", default="")
+
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [REDIS_URL],
+            },
+        }
+    }
+else:
+    # Local development only. Configure REDIS_URL on Render
+    # before using real-time chat in production.
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [("127.0.0.1", 6379)],
+            },
+        }
+    }
+
+
+# --------------------------------------------------
+# AUTHENTICATION
+# --------------------------------------------------
+AUTH_USER_MODEL = "api.CustomUser"
+
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "UserAttributeSimilarityValidator"
+        )
+    },
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "MinimumLengthValidator"
+        )
+    },
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "CommonPasswordValidator"
+        )
+    },
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "NumericPasswordValidator"
+        )
+    },
 ]
 
 
@@ -136,17 +200,32 @@ USE_TZ = True
 
 
 # --------------------------------------------------
-# STATIC & MEDIA
+# STATIC FILES
 # --------------------------------------------------
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        ),
+    },
+}
+
+
+# --------------------------------------------------
+# MEDIA FILES
+# --------------------------------------------------
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 
 # --------------------------------------------------
-# DRF CONFIG
+# DJANGO REST FRAMEWORK
 # --------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -169,12 +248,6 @@ SIMPLE_JWT = {
 
 
 # --------------------------------------------------
-# CUSTOM USER
-# --------------------------------------------------
-AUTH_USER_MODEL = "api.CustomUser"
-
-
-# --------------------------------------------------
-# DEFAULT PK
+# DEFAULT PRIMARY KEY
 # --------------------------------------------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
