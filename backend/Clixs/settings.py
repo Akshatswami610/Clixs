@@ -111,6 +111,7 @@ ASGI_APPLICATION = "Clixs.asgi.application"
 # --------------------------------------------------
 # POSTGRESQL DATABASE
 # --------------------------------------------------
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -118,7 +119,7 @@ DATABASES = {
         "USER": config("USER", default="clixs_db_user"),
         "PASSWORD": config("PASSWORD"),
         "HOST": config("HOST"),
-        "PORT": config("PORT", default="5432"),
+        "PORT": config("DB_PORT", default="5432"),
         "CONN_MAX_AGE": 60,
     }
 }
